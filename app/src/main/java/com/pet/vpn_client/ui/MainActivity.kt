@@ -12,7 +12,9 @@ import androidx.navigation.compose.rememberNavController
 import com.pet.vpn_client.ui.navigation.BottomNavigationBar
 import com.pet.vpn_client.ui.navigation.Navigation
 import com.pet.vpn_client.ui.theme.VPN_ClientTheme
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
