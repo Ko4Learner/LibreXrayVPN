@@ -44,7 +44,7 @@ android {
 dependencies {
 
 
-
+    // XrayCore libs
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.aar", "*.jar"))))
 
     implementation(libs.androidx.core.ktx)
@@ -80,10 +80,6 @@ dependencies {
     // MMKV and Gson for local storage
     implementation(libs.mmkv.static)
     implementation(libs.gson)
-
-    // Language and Processing Libraries
-    implementation(libs.language.base)
-    implementation(libs.language.json)
 
     // Test
     testImplementation(libs.junit)

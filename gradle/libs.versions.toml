@@ -1,9 +1,9 @@
 [versions]
-agp = "8.9.2"
+agp = "8.9.0"
 hiltAndroid = "2.50"
 hiltNavigationCompose = "1.2.0"
-kotlin = "2.1.20"
-coreKtx = "1.16.0"
+kotlin = "2.0.21"
+coreKtx = "1.15.0"
 junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
@@ -11,11 +11,10 @@ kotlinxCoroutinesAndroid = "1.9.0"
 lifecycleRuntimeCompose = "2.8.7"
 lifecycleRuntimeKtx = "2.8.7"
 activityCompose = "1.10.1"
-composeBom = "2025.04.01"
+composeBom = "2025.03.00"
 navigationCom = "2.8.9"
 gson = "2.12.1"
 mmkvStatic = "2.1.0"
-editorkit = "2.9.0"
 workRuntimeKtx = "2.10.1"
 
 [libraries]
@@ -42,8 +41,6 @@ kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutine
 lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycleRuntimeCompose" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 mmkv-static = { module = "com.tencent:mmkv-static", version.ref = "mmkvStatic" }
-language-base = { module = "com.blacksquircle.ui:language-base", version.ref = "editorkit" }
-language-json = { module = "com.blacksquircle.ui:language-json", version.ref = "editorkit" }
 work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workRuntimeKtx" }
 work-multiprocess = { module = "androidx.work:work-multiprocess", version.ref = "workRuntimeKtx" }
 
