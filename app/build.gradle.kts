@@ -58,6 +58,10 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
 
+    // Background Task Libraries (WorkManager)
+    implementation(libs.work.runtime.ktx)
+    implementation(libs.work.multiprocess)
+
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)
 
@@ -72,6 +76,14 @@ dependencies {
     implementation(libs.hilt.android)
     implementation(libs.androidx.hilt.navigation.compose)
     ksp(libs.hilt.compiler)
+
+    // MMKV and Gson for local storage
+    implementation(libs.mmkv.static)
+    implementation(libs.gson)
+
+    // Language and Processing Libraries
+    implementation(libs.language.base)
+    implementation(libs.language.json)
 
     // Test
     testImplementation(libs.junit)
