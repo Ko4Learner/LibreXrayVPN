@@ -2,6 +2,7 @@ package com.pet.vpn_client.data
 
 import java.util.UUID
 import androidx.core.net.toUri
+import com.pet.vpn_client.data.dto.VlessConfig
 
 
 fun parseVlessUrl(url: String): VlessConfig? {

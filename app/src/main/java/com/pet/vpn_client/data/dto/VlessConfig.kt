@@ -1,4 +1,4 @@
-package com.pet.vpn_client.data
+package com.pet.vpn_client.data.dto
 
 import java.util.UUID
 
