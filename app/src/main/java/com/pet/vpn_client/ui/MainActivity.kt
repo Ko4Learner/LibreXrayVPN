@@ -21,14 +21,14 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             VPN_ClientTheme {
-                MainScreen()
+                NavigationScreen()
             }
         }
     }
 }
 
 @Composable
-fun MainScreen() {
+fun NavigationScreen() {
     val navController = rememberNavController()
     Scaffold(
         modifier = Modifier.fillMaxSize(),

@@ -5,4 +5,13 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
 @HiltViewModel
-class VpnScreenViewModel @Inject constructor() : ViewModel()
+class VpnScreenViewModel @Inject constructor() : ViewModel() {
+    fun toggleVpnProxy() {
+        //TODO: Implement VPN/Proxy toggle logic
+    }
+
+    fun switchVpnProxy() {
+        //TODO: Implement VPN/Proxy switching logic
+    }
+
+}

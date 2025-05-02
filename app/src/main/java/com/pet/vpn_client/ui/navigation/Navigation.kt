@@ -6,7 +6,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.pet.vpn_client.ui.screens.MainScreen
+import com.pet.vpn_client.ui.screens.VpnScreen
 import com.pet.vpn_client.ui.screens.SettingsScreen
 
 @Composable
@@ -16,7 +16,7 @@ fun Navigation(
 ) {
     NavHost(navController, startDestination = BottomNavItem.Main.route) {
         composable(BottomNavItem.Main.route) {
-            MainScreen(Modifier.padding(innerPadding))
+            VpnScreen(Modifier.padding(innerPadding))
         }
 
         composable(BottomNavItem.Settings.route) {
