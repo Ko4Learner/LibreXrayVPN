@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -28,7 +27,7 @@ fun SubscriptionItem(item: SubscriptionItemModel) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp),
+            .padding(vertical = 8.dp),
         shape = MaterialTheme.shapes.medium,
         elevation = CardDefaults.cardElevation(
             defaultElevation = 4.dp
@@ -37,7 +36,7 @@ fun SubscriptionItem(item: SubscriptionItemModel) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(8.dp)
+                .padding(horizontal = 8.dp)
                 .background(color = MaterialTheme.colorScheme.background),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -55,10 +54,10 @@ fun SubscriptionItem(item: SubscriptionItemModel) {
                 horizontalAlignment = Alignment.Start,
                 verticalArrangement = Arrangement.SpaceEvenly
             ) {
-                Text(text = item.name, style = MaterialTheme.typography.titleMedium)
-                Text(text = item.ip, style = MaterialTheme.typography.titleMedium)
-                Text(text = item.protocol, style = MaterialTheme.typography.titleMedium)
-                Text(text = item.description, style = MaterialTheme.typography.titleMedium)
+                Text(text = item.name, style = MaterialTheme.typography.titleSmall)
+                Text(text = item.ip, style = MaterialTheme.typography.titleSmall)
+                Text(text = item.protocol, style = MaterialTheme.typography.titleSmall)
+                Text(text = item.description, style = MaterialTheme.typography.titleSmall)
 
             }
 

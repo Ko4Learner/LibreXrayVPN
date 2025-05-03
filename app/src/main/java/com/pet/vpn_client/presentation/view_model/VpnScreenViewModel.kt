@@ -14,4 +14,17 @@ class VpnScreenViewModel @Inject constructor() : ViewModel() {
         //TODO: Implement VPN/Proxy switching logic
     }
 
+    fun getSubscriptions() {
+        //TODO: Implement getting subscriptions
+    }
+
+    fun testConnection() {
+        //TODO: Implement testing connection
+    }
+
+    fun restartConnection() {
+        //TODO: Implement restarting connection
+    }
+
+
 }
