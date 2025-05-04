@@ -25,14 +25,14 @@
         android:theme="@style/Theme.VPN_Client"
         tools:targetApi="31">
 
-        <service
-            android:name=".data.MyVpnService"
-            android:exported="false"
-            android:permission="android.permission.BIND_VPN_SERVICE">
-            <intent-filter>
-                <action android:name="android.net.VpnService" />
-            </intent-filter>
-        </service>
+<!--        <service-->
+<!--            android:name=".data.MyVpnService"-->
+<!--            android:exported="false"-->
+<!--            android:permission="android.permission.BIND_VPN_SERVICE">-->
+<!--            <intent-filter>-->
+<!--                <action android:name="android.net.VpnService" />-->
+<!--            </intent-filter>-->
+<!--        </service>-->
 
         <activity
             android:name=".ui.MainActivity"

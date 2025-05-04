@@ -20,7 +20,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import com.pet.vpn_client.ui.models.SubscriptionItemModel
+import com.pet.vpn_client.presentation.models.SubscriptionItemModel
 
 @Composable
 fun SubscriptionItem(item: SubscriptionItemModel) {

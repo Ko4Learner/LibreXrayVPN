@@ -4,7 +4,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.runtime.Composable
 import com.pet.vpn_client.R
-import com.pet.vpn_client.ui.models.SubscriptionItemModel
+import com.pet.vpn_client.presentation.models.SubscriptionItemModel
 
 @Composable
 fun SubscriptionsList(itemList: List<SubscriptionItemModel>) {

@@ -1,4 +1,4 @@
-package com.pet.vpn_client.ui.models
+package com.pet.vpn_client.presentation.models
 
 data class SubscriptionItemModel(
     val id: Int = 0,
