@@ -3,6 +3,7 @@ package com.pet.vpn_client.di
 import android.content.Context
 import com.google.gson.Gson
 import com.pet.vpn_client.data.mmkv.MMKVConfig
+import com.pet.vpn_client.data.services.VPNService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -12,7 +13,7 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-class DataModule {
+object DataModule {
 
 //    @Provides
 //    @Singleton
@@ -30,6 +31,12 @@ class DataModule {
     @Singleton
     fun provideMMKVConfig(gson: Gson): MMKVConfig {
         return MMKVConfig(gson)
+    }
+
+    @Provides
+    @Singleton
+    fun provideVPNService(mmkvConfig: MMKVConfig): VPNService {
+        return VPNService(mmkvConfig)
     }
 
 }
