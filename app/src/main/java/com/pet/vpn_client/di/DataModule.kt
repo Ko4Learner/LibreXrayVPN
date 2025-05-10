@@ -23,20 +23,14 @@ object DataModule {
 
     @Provides
     @Singleton
-    fun provideGson(): Gson {
-        return Gson()
-    }
+    fun provideGson(): Gson = Gson()
+
 
     @Provides
     @Singleton
-    fun provideMMKVConfig(gson: Gson): MMKVConfig {
-        return MMKVConfig(gson)
-    }
+    fun provideMMKVConfig(gson: Gson): MMKVConfig = MMKVConfig(gson)
 
     @Provides
     @Singleton
-    fun provideVPNService(mmkvConfig: MMKVConfig): VPNService {
-        return VPNService(mmkvConfig)
-    }
-
+    fun provideVPNService(mmkvConfig: MMKVConfig): VPNService = VPNService(mmkvConfig)
 }
