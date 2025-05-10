@@ -1,13 +1,11 @@
 package com.pet.vpn_client.di
 
-import android.content.Context
 import com.google.gson.Gson
 import com.pet.vpn_client.data.mmkv.MMKVConfig
-import com.pet.vpn_client.data.services.VPNService
+import com.pet.vpn_client.framework.services.VPNService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 

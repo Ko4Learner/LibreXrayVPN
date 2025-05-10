@@ -1,4 +1,4 @@
-package com.pet.vpn_client.data.services
+package com.pet.vpn_client.framework.services
 
 import android.app.Service
 import android.content.Intent
@@ -8,7 +8,6 @@ import android.net.LocalSocketAddress
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
-import android.net.ProxyInfo
 import android.net.VpnService
 import android.os.ParcelFileDescriptor
 import android.os.StrictMode

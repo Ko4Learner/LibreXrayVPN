@@ -1,4 +1,4 @@
-package com.pet.vpn_client.data.services
+package com.pet.vpn_client.framework.services
 
 import android.app.Service
 
