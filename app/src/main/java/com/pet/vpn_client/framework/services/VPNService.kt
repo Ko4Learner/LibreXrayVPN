@@ -12,14 +12,19 @@ import android.net.VpnService
 import android.os.ParcelFileDescriptor
 import android.os.StrictMode
 import android.util.Log
-import com.pet.vpn_client.data.mmkv.MMKVConfig
+import com.pet.vpn_client.domain.interfaces.KeyValueStorage
+import com.pet.vpn_client.domain.interfaces.ServiceControl
+import com.pet.vpn_client.domain.interfaces.ServiceManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
 import javax.inject.Inject
 
-class VPNService @Inject constructor(private val mmkvConfig: MMKVConfig) : VpnService(),
+class VPNService @Inject constructor(
+    val storage: KeyValueStorage,
+    val serviceManager: ServiceManager
+) : VpnService(),
     ServiceControl {
 
     private lateinit var mInterface: ParcelFileDescriptor
@@ -59,9 +64,7 @@ class VPNService @Inject constructor(private val mmkvConfig: MMKVConfig) : VpnSe
         super.onCreate()
         val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
         StrictMode.setThreadPolicy(policy)
-
-        // (отсутствует необходимость, нужно переделать под репозиторий и di)
-        //ServiceManager.serviceControl = SoftReference(this)
+        serviceManager.setService(this)
     }
 
     override fun onRevoke() {
@@ -76,9 +79,9 @@ class VPNService @Inject constructor(private val mmkvConfig: MMKVConfig) : VpnSe
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         return super.onStartCommand(intent, flags, startId)
 
-//        if (ServiceManager.startCoreLoop()){
-        startService()
-//        }
+        if (serviceManager.startCoreLoop()) {
+            startService()
+        }
 
         return START_STICKY
     }
@@ -117,11 +120,9 @@ class VPNService @Inject constructor(private val mmkvConfig: MMKVConfig) : VpnSe
         builder.setMtu(VPN_MTU)
             .addAddress(PRIVATE_VLAN4_CLIENT, 30)
             .addRoute(DEFAULT_ROUTE, 0)
-//            .setSession(ServiceManager.getRunningServiceName())
-        //исключение vpn приложения из списка использующих vpn
+            .setSession(serviceManager.getRunningServerName())
 //            .addDisallowedApplication(selfPackageName)
 
-        //добавление днс серверов, у которых указан чистый ip
 //        SettingsManager.getVpnDnsServers()
 //            .forEach {
 //                if (Utils.isPureIpAddress(it)) {
@@ -139,7 +140,7 @@ class VPNService @Inject constructor(private val mmkvConfig: MMKVConfig) : VpnSe
             Log.e("VPNService", "Failed to request network: ${e.message}")
         }
         builder.setMetered(false)
-//        if (mmkvConfig.decodeSettingsBool("pref_append_http_proxy")) {
+//        if (storage.decodeSettingsBool(Constants.PREF_APPEND_HTTP_PROXY)) {
 //            builder.setHttpProxy(
 //                ProxyInfo.buildDirectProxy(
 //                    "127.0.0.1",
@@ -231,7 +232,7 @@ class VPNService @Inject constructor(private val mmkvConfig: MMKVConfig) : VpnSe
             Log.e("VPNService", "Failed to destroy process: ${e.message}")
         }
 
-        //ServiceManager.stopCoreLoop()
+        serviceManager.stopCoreLoop()
 
         if (isForcedStop) {
             stopSelf()
@@ -242,7 +243,6 @@ class VPNService @Inject constructor(private val mmkvConfig: MMKVConfig) : VpnSe
             }
         }
     }
-
 
     companion object {
         private const val VPN_MTU = 1500

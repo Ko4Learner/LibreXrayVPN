@@ -1,14 +1,14 @@
-package com.pet.vpn_client.data.dto
+package com.pet.vpn_client.domain.models
 
 data class ConfigProfileItem(
 //    val configVersion: Int = 4,
 
-//    val configType: EConfigType,
+    val configType: EConfigType,
     var subscriptionId: String = "",
 //    var addedTime: Long = System.currentTimeMillis(),
 //
-//    var remarks: String = "",
-//    var server: String? = null,
+    var remarks: String = "",
+    var server: String? = null,
 //    var serverPort: String? = null,
 //
 //    var password: String? = null,
@@ -51,15 +51,12 @@ data class ConfigProfileItem(
 //    var pinSHA256: String? = null,
 //    var bandwidthDown: String? = null,
 //    var bandwidthUp: String? = null,
-)
-
-
-//{
-//    companion object {
-//        fun create(configType: EConfigType): ProfileItem {
-//            return ProfileItem(configType = configType)
-//        }
-//    }
+) {
+    companion object {
+        fun create(configType: EConfigType): ConfigProfileItem {
+            return ConfigProfileItem(configType = configType)
+        }
+    }
 //
 //    fun getAllOutboundTags(): MutableList<String> {
 //        return mutableListOf(TAG_PROXY, TAG_DIRECT, TAG_BLOCKED)
@@ -113,4 +110,4 @@ data class ConfigProfileItem(
 //                && this.pinSHA256 == obj.pinSHA256
 //                )
 //    }
-//}
+}

@@ -1,4 +1,4 @@
-package com.pet.vpn_client.data.dto
+package com.pet.vpn_client.domain.models
 
 data class RulesetItem(
     var remarks: String? = "",

@@ -1,4 +1,4 @@
-package com.pet.vpn_client.data.dto
+package com.pet.vpn_client.domain.models
 
 data class ServerTestDelayInfo(var testDelayMillis: Long = 0L) {
     fun getTestDelayString(): String {

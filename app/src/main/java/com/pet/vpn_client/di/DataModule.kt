@@ -1,8 +1,8 @@
 package com.pet.vpn_client.di
 
 import com.google.gson.Gson
-import com.pet.vpn_client.data.mmkv.MMKVConfig
-import com.pet.vpn_client.framework.services.VPNService
+import com.pet.vpn_client.data.mmkv.MMKVStorage
+import com.pet.vpn_client.domain.interfaces.KeyValueStorage
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -13,11 +13,7 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object DataModule {
 
-//    @Provides
-//    @Singleton
-//    fun provide___Repository(@ApplicationContext context: Context): ___Repository {
-//        return ___RepositoryImpl()
-//    }
+    //@ApplicationContext context: Context
 
     @Provides
     @Singleton
@@ -26,9 +22,5 @@ object DataModule {
 
     @Provides
     @Singleton
-    fun provideMMKVConfig(gson: Gson): MMKVConfig = MMKVConfig(gson)
-
-    @Provides
-    @Singleton
-    fun provideVPNService(mmkvConfig: MMKVConfig): VPNService = VPNService(mmkvConfig)
+    fun provideMMKVConfig(gson: Gson): KeyValueStorage = MMKVStorage(gson)
 }

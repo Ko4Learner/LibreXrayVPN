@@ -1,4 +1,4 @@
-package com.pet.vpn_client.framework.services
+package com.pet.vpn_client.domain.interfaces
 
 import android.app.Service
 
