@@ -1,4 +1,4 @@
-package com.pet.vpn_client.domain.models.format_config
+package com.pet.vpn_client.data.config_formatter
 
 import com.pet.vpn_client.app.Constants
 import com.pet.vpn_client.domain.models.ConfigProfileItem
@@ -7,7 +7,7 @@ import com.pet.vpn_client.utils.Utils
 import com.pet.vpn_client.utils.isNotNullEmpty
 import java.net.URI
 
-open class BaseFormat {
+open class BaseFormatter {
 
     fun toUri(
         config: ConfigProfileItem,
