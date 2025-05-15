@@ -42,6 +42,7 @@ class XRayVpnBridge @Inject constructor(
 //        if (!result.status)
 //            return false
 
+        //!!!!В ServiceManager
         // Регистрирует BroadcastReceiver для получения уведомлений о событиях системы
         try {
             val mFilter = IntentFilter(Constants.BROADCAST_ACTION_SERVICE)
@@ -63,12 +64,16 @@ class XRayVpnBridge @Inject constructor(
             return false
         }
 
+
+        //!!!!В ServiceManager
         if (coreController.isRunning == false) {
             IntentUtil.sendMsg2UI(service, Constants.MSG_STATE_START_FAILURE, "")
             //NotificationService.cancelNotification()
             return false
         }
 
+
+        //!!!!В ServiceManager
         try {
             IntentUtil.sendMsg2UI(service, Constants.MSG_STATE_START_SUCCESS, "")
 //            NotificationService.startSpeedNotification(currentConfig)
@@ -95,9 +100,11 @@ class XRayVpnBridge @Inject constructor(
             }
         }
 
+        //!!!!В ServiceManager
         IntentUtil.sendMsg2UI(service as Context, Constants.MSG_STATE_STOP_SUCCESS, "")
         //NotificationService.cancelNotification()
 
+        //!!!!В ServiceManager
         try {
             service.unregisterReceiver(serviceManager.getMsgReceive())
         } catch (e: Exception) {
@@ -112,6 +119,7 @@ class XRayVpnBridge @Inject constructor(
         return coreController.queryStats(tag, link)
     }
 
+    //!!!!В ServiceManager
     override fun measureV2rayDelay() {
         if (coreController.isRunning == false) {
             return
@@ -165,6 +173,7 @@ class XRayVpnBridge @Inject constructor(
         }
 
         override fun shutdown(): Long {
+            //!!!!В ServiceManager
             val serviceControl = serviceManager.getService() ?: return -1
             return try {
                 serviceControl.stopService()
