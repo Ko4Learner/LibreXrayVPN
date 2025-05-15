@@ -11,6 +11,12 @@ import com.pet.vpn_client.data.dto.XrayConfig.OutboundBean.OutSettingsBean
 import com.pet.vpn_client.data.dto.XrayConfig.OutboundBean.StreamSettingsBean
 import com.pet.vpn_client.data.dto.XrayConfig.RoutingBean.RulesBean
 import com.pet.vpn_client.data.config_formatter.HttpFormatter
+import com.pet.vpn_client.data.config_formatter.ShadowsocksFormatter
+import com.pet.vpn_client.data.config_formatter.SocksFormatter
+import com.pet.vpn_client.data.config_formatter.TrojanFormatter
+import com.pet.vpn_client.data.config_formatter.VlessFormatter
+import com.pet.vpn_client.data.config_formatter.VmessFormatter
+import com.pet.vpn_client.data.config_formatter.WireguardFormatter
 import com.pet.vpn_client.domain.interfaces.KeyValueStorage
 import com.pet.vpn_client.domain.models.ConfigProfileItem
 import com.pet.vpn_client.domain.models.ConfigResult
@@ -27,7 +33,13 @@ class ConfigManager @Inject constructor(
     val storage: KeyValueStorage,
     val gson: Gson,
     val settingsManager: SettingsManager,
-    val httpFormatter: HttpFormatter
+    val httpFormatter: HttpFormatter,
+    val shadowsocksFormatter: ShadowsocksFormatter,
+    val socksFormatter: SocksFormatter,
+    val trojanFormatter: TrojanFormatter,
+    val vlessFormatter: VlessFormatter,
+    val vmessFormatter: VmessFormatter,
+    val wireguardFormatter: WireguardFormatter
 ) {
 
     private var initConfigCache: String? = null
@@ -78,12 +90,8 @@ class ConfigManager @Inject constructor(
 
         getInbounds(v2rayConfig)
 
-        if (config.configType == EConfigType.HYSTERIA2) {
-            result.socksPort = getPlusOutbounds(v2rayConfig, config) ?: return result
-        } else {
-            getOutbounds(v2rayConfig, config) ?: return result
-            getMoreOutbounds(v2rayConfig, config.subscriptionId)
-        }
+        getOutbounds(v2rayConfig, config) ?: return result
+        getMoreOutbounds(v2rayConfig, config.subscriptionId)
 
         getRouting(v2rayConfig)
 
@@ -124,12 +132,8 @@ class ConfigManager @Inject constructor(
 
         val v2rayConfig = initV2rayConfig(context) ?: return result
 
-        if (config.configType == EConfigType.HYSTERIA2) {
-            result.socksPort = getPlusOutbounds(v2rayConfig, config) ?: return result
-        } else {
-            getOutbounds(v2rayConfig, config) ?: return result
-            getMoreOutbounds(v2rayConfig, config.subscriptionId)
-        }
+        getOutbounds(v2rayConfig, config) ?: return result
+        getMoreOutbounds(v2rayConfig, config.subscriptionId)
 
         v2rayConfig.log.loglevel =
             storage.decodeSettingsString(Constants.PREF_LOGLEVEL) ?: "warning"
@@ -307,7 +311,7 @@ class ConfigManager @Inject constructor(
             // DNS outbound
             if (xrayConfig.outbounds.none { e -> e.protocol == "dns" && e.tag == "dns-out" }) {
                 xrayConfig.outbounds.add(
-                    XrayConfig.OutboundBean(
+                    OutboundBean(
                         protocol = "dns",
                         tag = "dns-out",
                         settings = null,
@@ -456,7 +460,7 @@ class ConfigManager @Inject constructor(
         return true
     }
 
-    private fun getPlusOutbounds(xrayConfig: XrayConfig, config: ConfigProfileItem): Int? {
+    private fun getPlusOutbounds(xrayConfig: XrayConfig): Int? {
         try {
             val socksPort = Utils.findFreePort(listOf(100 + settingsManager.getSocksPort(), 0))
 
@@ -532,7 +536,7 @@ class ConfigManager @Inject constructor(
         return true
     }
 
-    private fun updateOutboundWithGlobalSettings(outbound: XrayConfig.OutboundBean): Boolean {
+    private fun updateOutboundWithGlobalSettings(outbound: OutboundBean): Boolean {
         try {
             var muxEnabled = storage.decodeSettingsBool(Constants.PREF_MUX_ENABLED, false)
             val protocol = outbound.protocol
@@ -541,7 +545,6 @@ class ConfigManager @Inject constructor(
                 || protocol.equals(EConfigType.HTTP.name, true)
                 || protocol.equals(EConfigType.TROJAN.name, true)
                 || protocol.equals(EConfigType.WIREGUARD.name, true)
-                || protocol.equals(EConfigType.HYSTERIA2.name, true)
             ) {
                 muxEnabled = false
             } else if (outbound.streamSettings?.network == NetworkType.XHTTP.type) {
@@ -705,13 +708,12 @@ class ConfigManager @Inject constructor(
 
     private fun convertProfile2Outbound(profileItem: ConfigProfileItem): OutboundBean? {
         return when (profileItem.configType) {
-            EConfigType.VMESS -> VmessFormat.toOutbound(profileItem)
-            EConfigType.SHADOWSOCKS -> ShadowsocksFormat.toOutbound(profileItem)
-            EConfigType.SOCKS -> SocksFormat.toOutbound(profileItem)
-            EConfigType.VLESS -> VlessFormat.toOutbound(profileItem)
-            EConfigType.TROJAN -> TrojanFormat.toOutbound(profileItem)
-            EConfigType.WIREGUARD -> WireguardFormat.toOutbound(profileItem)
-            EConfigType.HYSTERIA2 -> Hysteria2Format.toOutbound(profileItem)
+            EConfigType.VMESS -> vmessFormatter.toOutbound(profileItem)
+            EConfigType.SHADOWSOCKS -> shadowsocksFormatter.toOutbound(profileItem)
+            EConfigType.SOCKS -> socksFormatter.toOutbound(profileItem)
+            EConfigType.VLESS -> vlessFormatter.toOutbound(profileItem)
+            EConfigType.TROJAN -> trojanFormatter.toOutbound(profileItem)
+            EConfigType.WIREGUARD -> wireguardFormatter.toOutbound(profileItem)
             EConfigType.HTTP -> httpFormatter.toOutbound(profileItem)
         }
     }
@@ -735,8 +737,7 @@ class ConfigManager @Inject constructor(
             EConfigType.SHADOWSOCKS,
             EConfigType.SOCKS,
             EConfigType.HTTP,
-            EConfigType.TROJAN,
-            EConfigType.HYSTERIA2 ->
+            EConfigType.TROJAN ->
                 return OutboundBean(
                     protocol = configType.name.lowercase(),
                     settings = OutSettingsBean(

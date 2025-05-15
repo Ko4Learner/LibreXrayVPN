@@ -9,7 +9,6 @@ enum class EConfigType(val value: Int, val protocolScheme: String) {
     VLESS(5, Constants.VLESS),
     TROJAN(6, Constants.TROJAN),
     WIREGUARD(7, Constants.WIREGUARD),
-    HYSTERIA2(9, Constants.HYSTERIA2),
     HTTP(10, Constants.HTTP);
 
     companion object {
