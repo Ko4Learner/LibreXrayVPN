@@ -9,8 +9,12 @@ interface ServiceManager {
     fun getMsgReceive(): BroadcastReceiver
     fun startServiceFromToggle(context: Context): Boolean
     fun startService(context: Context, guid: String? = null)
-    fun stopService(context: Context)
+    fun stopService()
     fun getRunningServerName(): String
     fun startCoreLoop(): Boolean
     fun stopCoreLoop(): Boolean
+    fun measureDelay(time: Long)
+    fun registerReceiver()
+    fun unregisterReceiver()
+
 }

@@ -1,5 +1,8 @@
 package com.pet.vpn_client.di
 
+import android.content.Context
+import com.pet.vpn_client.data.ConfigManager
+import com.pet.vpn_client.data.SettingsManager
 import com.pet.vpn_client.domain.interfaces.CoreVpnBridge
 import com.pet.vpn_client.domain.interfaces.KeyValueStorage
 import com.pet.vpn_client.domain.interfaces.ServiceManager
@@ -9,6 +12,7 @@ import com.pet.vpn_client.framework.services.VPNService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
@@ -32,8 +36,11 @@ class FrameworkModule {
     @Provides
     @Singleton
     fun provideCoreVpnBridge(
+        @ApplicationContext context: Context,
         storage: KeyValueStorage,
-        serviceManager: ServiceManager
+        serviceManager: ServiceManager,
+        configManager: ConfigManager,
+        settingsManager: SettingsManager
     ): CoreVpnBridge =
-        XRayVpnBridge(storage, serviceManager)
+        XRayVpnBridge(context, storage, serviceManager, configManager, settingsManager)
 }

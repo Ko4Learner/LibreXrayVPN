@@ -4,12 +4,12 @@ import com.pet.vpn_client.app.Constants
 
 enum class EConfigType(val value: Int, val protocolScheme: String) {
     VMESS(1, Constants.VMESS),
-    SHADOWSOCKS(3, Constants.SHADOWSOCKS),
-    SOCKS(4, Constants.SOCKS),
-    VLESS(5, Constants.VLESS),
-    TROJAN(6, Constants.TROJAN),
-    WIREGUARD(7, Constants.WIREGUARD),
-    HTTP(10, Constants.HTTP);
+    SHADOWSOCKS(2, Constants.SHADOWSOCKS),
+    SOCKS(3, Constants.SOCKS),
+    VLESS(4, Constants.VLESS),
+    TROJAN(5, Constants.TROJAN),
+    WIREGUARD(6, Constants.WIREGUARD),
+    HTTP(7, Constants.HTTP);
 
     companion object {
         fun fromInt(value: Int) = entries.firstOrNull { it.value == value }

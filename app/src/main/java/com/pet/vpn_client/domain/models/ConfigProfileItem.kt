@@ -61,9 +61,9 @@ data class ConfigProfileItem(
     }
 
     fun getServerAddressAndPort(): String {
-        if (server.isNullOrEmpty() && configType == EConfigType.CUSTOM) {
-            return "${Constants.LOOPBACK}:${Constants.PORT_SOCKS}"
-        }
+//        if (server.isNullOrEmpty() && configType == EConfigType.CUSTOM) {
+//            return "${Constants.LOOPBACK}:${Constants.PORT_SOCKS}"
+//        }
         return Utils.getIpv6Address(server) + ":" + serverPort
     }
 

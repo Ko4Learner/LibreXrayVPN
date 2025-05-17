@@ -3,14 +3,16 @@ package com.pet.vpn_client.framework
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.os.Build
+import android.util.Log
+import androidx.core.content.ContextCompat
 import com.pet.vpn_client.app.Constants
 import com.pet.vpn_client.domain.interfaces.CoreVpnBridge
 import com.pet.vpn_client.domain.interfaces.KeyValueStorage
 import com.pet.vpn_client.domain.interfaces.ServiceControl
 import com.pet.vpn_client.domain.interfaces.ServiceManager
 import com.pet.vpn_client.domain.models.ConfigProfileItem
-import com.pet.vpn_client.domain.models.EConfigType
 import com.pet.vpn_client.framework.services.VPNService
 import com.pet.vpn_client.utils.IntentUtil
 import com.pet.vpn_client.utils.Utils
@@ -54,18 +56,86 @@ class ServiceManagerImpl @Inject constructor(
         startContextService(context)
     }
 
-    override fun stopService(context: Context) {
+    override fun stopService() {
         //context.toast(R.string.toast_services_stop)
-        IntentUtil.sendMsg2Service(context, Constants.MSG_STATE_STOP, "")
+        val service = serviceControl?.get() ?: return
+        service.stopService()
     }
 
     override fun getRunningServerName() = currentConfig?.remarks.orEmpty()
+
     override fun startCoreLoop(): Boolean {
-        return coreVpnBridge.startCoreLoop()
+        if (coreVpnBridge.startCoreLoop()) {
+            registerReceiver()
+            if (coreVpnBridge.isRunning() == false) {
+                //IntentUtil.sendMsg2UI(context, Constants.MSG_STATE_START_FAILURE, "")
+                //NotificationService.cancelNotification()
+                return false
+            }
+
+            try {
+                //IntentUtil.sendMsg2UI(context, Constants.MSG_STATE_START_SUCCESS, "")
+//            NotificationService.startSpeedNotification(currentConfig)
+//            NotificationService.showNotification(currentConfig)
+            } catch (e: Exception) {
+                Log.e(Constants.TAG, "Failed to startup service", e)
+                return false
+            }
+            return true
+        } else return false
     }
 
     override fun stopCoreLoop(): Boolean {
-        return coreVpnBridge.stopCoreLoop()
+        coreVpnBridge.stopCoreLoop()
+        //IntentUtil.sendMsg2UI(context, Constants.MSG_STATE_STOP_SUCCESS, "")
+        //NotificationService.cancelNotification()
+        unregisterReceiver()
+        return true
+    }
+
+    override fun measureDelay(time: Long) {
+        val result = if (time >= 0) {
+            // context.getString(R.string.connection_test_available, time)
+            ""
+        } else {
+            //context.getString(R.string.connection_test_error, errorStr)
+            ""
+        }
+        //IntentUtil.sendMsg2UI(context, Constants.MSG_MEASURE_DELAY_SUCCESS, result)
+        if (time >= 0) {
+            // показывает после успешной проверки в том числе и ip удаленного сервера
+//                SpeedtestManager.getRemoteIPInfo()?.let { ip ->
+//                    IntentUtil.sendMsg2UI(context, Constants.MSG_MEASURE_DELAY_SUCCESS, "$result\n$ip")
+//                }
+        }
+    }
+
+    override fun registerReceiver() {
+        val service = serviceControl?.get() ?: return
+        try {
+            val mFilter = IntentFilter(Constants.BROADCAST_ACTION_SERVICE)
+            mFilter.addAction(Intent.ACTION_SCREEN_ON)
+            mFilter.addAction(Intent.ACTION_SCREEN_OFF)
+            mFilter.addAction(Intent.ACTION_USER_PRESENT)
+            ContextCompat.registerReceiver(
+                service as Context,
+                mMsgReceive,
+                mFilter,
+                Utils.receiverFlags()
+            )
+        } catch (e: Exception) {
+            Log.e(Constants.TAG, "Failed to register broadcast receiver", e)
+            //return false
+        }
+    }
+
+    override fun unregisterReceiver() {
+        val service = serviceControl?.get() ?: return
+        try {
+            (service as Context).unregisterReceiver(mMsgReceive)
+        } catch (e: Exception) {
+            Log.e(Constants.TAG, "Failed to unregister broadcast receiver", e)
+        }
     }
 
     private fun startContextService(context: Context) {
@@ -74,8 +144,7 @@ class ServiceManagerImpl @Inject constructor(
         }
         val guid = storage.getSelectServer() ?: return
         val config = storage.decodeServerConfig(guid) ?: return
-        if (config.configType != EConfigType.CUSTOM
-            && !Utils.isValidUrl(config.server)
+        if (!Utils.isValidUrl(config.server)
             && !Utils.isIpAddress(config.server)
         ) return
 
