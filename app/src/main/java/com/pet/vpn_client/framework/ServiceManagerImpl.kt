@@ -4,7 +4,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.os.Build
 import android.util.Log
 import androidx.core.content.ContextCompat
 import com.pet.vpn_client.app.Constants
@@ -14,7 +13,6 @@ import com.pet.vpn_client.domain.interfaces.ServiceControl
 import com.pet.vpn_client.domain.interfaces.ServiceManager
 import com.pet.vpn_client.domain.models.ConfigProfileItem
 import com.pet.vpn_client.framework.services.VPNService
-import com.pet.vpn_client.utils.IntentUtil
 import com.pet.vpn_client.utils.Utils
 import java.lang.ref.SoftReference
 import javax.inject.Inject
@@ -36,9 +34,9 @@ class ServiceManagerImpl @Inject constructor(
         return serviceControl?.get()?.getService() as ServiceControl?
     }
 
-    override fun getMsgReceive(): BroadcastReceiver {
-        return mMsgReceive
-    }
+//    override fun getMsgReceive(): BroadcastReceiver {
+//        return mMsgReceive
+//    }
 
     override fun startServiceFromToggle(context: Context): Boolean {
         if (storage.getSelectServer().isNullOrEmpty()) {
@@ -66,7 +64,7 @@ class ServiceManagerImpl @Inject constructor(
 
     override fun startCoreLoop(): Boolean {
         if (coreVpnBridge.startCoreLoop()) {
-            registerReceiver()
+//            registerReceiver()
             if (coreVpnBridge.isRunning() == false) {
                 //IntentUtil.sendMsg2UI(context, Constants.MSG_STATE_START_FAILURE, "")
                 //NotificationService.cancelNotification()
@@ -110,8 +108,10 @@ class ServiceManagerImpl @Inject constructor(
         }
     }
 
-    override fun registerReceiver() {
-        val service = serviceControl?.get() ?: return
+    override fun registerReceiver(): Boolean {
+        val guid = storage.getSelectServer() ?: return false
+        currentConfig = storage.decodeServerConfig(guid) ?: return false
+        val service = serviceControl?.get() ?: return false
         try {
             val mFilter = IntentFilter(Constants.BROADCAST_ACTION_SERVICE)
             mFilter.addAction(Intent.ACTION_SCREEN_ON)
@@ -125,8 +125,9 @@ class ServiceManagerImpl @Inject constructor(
             )
         } catch (e: Exception) {
             Log.e(Constants.TAG, "Failed to register broadcast receiver", e)
-            //return false
+            return false
         }
+        return true
     }
 
     override fun unregisterReceiver() {
@@ -152,7 +153,7 @@ class ServiceManagerImpl @Inject constructor(
         if (storage.decodeSettingsBool(Constants.PREF_PROXY_SHARING) == true) {
             //context.toast(R.string.toast_warning_pref_proxysharing_short)
         } else {
-            //Оставить только это
+            //!!!_Оставить только это
             //context.toast(R.string.toast_services_start)
         }
 
@@ -165,14 +166,10 @@ class ServiceManagerImpl @Inject constructor(
             Intent(context.applicationContext, VPNService::class.java)
         }
 
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.N_MR1) {
-            context.startForegroundService(intent)
-        } else {
-            context.startService(intent)
-        }
+        context.startForegroundService(intent)
     }
 
-
+    //ПОЧЕМУ НЕТ СТАРТА СЕРВИСА?
     private inner class ReceiveMessageHandler : BroadcastReceiver() {
 
         override fun onReceive(ctx: Context?, intent: Intent?) {
@@ -181,17 +178,17 @@ class ServiceManagerImpl @Inject constructor(
             when (intent?.getIntExtra("key", 0)) {
                 Constants.MSG_REGISTER_CLIENT -> {
                     if (coreVpnBridge.isRunning()) {
-                        IntentUtil.sendMsg2UI(
-                            serviceControl.getService(),
-                            Constants.MSG_STATE_RUNNING,
-                            ""
-                        )
+//                        IntentUtil.sendMsg2UI(
+//                            serviceControl.getService(),
+//                            Constants.MSG_STATE_RUNNING,
+//                            ""
+//                        )
                     } else {
-                        IntentUtil.sendMsg2UI(
-                            serviceControl.getService(),
-                            Constants.MSG_STATE_NOT_RUNNING,
-                            ""
-                        )
+//                        IntentUtil.sendMsg2UI(
+//                            serviceControl.getService(),
+//                            Constants.MSG_STATE_NOT_RUNNING,
+//                            ""
+//                        )
                     }
                 }
 

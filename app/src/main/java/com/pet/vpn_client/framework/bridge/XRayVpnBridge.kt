@@ -8,7 +8,6 @@ import com.pet.vpn_client.data.SettingsManager
 import com.pet.vpn_client.domain.interfaces.CoreVpnBridge
 import com.pet.vpn_client.domain.interfaces.KeyValueStorage
 import com.pet.vpn_client.domain.interfaces.ServiceManager
-import com.pet.vpn_client.domain.models.ConfigProfileItem
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -26,7 +25,7 @@ class XRayVpnBridge @Inject constructor(
 ) : CoreVpnBridge {
 
     private val coreController: CoreController = Libv2ray.newCoreController(CoreCallback())
-    private var currentConfig: ConfigProfileItem? = null
+//    private var currentConfig: ConfigProfileItem? = null
 
     override fun isRunning(): Boolean = coreController.isRunning
 
@@ -35,13 +34,13 @@ class XRayVpnBridge @Inject constructor(
             return false
         }
         val guid = storage.getSelectServer() ?: return false
-        val config = storage.decodeServerConfig(guid) ?: return false
+//        val config = storage.decodeServerConfig(guid) ?: return false
         val result = configManager.getV2rayConfig(context, guid)
         if (!result.status) return false
 
-        serviceManager.registerReceiver()
+        if (!serviceManager.registerReceiver()) return false
 
-        currentConfig = config
+//        currentConfig = config
 
         try {
             coreController.startLoop(result.content)

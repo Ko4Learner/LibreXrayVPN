@@ -30,8 +30,12 @@ class FrameworkModule {
 
     @Provides
     @Singleton
-    fun provideVPNService(storage: KeyValueStorage, serviceManager: ServiceManager): VPNService =
-        VPNService(storage, serviceManager)
+    fun provideVPNService(
+        storage: KeyValueStorage,
+        serviceManager: ServiceManager,
+        settingsManager: SettingsManager
+    ): VPNService =
+        VPNService(storage, serviceManager, settingsManager)
 
     @Provides
     @Singleton

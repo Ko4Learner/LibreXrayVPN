@@ -8,22 +8,29 @@ import android.net.LocalSocketAddress
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
+import android.net.ProxyInfo
 import android.net.VpnService
 import android.os.ParcelFileDescriptor
 import android.os.StrictMode
 import android.util.Log
+import com.pet.vpn_client.app.Constants
+import com.pet.vpn_client.data.SettingsManager
 import com.pet.vpn_client.domain.interfaces.KeyValueStorage
 import com.pet.vpn_client.domain.interfaces.ServiceControl
 import com.pet.vpn_client.domain.interfaces.ServiceManager
+import com.pet.vpn_client.utils.Utils
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
 import javax.inject.Inject
 
+@AndroidEntryPoint
 class VPNService @Inject constructor(
     val storage: KeyValueStorage,
-    val serviceManager: ServiceManager
+    val serviceManager: ServiceManager,
+    val settingsManager: SettingsManager
 ) : VpnService(),
     ServiceControl {
 
@@ -42,7 +49,6 @@ class VPNService @Inject constructor(
 
     private val networkCallback by lazy {
         object : ConnectivityManager.NetworkCallback() {
-
             override fun onAvailable(network: Network) {
                 setUnderlyingNetworks(arrayOf(network))
             }
@@ -89,11 +95,11 @@ class VPNService @Inject constructor(
     //    //применение локали (язык) приложения
 //    override fun attachBaseContext(newBase: Context?) {
 //        val context = newBase?.let {
-//            MyContextWrapper.wrap(newBase, SettingsManager.getLocale())
+//            MyContextWrapper.wrap(newBase, settingsManager.getLocale())
 //        }
 //        super.attachBaseContext(context)
 //    }
-//
+
     override fun getService(): Service {
         return this
     }
@@ -121,17 +127,19 @@ class VPNService @Inject constructor(
             .addAddress(PRIVATE_VLAN4_CLIENT, 30)
             .addRoute(DEFAULT_ROUTE, 0)
             .setSession(serviceManager.getRunningServerName())
-//            .addDisallowedApplication(selfPackageName)
+            //надо переделать
+            .addDisallowedApplication("com.pet.vpn_client")
 
-//        SettingsManager.getVpnDnsServers()
-//            .forEach {
-//                if (Utils.isPureIpAddress(it)) {
-//                    builder.addDnsServer(it)
-//                }
-//            }
+        //нужно ли мне это?
+        settingsManager.getVpnDnsServers()
+            .forEach {
+                if (Utils.isPureIpAddress(it)) {
+                    builder.addDnsServer(it)
+                }
+            }
         try {
             mInterface.close()
-        } catch (ignored: Exception) {
+        } catch (_: Exception) {
         }
 
         try {
@@ -140,14 +148,14 @@ class VPNService @Inject constructor(
             Log.e("VPNService", "Failed to request network: ${e.message}")
         }
         builder.setMetered(false)
-//        if (storage.decodeSettingsBool(Constants.PREF_APPEND_HTTP_PROXY)) {
-//            builder.setHttpProxy(
-//                ProxyInfo.buildDirectProxy(
-//                    "127.0.0.1",
-//                    SettingManager.getHttpPort()
-//                )
-//            )
-//        }
+        if (storage.decodeSettingsBool(Constants.PREF_APPEND_HTTP_PROXY)) {
+            builder.setHttpProxy(
+                ProxyInfo.buildDirectProxy(
+                    "127.0.0.1",
+                    settingsManager.getHttpPort()
+                )
+            )
+        }
         try {
             mInterface = builder.establish()!!
             isRunning = true
@@ -224,7 +232,7 @@ class VPNService @Inject constructor(
         isRunning = false
         try {
             connectivityManager.unregisterNetworkCallback(networkCallback)
-        } catch (ignored: Exception) {
+        } catch (_: Exception) {
         }
         try {
             process.destroy()
@@ -251,6 +259,5 @@ class VPNService @Inject constructor(
         private const val PORT_SOCKS = 10808
         private const val PRIVATE_VLAN4_ROUTER = "10.10.14.2"
         private const val TUN2SOCKS = "libtun2socks.so"
-
     }
 }
