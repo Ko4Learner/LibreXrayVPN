@@ -12,6 +12,7 @@ import com.pet.vpn_client.data.config_formatter.VlessFormatter
 import com.pet.vpn_client.data.config_formatter.VmessFormatter
 import com.pet.vpn_client.data.config_formatter.WireguardFormatter
 import com.pet.vpn_client.data.mmkv.MMKVStorage
+import com.pet.vpn_client.data.qr_code.QRCodeDecoder
 import com.pet.vpn_client.domain.interfaces.KeyValueStorage
 import dagger.Module
 import dagger.Provides
@@ -67,24 +68,28 @@ object DataModule {
         storage: KeyValueStorage,
         gson: Gson,
         settingsManager: SettingsManager,
+        configManager: ConfigManager,
         httpFormatter: HttpFormatter,
         shadowsocksFormatter: ShadowsocksFormatter,
         socksFormatter: SocksFormatter,
         trojanFormatter: TrojanFormatter,
         vlessFormatter: VlessFormatter,
         vmessFormatter: VmessFormatter,
-        wireguardFormatter: WireguardFormatter
+        wireguardFormatter: WireguardFormatter,
+        qrCodeDecoder: QRCodeDecoder
     ): SubscriptionManager = SubscriptionManager(
         storage,
         gson,
         settingsManager,
+        configManager,
         httpFormatter,
         shadowsocksFormatter,
         socksFormatter,
         trojanFormatter,
         vlessFormatter,
         vmessFormatter,
-        wireguardFormatter
+        wireguardFormatter,
+        qrCodeDecoder
     )
 
     @Provides

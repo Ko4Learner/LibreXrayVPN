@@ -26,5 +26,7 @@ class VpnScreenViewModel @Inject constructor() : ViewModel() {
         //TODO: Implement restarting connection
     }
 
-
+    fun importConfigFromClipboard() {
+        //TODO: Implement importing config from clipboard
+    }
 }
