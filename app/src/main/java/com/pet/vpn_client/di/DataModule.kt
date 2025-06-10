@@ -3,6 +3,7 @@ package com.pet.vpn_client.di
 import com.google.gson.Gson
 import com.pet.vpn_client.data.ConfigManager
 import com.pet.vpn_client.data.SettingsManager
+import com.pet.vpn_client.data.SubscriptionManager
 import com.pet.vpn_client.data.config_formatter.HttpFormatter
 import com.pet.vpn_client.data.config_formatter.ShadowsocksFormatter
 import com.pet.vpn_client.data.config_formatter.SocksFormatter
@@ -59,6 +60,32 @@ object DataModule {
             vmessFormatter,
             wireguardFormatter
         )
+
+    @Provides
+    @Singleton
+    fun provideSubscriptionManager(
+        storage: KeyValueStorage,
+        gson: Gson,
+        settingsManager: SettingsManager,
+        httpFormatter: HttpFormatter,
+        shadowsocksFormatter: ShadowsocksFormatter,
+        socksFormatter: SocksFormatter,
+        trojanFormatter: TrojanFormatter,
+        vlessFormatter: VlessFormatter,
+        vmessFormatter: VmessFormatter,
+        wireguardFormatter: WireguardFormatter
+    ): SubscriptionManager = SubscriptionManager(
+        storage,
+        gson,
+        settingsManager,
+        httpFormatter,
+        shadowsocksFormatter,
+        socksFormatter,
+        trojanFormatter,
+        vlessFormatter,
+        vmessFormatter,
+        wireguardFormatter
+    )
 
     @Provides
     @Singleton

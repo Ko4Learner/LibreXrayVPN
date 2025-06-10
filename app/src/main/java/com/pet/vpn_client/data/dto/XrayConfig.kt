@@ -315,7 +315,6 @@ data class XrayConfig(
                 || protocol.equals(EConfigType.SOCKS.name, true)
                 || protocol.equals(EConfigType.HTTP.name, true)
                 || protocol.equals(EConfigType.TROJAN.name, true)
-                || protocol.equals(EConfigType.HYSTERIA2.name, true)
             ) {
                 return settings?.servers?.first()?.address
             } else if (protocol.equals(EConfigType.WIREGUARD.name, true)) {
@@ -333,7 +332,6 @@ data class XrayConfig(
                 || protocol.equals(EConfigType.SOCKS.name, true)
                 || protocol.equals(EConfigType.HTTP.name, true)
                 || protocol.equals(EConfigType.TROJAN.name, true)
-                || protocol.equals(EConfigType.HYSTERIA2.name, true)
             ) {
                 return settings?.servers?.first()?.port
             } else if (protocol.equals(EConfigType.WIREGUARD.name, true)) {
@@ -355,7 +353,6 @@ data class XrayConfig(
                 return settings?.vnext?.first()?.users?.first()?.id
             } else if (protocol.equals(EConfigType.SHADOWSOCKS.name, true)
                 || protocol.equals(EConfigType.TROJAN.name, true)
-                || protocol.equals(EConfigType.HYSTERIA2.name, true)
             ) {
                 return settings?.servers?.first()?.password
             } else if (protocol.equals(EConfigType.SOCKS.name, true)

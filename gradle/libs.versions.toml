@@ -16,6 +16,7 @@ navigationCom = "2.8.9"
 gson = "2.12.1"
 mmkvStatic = "2.1.0"
 workRuntimeKtx = "2.10.1"
+scanner = "4.3.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -43,6 +44,7 @@ gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 mmkv-static = { module = "com.tencent:mmkv-static", version.ref = "mmkvStatic" }
 work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workRuntimeKtx" }
 work-multiprocess = { module = "androidx.work:work-multiprocess", version.ref = "workRuntimeKtx" }
+scanner = { group = "com.journeyapps", name = "zxing-android-embedded", version.ref = "scanner" }
 
 
 [plugins]

@@ -92,14 +92,6 @@ class VPNService @Inject constructor(
         return START_STICKY
     }
 
-    //    //применение локали (язык) приложения
-//    override fun attachBaseContext(newBase: Context?) {
-//        val context = newBase?.let {
-//            MyContextWrapper.wrap(newBase, settingsManager.getLocale())
-//        }
-//        super.attachBaseContext(context)
-//    }
-
     override fun getService(): Service {
         return this
     }
@@ -251,6 +243,14 @@ class VPNService @Inject constructor(
             }
         }
     }
+
+    //    //применение локали (язык) приложения
+//    override fun attachBaseContext(newBase: Context?) {
+//        val context = newBase?.let {
+//            MyContextWrapper.wrap(newBase, settingsManager.getLocale())
+//        }
+//        super.attachBaseContext(context)
+//    }
 
     companion object {
         private const val VPN_MTU = 1500

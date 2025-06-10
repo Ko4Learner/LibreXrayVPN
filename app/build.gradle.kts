@@ -80,6 +80,9 @@ dependencies {
     implementation(libs.mmkv.static)
     implementation(libs.gson)
 
+    //QR scanner
+    implementation(libs.scanner)
+
     // Test
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
