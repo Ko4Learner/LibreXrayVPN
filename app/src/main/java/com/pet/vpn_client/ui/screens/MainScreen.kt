@@ -34,7 +34,7 @@ import com.pet.vpn_client.ui.composable_elements.SwitchVpnProxy
     uiMode = Configuration.UI_MODE_NIGHT_YES
 )
 @Composable
-fun VpnScreen(modifier: Modifier = Modifier) {
+fun VpnScreen(modifier: Modifier = Modifier/*, viewModel: VpnScreenViewModel*/) {
     val viewModel: VpnScreenViewModel = hiltViewModel()
     Column(
         modifier = modifier

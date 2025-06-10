@@ -1,11 +1,14 @@
 package com.pet.vpn_client.presentation.view_model
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.pet.vpn_client.domain.interfaces.interactor.ConfigInteractor
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class VpnScreenViewModel @Inject constructor() : ViewModel() {
+class VpnScreenViewModel @Inject constructor(val configInteractor: ConfigInteractor) : ViewModel() {
     fun toggleVpnProxy() {
         //TODO: Implement VPN/Proxy toggle logic
     }
@@ -27,6 +30,8 @@ class VpnScreenViewModel @Inject constructor() : ViewModel() {
     }
 
     fun importConfigFromClipboard() {
-        //TODO: Implement importing config from clipboard
+        viewModelScope.launch {
+            configInteractor.importClipboardConfig()
+        }
     }
 }

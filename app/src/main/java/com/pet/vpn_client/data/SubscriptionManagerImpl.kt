@@ -38,10 +38,11 @@ class SubscriptionManagerImpl @Inject constructor(
     val vlessFormatter: VlessFormatter,
     val vmessFormatter: VmessFormatter,
     val wireguardFormatter: WireguardFormatter,
-    val qrCodeDecoder: QRCodeDecoder
+    val qrCodeDecoder: QRCodeDecoder,
+    val context: Context
 ) : SubscriptionManager {
 
-    fun shareToClipboard(context: Context, guid: String): Int {
+    fun shareToClipboard(guid: String): Int {
         try {
             val conf = shareConfig(guid)
             if (TextUtils.isEmpty(conf)) {
@@ -57,7 +58,7 @@ class SubscriptionManagerImpl @Inject constructor(
         return 0
     }
 
-    fun shareNonCustomConfigsToClipboard(context: Context, serverList: List<String>): Int {
+    fun shareNonCustomConfigsToClipboard(serverList: List<String>): Int {
         try {
             val sb = StringBuilder()
             for (guid in serverList) {
@@ -92,7 +93,7 @@ class SubscriptionManagerImpl @Inject constructor(
         }
     }
 
-    fun shareFullContentToClipboard(context: Context, guid: String?): Int {
+    fun shareFullContentToClipboard(guid: String?): Int {
         try {
             if (guid == null) return -1
             val result = configManager.getCoreConfig(guid)
@@ -127,7 +128,28 @@ class SubscriptionManagerImpl @Inject constructor(
         }
     }
 
-    fun importBatchConfig(server: String?, subid: String, append: Boolean): Pair<Int, Int> {
+    override suspend fun importClipboard()
+            : Boolean {
+        try {
+            val clipboard = Utils.getClipboard(context)
+            importBatchConfig(
+                clipboard,
+                storage.decodeSettingsString(Constants.CACHE_SUBSCRIPTION_ID, "").orEmpty(),
+                true
+            )
+        } catch (e: Exception) {
+            Log.e(Constants.TAG, "Failed to import config from clipboard", e)
+            return false
+        }
+        return true
+    }
+
+    override suspend fun importBatchConfig(
+        server: String?,
+        subid: String,
+        append: Boolean
+    ): Pair<Int, Int> {
+        val clipboard = Utils.getClipboard(context)
         var count = parseBatchConfig(Utils.decode(server), subid, append)
         if (count <= 0) {
             count = parseBatchConfig(server, subid, append)
