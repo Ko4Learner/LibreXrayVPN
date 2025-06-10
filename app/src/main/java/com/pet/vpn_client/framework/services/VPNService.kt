@@ -14,10 +14,10 @@ import android.os.ParcelFileDescriptor
 import android.os.StrictMode
 import android.util.Log
 import com.pet.vpn_client.app.Constants
-import com.pet.vpn_client.data.SettingsManager
 import com.pet.vpn_client.domain.interfaces.KeyValueStorage
 import com.pet.vpn_client.domain.interfaces.ServiceControl
 import com.pet.vpn_client.domain.interfaces.ServiceManager
+import com.pet.vpn_client.domain.interfaces.SettingsManager
 import com.pet.vpn_client.utils.Utils
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope

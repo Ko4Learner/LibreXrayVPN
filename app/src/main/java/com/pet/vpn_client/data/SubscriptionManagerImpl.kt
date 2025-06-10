@@ -14,7 +14,10 @@ import com.pet.vpn_client.data.config_formatter.VlessFormatter
 import com.pet.vpn_client.data.config_formatter.VmessFormatter
 import com.pet.vpn_client.data.config_formatter.WireguardFormatter
 import com.pet.vpn_client.data.qr_code.QRCodeDecoder
+import com.pet.vpn_client.domain.interfaces.ConfigManager
 import com.pet.vpn_client.domain.interfaces.KeyValueStorage
+import com.pet.vpn_client.domain.interfaces.SettingsManager
+import com.pet.vpn_client.domain.interfaces.SubscriptionManager
 import com.pet.vpn_client.domain.models.ConfigProfileItem
 import com.pet.vpn_client.domain.models.EConfigType
 import com.pet.vpn_client.domain.models.SubscriptionItem
@@ -23,7 +26,7 @@ import com.pet.vpn_client.utils.Utils
 import java.net.URI
 import javax.inject.Inject
 
-class SubscriptionManager @Inject constructor(
+class SubscriptionManagerImpl @Inject constructor(
     val storage: KeyValueStorage,
     val gson: Gson,
     val settingsManager: SettingsManager,
@@ -36,7 +39,7 @@ class SubscriptionManager @Inject constructor(
     val vmessFormatter: VmessFormatter,
     val wireguardFormatter: WireguardFormatter,
     val qrCodeDecoder: QRCodeDecoder
-) {
+) : SubscriptionManager {
 
     fun shareToClipboard(context: Context, guid: String): Int {
         try {
@@ -92,7 +95,7 @@ class SubscriptionManager @Inject constructor(
     fun shareFullContentToClipboard(context: Context, guid: String?): Int {
         try {
             if (guid == null) return -1
-            val result = configManager.getV2rayConfig(context, guid)
+            val result = configManager.getCoreConfig(guid)
             if (result.status) {
                 Utils.setClipboard(context, result.content)
             } else {
@@ -347,14 +350,22 @@ class SubscriptionManager @Inject constructor(
                 val httpPort = settingsManager.getHttpPort()
                 HttpUtil.getUrlContentWithUserAgent(url, 15000, httpPort)
             } catch (e: Exception) {
-                Log.e(Constants.ANG_PACKAGE, "Update subscription: proxy not ready or other error", e)
+                Log.e(
+                    Constants.ANG_PACKAGE,
+                    "Update subscription: proxy not ready or other error",
+                    e
+                )
                 ""
             }
             if (configText.isEmpty()) {
                 configText = try {
                     HttpUtil.getUrlContentWithUserAgent(url)
                 } catch (e: Exception) {
-                    Log.e(Constants.TAG, "Update subscription: Failed to get URL content with user agent", e)
+                    Log.e(
+                        Constants.TAG,
+                        "Update subscription: Failed to get URL content with user agent",
+                        e
+                    )
                     ""
                 }
             }

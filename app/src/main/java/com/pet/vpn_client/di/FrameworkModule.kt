@@ -1,8 +1,8 @@
 package com.pet.vpn_client.di
 
 import android.content.Context
-import com.pet.vpn_client.data.ConfigManager
-import com.pet.vpn_client.data.SettingsManager
+import com.pet.vpn_client.data.SettingsManagerImpl
+import com.pet.vpn_client.domain.interfaces.ConfigManager
 import com.pet.vpn_client.domain.interfaces.CoreVpnBridge
 import com.pet.vpn_client.domain.interfaces.KeyValueStorage
 import com.pet.vpn_client.domain.interfaces.ServiceManager
@@ -33,7 +33,7 @@ class FrameworkModule {
     fun provideVPNService(
         storage: KeyValueStorage,
         serviceManager: ServiceManager,
-        settingsManager: SettingsManager
+        settingsManager: SettingsManagerImpl
     ): VPNService =
         VPNService(storage, serviceManager, settingsManager)
 
@@ -44,7 +44,7 @@ class FrameworkModule {
         storage: KeyValueStorage,
         serviceManager: ServiceManager,
         configManager: ConfigManager,
-        settingsManager: SettingsManager
+        settingsManager: SettingsManagerImpl
     ): CoreVpnBridge =
         XRayVpnBridge(context, storage, serviceManager, configManager, settingsManager)
 }

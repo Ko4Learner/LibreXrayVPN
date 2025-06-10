@@ -17,7 +17,9 @@ import com.pet.vpn_client.data.config_formatter.TrojanFormatter
 import com.pet.vpn_client.data.config_formatter.VlessFormatter
 import com.pet.vpn_client.data.config_formatter.VmessFormatter
 import com.pet.vpn_client.data.config_formatter.WireguardFormatter
+import com.pet.vpn_client.domain.interfaces.ConfigManager
 import com.pet.vpn_client.domain.interfaces.KeyValueStorage
+import com.pet.vpn_client.domain.interfaces.SettingsManager
 import com.pet.vpn_client.domain.models.ConfigProfileItem
 import com.pet.vpn_client.domain.models.ConfigResult
 import com.pet.vpn_client.domain.models.EConfigType
@@ -29,7 +31,7 @@ import com.pet.vpn_client.utils.Utils
 import com.pet.vpn_client.utils.isNotNullEmpty
 import javax.inject.Inject
 
-class ConfigManager @Inject constructor(
+class ConfigManagerImpl @Inject constructor(
     val storage: KeyValueStorage,
     val gson: Gson,
     val settingsManager: SettingsManager,
@@ -39,14 +41,15 @@ class ConfigManager @Inject constructor(
     val trojanFormatter: TrojanFormatter,
     val vlessFormatter: VlessFormatter,
     val vmessFormatter: VmessFormatter,
-    val wireguardFormatter: WireguardFormatter
-) {
+    val wireguardFormatter: WireguardFormatter,
+    val context: Context
+) :ConfigManager{
 
     private var initConfigCache: String? = null
 
     //region get config function
 
-    fun getV2rayConfig(context: Context, guid: String): ConfigResult {
+    override fun getCoreConfig(guid: String): ConfigResult {
         try {
             val config = storage.decodeServerConfig(guid) ?: return ConfigResult(false)
             return getV2rayNormalConfig(context, guid, config)

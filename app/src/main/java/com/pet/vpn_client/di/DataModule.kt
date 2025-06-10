@@ -1,9 +1,10 @@
 package com.pet.vpn_client.di
 
+import android.content.Context
 import com.google.gson.Gson
-import com.pet.vpn_client.data.ConfigManager
-import com.pet.vpn_client.data.SettingsManager
-import com.pet.vpn_client.data.SubscriptionManager
+import com.pet.vpn_client.data.ConfigManagerImpl
+import com.pet.vpn_client.data.SettingsManagerImpl
+import com.pet.vpn_client.data.SubscriptionManagerImpl
 import com.pet.vpn_client.data.config_formatter.HttpFormatter
 import com.pet.vpn_client.data.config_formatter.ShadowsocksFormatter
 import com.pet.vpn_client.data.config_formatter.SocksFormatter
@@ -13,10 +14,14 @@ import com.pet.vpn_client.data.config_formatter.VmessFormatter
 import com.pet.vpn_client.data.config_formatter.WireguardFormatter
 import com.pet.vpn_client.data.mmkv.MMKVStorage
 import com.pet.vpn_client.data.qr_code.QRCodeDecoder
+import com.pet.vpn_client.domain.interfaces.ConfigManager
 import com.pet.vpn_client.domain.interfaces.KeyValueStorage
+import com.pet.vpn_client.domain.interfaces.SettingsManager
+import com.pet.vpn_client.domain.interfaces.SubscriptionManager
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
@@ -47,9 +52,10 @@ object DataModule {
         trojanFormatter: TrojanFormatter,
         vlessFormatter: VlessFormatter,
         vmessFormatter: VmessFormatter,
-        wireguardFormatter: WireguardFormatter
+        wireguardFormatter: WireguardFormatter,
+        @ApplicationContext context: Context
     ): ConfigManager =
-        ConfigManager(
+        ConfigManagerImpl(
             storage,
             gson,
             settingsManager,
@@ -59,7 +65,8 @@ object DataModule {
             trojanFormatter,
             vlessFormatter,
             vmessFormatter,
-            wireguardFormatter
+            wireguardFormatter,
+            context
         )
 
     @Provides
@@ -77,7 +84,7 @@ object DataModule {
         vmessFormatter: VmessFormatter,
         wireguardFormatter: WireguardFormatter,
         qrCodeDecoder: QRCodeDecoder
-    ): SubscriptionManager = SubscriptionManager(
+    ): SubscriptionManager = SubscriptionManagerImpl(
         storage,
         gson,
         settingsManager,
@@ -91,6 +98,11 @@ object DataModule {
         wireguardFormatter,
         qrCodeDecoder
     )
+
+    @Provides
+    @Singleton
+    fun provideSettingsManager(storage: KeyValueStorage, gson: Gson): SettingsManager =
+        SettingsManagerImpl(storage, gson)
 
     @Provides
     @Singleton

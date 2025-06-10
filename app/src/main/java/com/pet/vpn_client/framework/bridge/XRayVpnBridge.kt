@@ -3,11 +3,11 @@ package com.pet.vpn_client.framework.bridge
 import android.content.Context
 import android.util.Log
 import com.pet.vpn_client.app.Constants
-import com.pet.vpn_client.data.ConfigManager
-import com.pet.vpn_client.data.SettingsManager
+import com.pet.vpn_client.domain.interfaces.ConfigManager
 import com.pet.vpn_client.domain.interfaces.CoreVpnBridge
 import com.pet.vpn_client.domain.interfaces.KeyValueStorage
 import com.pet.vpn_client.domain.interfaces.ServiceManager
+import com.pet.vpn_client.domain.interfaces.SettingsManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -35,7 +35,7 @@ class XRayVpnBridge @Inject constructor(
         }
         val guid = storage.getSelectServer() ?: return false
 //        val config = storage.decodeServerConfig(guid) ?: return false
-        val result = configManager.getV2rayConfig(context, guid)
+        val result = configManager.getCoreConfig(guid)
         if (!result.status) return false
 
         if (!serviceManager.registerReceiver()) return false
@@ -76,13 +76,13 @@ class XRayVpnBridge @Inject constructor(
         CoroutineScope(Dispatchers.IO).launch {
             serviceManager.getService() ?: return@launch
             var time = -1L
-            var errorStr = ""
+            //var errorStr = ""
 
             try {
                 time = coreController.measureDelay(settingsManager.getDelayTestUrl())
             } catch (e: Exception) {
                 Log.e(Constants.TAG, "Failed to measure delay with primary URL", e)
-                errorStr = e.message?.substringAfter("\":") ?: "empty message"
+                //errorStr = e.message?.substringAfter("\":") ?: "empty message"
             }
 
             if (time == -1L) {
@@ -90,7 +90,7 @@ class XRayVpnBridge @Inject constructor(
                     time = coreController.measureDelay(settingsManager.getDelayTestUrl(true))
                 } catch (e: Exception) {
                     Log.e(Constants.TAG, "Failed to measure delay with alternative URL", e)
-                    errorStr = e.message?.substringAfter("\":") ?: "empty message"
+                    //errorStr = e.message?.substringAfter("\":") ?: "empty message"
                 }
             }
             serviceManager.measureDelay(time)

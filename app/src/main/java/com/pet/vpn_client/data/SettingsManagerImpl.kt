@@ -7,6 +7,7 @@ import android.util.Log
 import com.google.gson.Gson
 import com.pet.vpn_client.app.Constants
 import com.pet.vpn_client.domain.interfaces.KeyValueStorage
+import com.pet.vpn_client.domain.interfaces.SettingsManager
 import com.pet.vpn_client.domain.models.ConfigProfileItem
 import com.pet.vpn_client.domain.models.Language
 import com.pet.vpn_client.domain.models.RoutingType
@@ -18,7 +19,7 @@ import java.util.Collections
 import java.util.Locale
 import javax.inject.Inject
 
-class SettingsManager @Inject constructor(val storage: KeyValueStorage, val gson: Gson) {
+class SettingsManagerImpl @Inject constructor(val storage: KeyValueStorage, val gson: Gson): SettingsManager {
 
     fun initRoutingRulesets(context: Context) {
         val exist = storage.decodeRoutingRulesets()
@@ -147,7 +148,7 @@ class SettingsManager @Inject constructor(val storage: KeyValueStorage, val gson
         storage.encodeSubsList(subsList)
     }
 
-    fun getServerViaRemarks(remarks: String?): ConfigProfileItem? {
+    override fun getServerViaRemarks(remarks: String?): ConfigProfileItem? {
         if (remarks == null) {
             return null
         }
@@ -161,14 +162,14 @@ class SettingsManager @Inject constructor(val storage: KeyValueStorage, val gson
         return null
     }
 
-    fun getSocksPort(): Int {
+    override fun getSocksPort(): Int {
         return Utils.parseInt(
             storage.decodeSettingsString(Constants.PREF_SOCKS_PORT),
             Constants.PORT_SOCKS.toInt()
         )
     }
 
-    fun getHttpPort(): Int {
+    override fun getHttpPort(): Int {
         return getSocksPort() + 0
         //return getSocksPort() + if (Utils.isXray()) 0 else 1
     }
@@ -195,7 +196,7 @@ class SettingsManager @Inject constructor(val storage: KeyValueStorage, val gson
         }
     }
 
-    fun getDomesticDnsServers(): List<String> {
+    override fun getDomesticDnsServers(): List<String> {
         val domesticDns =
             storage.decodeSettingsString(Constants.PREF_DOMESTIC_DNS) ?: Constants.DNS_DIRECT
         val ret = domesticDns.split(",")
@@ -206,7 +207,7 @@ class SettingsManager @Inject constructor(val storage: KeyValueStorage, val gson
         return ret
     }
 
-    fun getRemoteDnsServers(): List<String> {
+    override fun getRemoteDnsServers(): List<String> {
         val remoteDns =
             storage.decodeSettingsString(Constants.PREF_REMOTE_DNS) ?: Constants.DNS_PROXY
         val ret =
@@ -217,12 +218,12 @@ class SettingsManager @Inject constructor(val storage: KeyValueStorage, val gson
         return ret
     }
 
-    fun getVpnDnsServers(): List<String> {
+    override fun getVpnDnsServers(): List<String> {
         val vpnDns = storage.decodeSettingsString(Constants.PREF_VPN_DNS) ?: Constants.DNS_VPN
         return vpnDns.split(",").filter { Utils.isPureIpAddress(it) }
     }
 
-    fun getDelayTestUrl(second: Boolean = false): String {
+    override fun getDelayTestUrl(second: Boolean): String {
         return if (second) {
             Constants.DELAY_TEST_URL2
         } else {
