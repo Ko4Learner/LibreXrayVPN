@@ -4,7 +4,7 @@ import android.text.TextUtils
 import android.util.Log
 import com.google.gson.Gson
 import com.pet.vpn_client.app.Constants
-import com.pet.vpn_client.data.ConfigManager
+import com.pet.vpn_client.domain.interfaces.ConfigManager
 import com.pet.vpn_client.data.dto.XrayConfig.OutboundBean
 import com.pet.vpn_client.domain.interfaces.KeyValueStorage
 import com.pet.vpn_client.domain.models.ConfigProfileItem
@@ -16,9 +16,10 @@ import com.pet.vpn_client.utils.idnHost
 import com.pet.vpn_client.utils.isNotNullEmpty
 import java.net.URI
 import javax.inject.Inject
+import javax.inject.Provider
 
 class VmessFormatter @Inject constructor(
-    val configManager: ConfigManager,
+    val configManager: Provider<ConfigManager>,
     val storage: KeyValueStorage,
     val gson: Gson
 ) : BaseFormatter() {
@@ -142,7 +143,7 @@ class VmessFormatter @Inject constructor(
     }
 
     fun toOutbound(profileItem: ConfigProfileItem): OutboundBean? {
-        val outboundBean = configManager.createInitOutbound(EConfigType.VMESS)
+        val outboundBean = configManager.get().createInitOutbound(EConfigType.VMESS)
 
         outboundBean?.settings?.vnext?.first()?.let { vnext ->
             vnext.address = profileItem.server.orEmpty()
@@ -152,11 +153,11 @@ class VmessFormatter @Inject constructor(
         }
 
         val sni = outboundBean?.streamSettings?.let {
-            configManager.populateTransportSettings(it, profileItem)
+            configManager.get().populateTransportSettings(it, profileItem)
         }
 
         outboundBean?.streamSettings?.let {
-            configManager.populateTlsSettings(it, profileItem, sni)
+            configManager.get().populateTlsSettings(it, profileItem, sni)
         }
 
         return outboundBean

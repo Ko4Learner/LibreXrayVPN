@@ -13,8 +13,9 @@ import com.google.zxing.NotFoundException
 import com.google.zxing.RGBLuminanceSource
 import com.google.zxing.common.GlobalHistogramBinarizer
 import com.google.zxing.qrcode.QRCodeReader
+import javax.inject.Inject
 
-class QRCodeDecoder {
+class QRCodeDecoder @Inject constructor() {
     val HINTS: MutableMap<DecodeHintType, Any?> = EnumMap(DecodeHintType::class.java)
 
     fun createQRCode(text: String, size: Int = 800): Bitmap? {

@@ -129,96 +129,91 @@ class SubscriptionManagerImpl @Inject constructor(
     }
 
     override suspend fun importClipboard()
-            : Boolean {
+            : Int {
         try {
             val clipboard = Utils.getClipboard(context)
-            importBatchConfig(
+            val count = importBatchConfig(
                 clipboard,
-                storage.decodeSettingsString(Constants.CACHE_SUBSCRIPTION_ID, "").orEmpty(),
                 true
             )
+            return count
         } catch (e: Exception) {
             Log.e(Constants.TAG, "Failed to import config from clipboard", e)
-            return false
+            return -1
         }
-        return true
     }
 
-    override suspend fun importBatchConfig(
+    private fun importBatchConfig(
         server: String?,
-        subid: String,
         append: Boolean
-    ): Pair<Int, Int> {
-        val clipboard = Utils.getClipboard(context)
-        var count = parseBatchConfig(Utils.decode(server), subid, append)
+    ): Int {
+        var count = parseBatchConfig(Utils.decode(server), append)
         if (count <= 0) {
-            count = parseBatchConfig(server, subid, append)
+            count = parseBatchConfig(server, append)
         }
 //        if (count <= 0) {
 //            count = parseCustomConfigServer(server, subid)
 //        }
 
-        var countSub = parseBatchSubscription(server)
-        if (countSub <= 0) {
-            countSub = parseBatchSubscription(Utils.decode(server))
-        }
-        if (countSub > 0) {
-            updateConfigViaSubAll()
-        }
+//        var countSub = parseBatchSubscription(server)
+//        if (countSub <= 0) {
+//            countSub = parseBatchSubscription(Utils.decode(server))
+//        }
+//        if (countSub > 0) {
+//            updateConfigViaSubAll()
+//        }
 
-        return count to countSub
+        return count
     }
 
-    private fun parseBatchSubscription(servers: String?): Int {
+//    private fun parseBatchSubscription(servers: String?): Int {
+//        try {
+//            if (servers == null) {
+//                return 0
+//            }
+//
+//            var count = 0
+//            servers.lines()
+//                .distinct()
+//                .forEach { str ->
+//                    if (Utils.isValidSubUrl(str)) {
+//                        count += importUrlAsSubscription(str)
+//                    }
+//                }
+//            return count
+//        } catch (e: Exception) {
+//            Log.e(Constants.TAG, "Failed to parse batch subscription", e)
+//        }
+//        return 0
+//    }
+
+    private fun parseBatchConfig(servers: String?, append: Boolean): Int {
         try {
             if (servers == null) {
                 return 0
             }
-
-            var count = 0
-            servers.lines()
-                .distinct()
-                .forEach { str ->
-                    if (Utils.isValidSubUrl(str)) {
-                        count += importUrlAsSubscription(str)
-                    }
-                }
-            return count
-        } catch (e: Exception) {
-            Log.e(Constants.TAG, "Failed to parse batch subscription", e)
-        }
-        return 0
-    }
-
-    private fun parseBatchConfig(servers: String?, subid: String, append: Boolean): Int {
-        try {
-            if (servers == null) {
-                return 0
-            }
+            //TODO добавить проверку наличия серверов
             val removedSelectedServer =
-                if (!TextUtils.isEmpty(subid) && !append) {
+                if (!append) {
                     storage.decodeServerConfig(
                         storage.getSelectServer().orEmpty()
                     )?.let {
-                        if (it.subscriptionId == subid) {
-                            return@let it
-                        }
-                        return@let null
+                        return@let it
                     }
                 } else {
                     null
                 }
             if (!append) {
-                storage.removeServerViaSubId(subid)
+                storage.removeServerViaSubId()
             }
 
-            val subItem = storage.decodeSubscription(subid)
+            val subItem = storage.decodeSubscription()
             var count = 0
             servers.lines()
                 .distinct()
                 .reversed()
                 .forEach {
-                    val resId = parseConfig(it, subid, subItem, removedSelectedServer)
+                    val resId = parseConfig(it, subItem, removedSelectedServer)
                     if (resId == 0) {
                         count++
                     }
@@ -286,7 +281,6 @@ class SubscriptionManagerImpl @Inject constructor(
 
     private fun parseConfig(
         str: String?,
-        subid: String,
         subItem: SubscriptionItem?,
         removedSelectedServer: ConfigProfileItem?
     ): Int {
@@ -314,14 +308,14 @@ class SubscriptionManagerImpl @Inject constructor(
             if (config == null) {
                 return /*R.string.toast_incorrect_protocol*/ 1
             }
-            //filter
+            //TODO разобраться в необходимости фильтра
             if (subItem?.filter != null && subItem.filter?.isNotEmpty() == true && config.remarks.isNotEmpty()) {
                 val matched = Regex(pattern = subItem.filter ?: "")
                     .containsMatchIn(input = config.remarks)
                 if (!matched) return -1
             }
-
-            config.subscriptionId = subid
+            //TODO все сервера имеют один subId
+            config.subscriptionId = "1"
             val guid = storage.encodeServerConfig("", config)
             if (removedSelectedServer != null &&
                 config.server == removedSelectedServer.server && config.serverPort == removedSelectedServer.serverPort
@@ -394,17 +388,17 @@ class SubscriptionManagerImpl @Inject constructor(
             if (configText.isEmpty()) {
                 return 0
             }
-            return parseConfigViaSub(configText, it.first, false)
+            return parseConfigViaSub(configText, false)
         } catch (e: Exception) {
             Log.e(Constants.TAG, "Failed to update config via subscription", e)
             return 0
         }
     }
 
-    private fun parseConfigViaSub(server: String?, subid: String, append: Boolean): Int {
-        var count = parseBatchConfig(Utils.decode(server), subid, append)
+    private fun parseConfigViaSub(server: String?, append: Boolean): Int {
+        var count = parseBatchConfig(Utils.decode(server), append)
         if (count <= 0) {
-            count = parseBatchConfig(server, subid, append)
+            count = parseBatchConfig(server, append)
         }
 //        if (count <= 0) {
 //            count = parseCustomConfigServer(server, subid)

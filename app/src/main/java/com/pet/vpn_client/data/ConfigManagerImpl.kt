@@ -94,7 +94,7 @@ class ConfigManagerImpl @Inject constructor(
         getInbounds(v2rayConfig)
 
         getOutbounds(v2rayConfig, config) ?: return result
-        getMoreOutbounds(v2rayConfig, config.subscriptionId)
+        getMoreOutbounds(v2rayConfig)
 
         getRouting(v2rayConfig)
 
@@ -136,7 +136,7 @@ class ConfigManagerImpl @Inject constructor(
         val v2rayConfig = initV2rayConfig(context) ?: return result
 
         getOutbounds(v2rayConfig, config) ?: return result
-        getMoreOutbounds(v2rayConfig, config.subscriptionId)
+        getMoreOutbounds(v2rayConfig)
 
         v2rayConfig.log.loglevel =
             storage.decodeSettingsString(Constants.PREF_LOGLEVEL) ?: "warning"
@@ -492,17 +492,13 @@ class ConfigManagerImpl @Inject constructor(
         }
     }
 
-    private fun getMoreOutbounds(xrayConfig: XrayConfig, subscriptionId: String): Boolean {
+    private fun getMoreOutbounds(xrayConfig: XrayConfig): Boolean {
         //fragment proxy
         if (storage.decodeSettingsBool(Constants.PREF_FRAGMENT_ENABLED, false) == true) {
             return false
         }
-
-        if (subscriptionId.isEmpty()) {
-            return false
-        }
         try {
-            val subItem = storage.decodeSubscription(subscriptionId) ?: return false
+            val subItem = storage.decodeSubscription() ?: return false
 
             //current proxy
             val outbound = xrayConfig.outbounds[0]
@@ -721,7 +717,7 @@ class ConfigManagerImpl @Inject constructor(
         }
     }
 
-    fun createInitOutbound(configType: EConfigType): OutboundBean? {
+    override fun createInitOutbound(configType: EConfigType): OutboundBean? {
         return when (configType) {
             EConfigType.VMESS,
             EConfigType.VLESS ->
@@ -760,7 +756,7 @@ class ConfigManagerImpl @Inject constructor(
         }
     }
 
-    fun populateTransportSettings(
+    override fun populateTransportSettings(
         streamSettings: StreamSettingsBean,
         profileItem: ConfigProfileItem
     ): String? {
@@ -864,7 +860,7 @@ class ConfigManagerImpl @Inject constructor(
         return sni
     }
 
-    fun populateTlsSettings(
+    override fun populateTlsSettings(
         streamSettings: StreamSettingsBean,
         profileItem: ConfigProfileItem,
         sniExt: String?

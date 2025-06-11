@@ -94,15 +94,13 @@ class MMKVStorage @Inject constructor(private val gson: Gson) : KeyValueStorage 
         serverTestDelayStorage.remove(guid)
     }
 
-    override fun removeServerViaSubId(subId: String) {
-        if (subId.isBlank()) {
-            return
-        }
+    override fun removeServerViaSubId() {
+//        if (subId.isBlank()) {
+//            return
+//        }
         profileFullStorage.allKeys()?.forEach { key ->
             decodeServerConfig(key)?.let { config ->
-                if (config.subscriptionId == subId) {
-                    removeServer(key)
-                }
+                removeServer(key)
             }
         }
     }
@@ -209,7 +207,7 @@ class MMKVStorage @Inject constructor(private val gson: Gson) : KeyValueStorage 
         subsList.remove(subId)
         encodeSubsList(subsList)
 
-        removeServerViaSubId(subId)
+        removeServerViaSubId()
     }
 
     override fun encodeSubscription(guid: String, subItem: SubscriptionItem) {
@@ -223,8 +221,9 @@ class MMKVStorage @Inject constructor(private val gson: Gson) : KeyValueStorage 
         }
     }
 
-    override fun decodeSubscription(subscriptionId: String): SubscriptionItem? {
-        val json = subStorage.decodeString(subscriptionId) ?: return null
+    override fun decodeSubscription(): SubscriptionItem? {
+        //TODO сделать 1 группу подписок
+        val json = subStorage.decodeString("1") ?: return null
         return gson.fromJson(json, SubscriptionItem::class.java)
     }
 

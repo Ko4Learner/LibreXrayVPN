@@ -1,7 +1,7 @@
 package com.pet.vpn_client.data.config_formatter
 
 import com.pet.vpn_client.app.Constants
-import com.pet.vpn_client.data.ConfigManager
+import com.pet.vpn_client.domain.interfaces.ConfigManager
 import com.pet.vpn_client.data.dto.XrayConfig.OutboundBean
 import com.pet.vpn_client.domain.interfaces.KeyValueStorage
 import com.pet.vpn_client.domain.models.ConfigProfileItem
@@ -11,10 +11,11 @@ import com.pet.vpn_client.utils.idnHost
 import com.pet.vpn_client.utils.removeWhiteSpace
 import java.net.URI
 import javax.inject.Inject
+import javax.inject.Provider
 
 
 class WireguardFormatter @Inject constructor(
-    val configManager: ConfigManager,
+    val configManager: Provider<ConfigManager>,
     val storage: KeyValueStorage
 ) : BaseFormatter() {
 
@@ -96,7 +97,7 @@ class WireguardFormatter @Inject constructor(
     }
 
     fun toOutbound(profileItem: ConfigProfileItem): OutboundBean? {
-        val outboundBean = configManager.createInitOutbound(EConfigType.WIREGUARD)
+        val outboundBean = configManager.get().createInitOutbound(EConfigType.WIREGUARD)
 
         outboundBean?.settings?.let { wireguard ->
             wireguard.secretKey = profileItem.secretKey

@@ -1,7 +1,7 @@
 package com.pet.vpn_client.data.config_formatter
 
-import com.pet.vpn_client.data.ConfigManager
 import com.pet.vpn_client.data.dto.XrayConfig.OutboundBean
+import com.pet.vpn_client.domain.interfaces.ConfigManager
 import com.pet.vpn_client.domain.models.ConfigProfileItem
 import com.pet.vpn_client.domain.models.EConfigType
 import com.pet.vpn_client.utils.Utils
@@ -9,8 +9,9 @@ import com.pet.vpn_client.utils.idnHost
 import com.pet.vpn_client.utils.isNotNullEmpty
 import java.net.URI
 import javax.inject.Inject
+import javax.inject.Provider
 
-class SocksFormatter @Inject constructor(val configManager: ConfigManager) : BaseFormatter() {
+class SocksFormatter @Inject constructor(val configManager: Provider<ConfigManager>) : BaseFormatter() {
     
     fun parse(str: String): ConfigProfileItem? {
         val config = ConfigProfileItem.create(EConfigType.SOCKS)
@@ -45,7 +46,7 @@ class SocksFormatter @Inject constructor(val configManager: ConfigManager) : Bas
     }
 
     fun toOutbound(profileItem: ConfigProfileItem): OutboundBean? {
-        val outboundBean = configManager.createInitOutbound(EConfigType.SOCKS)
+        val outboundBean = configManager.get().createInitOutbound(EConfigType.SOCKS)
 
         outboundBean?.settings?.servers?.first()?.let { server ->
             server.address = profileItem.server.orEmpty()

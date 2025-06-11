@@ -22,7 +22,7 @@ interface KeyValueStorage {
 
     fun removeServer(guid: String)
 
-    fun removeServerViaSubId(subId: String)
+    fun removeServerViaSubId()
 
     fun decodeServerTestDelayInfo(guid: String): ServerTestDelayInfo?
 
@@ -48,7 +48,7 @@ interface KeyValueStorage {
 
     fun encodeSubscription(guid: String, subItem: SubscriptionItem)
 
-    fun decodeSubscription(subscriptionId: String): SubscriptionItem?
+    fun decodeSubscription(): SubscriptionItem?
 
     fun decodeAssetUrls(): List<Pair<String, AssetUrlItem>>
 

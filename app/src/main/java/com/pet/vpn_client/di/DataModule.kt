@@ -83,7 +83,8 @@ object DataModule {
         vlessFormatter: VlessFormatter,
         vmessFormatter: VmessFormatter,
         wireguardFormatter: WireguardFormatter,
-        qrCodeDecoder: QRCodeDecoder
+        qrCodeDecoder: QRCodeDecoder,
+        @ApplicationContext context: Context
     ): SubscriptionManager = SubscriptionManagerImpl(
         storage,
         gson,
@@ -96,7 +97,8 @@ object DataModule {
         vlessFormatter,
         vmessFormatter,
         wireguardFormatter,
-        qrCodeDecoder
+        qrCodeDecoder,
+        context
     )
 
     @Provides
@@ -104,51 +106,51 @@ object DataModule {
     fun provideSettingsManager(storage: KeyValueStorage, gson: Gson): SettingsManager =
         SettingsManagerImpl(storage, gson)
 
-    @Provides
-    @Singleton
-    fun provideHttpFormatter(configManager: ConfigManager): HttpFormatter =
-        HttpFormatter(configManager)
-
-    @Provides
-    @Singleton
-    fun provideShadowsocksFormatter(configManager: ConfigManager): ShadowsocksFormatter =
-        ShadowsocksFormatter(configManager)
-
-    @Provides
-    @Singleton
-    fun provideSocksFormatter(configManager: ConfigManager): SocksFormatter =
-        SocksFormatter(configManager)
-
-    @Provides
-    @Singleton
-    fun provideTrojanFormatter(
-        configManager: ConfigManager,
-        storage: KeyValueStorage
-    ): TrojanFormatter =
-        TrojanFormatter(configManager, storage)
-
-    @Provides
-    @Singleton
-    fun provideVlessFormatter(
-        configManager: ConfigManager,
-        storage: KeyValueStorage
-    ): VlessFormatter =
-        VlessFormatter(configManager, storage)
-
-    @Provides
-    @Singleton
-    fun provideVmessFormatter(
-        configManager: ConfigManager,
-        storage: KeyValueStorage,
-        gson: Gson
-    ): VmessFormatter =
-        VmessFormatter(configManager, storage, gson)
-
-    @Provides
-    @Singleton
-    fun provideWireguardFormatter(
-        configManager: ConfigManager,
-        storage: KeyValueStorage,
-    ): WireguardFormatter =
-        WireguardFormatter(configManager, storage)
+//    @Provides
+//    @Singleton
+//    fun provideHttpFormatter(configManager: ConfigManager): HttpFormatter =
+//        HttpFormatter(configManager)
+//
+//    @Provides
+//    @Singleton
+//    fun provideShadowsocksFormatter(configManager: ConfigManager): ShadowsocksFormatter =
+//        ShadowsocksFormatter(configManager)
+//
+//    @Provides
+//    @Singleton
+//    fun provideSocksFormatter(configManager: ConfigManager): SocksFormatter =
+//        SocksFormatter(configManager)
+//
+//    @Provides
+//    @Singleton
+//    fun provideTrojanFormatter(
+//        configManager: ConfigManager,
+//        storage: KeyValueStorage
+//    ): TrojanFormatter =
+//        TrojanFormatter(configManager, storage)
+//
+//    @Provides
+//    @Singleton
+//    fun provideVlessFormatter(
+//        configManager: ConfigManager,
+//        storage: KeyValueStorage
+//    ): VlessFormatter =
+//        VlessFormatter(configManager, storage)
+//
+//    @Provides
+//    @Singleton
+//    fun provideVmessFormatter(
+//        configManager: ConfigManager,
+//        storage: KeyValueStorage,
+//        gson: Gson
+//    ): VmessFormatter =
+//        VmessFormatter(configManager, storage, gson)
+//
+//    @Provides
+//    @Singleton
+//    fun provideWireguardFormatter(
+//        configManager: ConfigManager,
+//        storage: KeyValueStorage,
+//    ): WireguardFormatter =
+//        WireguardFormatter(configManager, storage)
 }

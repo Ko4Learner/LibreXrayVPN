@@ -1,7 +1,7 @@
 package com.pet.vpn_client.data.config_formatter
 
 import com.pet.vpn_client.app.Constants
-import com.pet.vpn_client.data.ConfigManager
+import com.pet.vpn_client.domain.interfaces.ConfigManager
 import com.pet.vpn_client.data.dto.XrayConfig.OutboundBean
 import com.pet.vpn_client.domain.interfaces.KeyValueStorage
 import com.pet.vpn_client.domain.models.ConfigProfileItem
@@ -11,9 +11,10 @@ import com.pet.vpn_client.utils.Utils
 import com.pet.vpn_client.utils.idnHost
 import java.net.URI
 import javax.inject.Inject
+import javax.inject.Provider
 
 class TrojanFormatter @Inject constructor(
-    val configManager: ConfigManager,
+    val configManager: Provider<ConfigManager>,
     val storage: KeyValueStorage
 ) : BaseFormatter() {
     fun parse(str: String): ConfigProfileItem? {
@@ -47,7 +48,7 @@ class TrojanFormatter @Inject constructor(
     }
 
     fun toOutbound(profileItem: ConfigProfileItem): OutboundBean? {
-        val outboundBean = configManager.createInitOutbound(EConfigType.TROJAN)
+        val outboundBean = configManager.get().createInitOutbound(EConfigType.TROJAN)
 
         outboundBean?.settings?.servers?.first()?.let { server ->
             server.address = profileItem.server.orEmpty()
@@ -57,11 +58,11 @@ class TrojanFormatter @Inject constructor(
         }
 
         val sni = outboundBean?.streamSettings?.let {
-            configManager.populateTransportSettings(it, profileItem)
+            configManager.get().populateTransportSettings(it, profileItem)
         }
 
         outboundBean?.streamSettings?.let {
-            configManager.populateTlsSettings(it, profileItem, sni)
+            configManager.get().populateTlsSettings(it, profileItem, sni)
         }
 
         return outboundBean
