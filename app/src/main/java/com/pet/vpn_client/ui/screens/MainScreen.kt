@@ -35,7 +35,6 @@ import com.pet.vpn_client.ui.composable_elements.SwitchVpnProxy
 )
 @Composable
 fun VpnScreen(modifier: Modifier = Modifier, viewModel: VpnScreenViewModel = hiltViewModel()) {
-    val viewModel: VpnScreenViewModel = hiltViewModel()
     Column(
         modifier = modifier
             .padding(horizontal = 8.dp)
@@ -56,7 +55,7 @@ fun VpnScreen(modifier: Modifier = Modifier, viewModel: VpnScreenViewModel = hil
         }
 
         Column(modifier = Modifier.weight(1f)) {
-            SubscriptionsList(listOf())
+            SubscriptionsList(viewModel.serverItemList)
         }
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             StartVpnButton(viewModel)
