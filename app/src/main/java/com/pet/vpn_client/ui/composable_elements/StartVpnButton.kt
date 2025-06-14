@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.pet.vpn_client.presentation.intent.VpnScreenIntent
 import com.pet.vpn_client.presentation.view_model.VpnScreenViewModel
 
 @Composable
@@ -23,7 +24,7 @@ fun StartVpnButton(viewModel: VpnScreenViewModel) {
             .background(color = colorScheme.secondary, shape = CircleShape)
             .size(80.dp)
             .clickable {
-                viewModel.toggleVpnProxy()
+                viewModel.onIntent(VpnScreenIntent.ToggleVpnProxy)
             },
         contentAlignment = Alignment.Center
 

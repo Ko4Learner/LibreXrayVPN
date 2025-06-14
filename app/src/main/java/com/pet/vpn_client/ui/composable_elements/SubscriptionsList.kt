@@ -29,8 +29,8 @@ fun SubscriptionsList(itemList: List<ServerItemModel>) {
     }
 }
 
+//TODO перенести в модель данных
 private fun getAddress(profile: ConfigProfileItem): String {
-    // Hide xxx:xxx:***/xxx.xxx.xxx.***
     return "${
         profile.server?.let {
             if (it.contains(":"))

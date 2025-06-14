@@ -15,6 +15,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.pet.vpn_client.presentation.intent.VpnScreenIntent
 import com.pet.vpn_client.presentation.view_model.VpnScreenViewModel
 
 @Composable
@@ -32,7 +33,7 @@ fun SwitchVpnProxy(viewModel: VpnScreenViewModel) {
             checked = isChecked,
             onCheckedChange = {
                 isChecked = it
-                viewModel.switchVpnProxy()
+                viewModel.onIntent(VpnScreenIntent.SwitchVpnProxy)
             },
             colors = SwitchDefaults.colors()
         )

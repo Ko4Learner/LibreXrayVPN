@@ -6,8 +6,8 @@ interface ServiceManager {
     fun setService(service: ServiceControl)
     fun getService(): ServiceControl?
 //    fun getMsgReceive(): BroadcastReceiver
-    fun startServiceFromToggle(context: Context): Boolean
-    fun startService(context: Context, guid: String? = null)
+    fun startServiceFromToggle(): Boolean
+    fun startService( guid: String? = null)
     fun stopService()
     fun getRunningServerName(): String
     fun startCoreLoop(): Boolean

@@ -12,6 +12,7 @@ import com.pet.vpn_client.domain.interfaces.KeyValueStorage
 import com.pet.vpn_client.domain.interfaces.ServiceControl
 import com.pet.vpn_client.domain.interfaces.ServiceManager
 import com.pet.vpn_client.domain.models.ConfigProfileItem
+import com.pet.vpn_client.framework.services.ProxyService
 import com.pet.vpn_client.framework.services.VPNService
 import com.pet.vpn_client.utils.Utils
 import java.lang.ref.SoftReference
@@ -19,7 +20,8 @@ import javax.inject.Inject
 
 class ServiceManagerImpl @Inject constructor(
     val storage: KeyValueStorage,
-    val coreVpnBridge: CoreVpnBridge
+    val coreVpnBridge: CoreVpnBridge,
+    val context: Context
 ) : ServiceManager {
 
     var serviceControl: SoftReference<ServiceControl>? = null
@@ -38,20 +40,20 @@ class ServiceManagerImpl @Inject constructor(
 //        return mMsgReceive
 //    }
 
-    override fun startServiceFromToggle(context: Context): Boolean {
+    override fun startServiceFromToggle(): Boolean {
         if (storage.getSelectServer().isNullOrEmpty()) {
             //context.toast(R.string.app_tile_first_use)
             return false
         }
-        startContextService(context)
+        startContextService()
         return true
     }
 
-    override fun startService(context: Context, guid: String?) {
+    override fun startService(guid: String?) {
         if (guid != null) {
             storage.setSelectServer(guid)
         }
-        startContextService(context)
+        startContextService()
     }
 
     override fun stopService() {
@@ -139,7 +141,7 @@ class ServiceManagerImpl @Inject constructor(
         }
     }
 
-    private fun startContextService(context: Context) {
+    private fun startContextService() {
         if (coreVpnBridge.isRunning()) {
             return
         }
@@ -160,16 +162,15 @@ class ServiceManagerImpl @Inject constructor(
         val intent = if ((storage.decodeSettingsString(Constants.PREF_MODE)
                 ?: Constants.VPN) == Constants.VPN
         ) {
-            Intent(context.applicationContext, VPNService::class.java)
+            Intent(context, VPNService::class.java)
         } else {
-            //TODO заменить на Proxy
-            Intent(context.applicationContext, VPNService::class.java)
+            Intent(context, ProxyService::class.java)
         }
 
         context.startForegroundService(intent)
     }
 
-    //ПОЧЕМУ НЕТ СТАРТА СЕРВИСА?
+    //TODO ПОЧЕМУ НЕТ СТАРТА СЕРВИСА?
     private inner class ReceiveMessageHandler : BroadcastReceiver() {
 
         override fun onReceive(ctx: Context?, intent: Intent?) {
@@ -207,7 +208,7 @@ class ServiceManagerImpl @Inject constructor(
                 Constants.MSG_STATE_RESTART -> {
                     serviceControl.stopService()
                     Thread.sleep(500L)
-                    startService(serviceControl.getService())
+                   // startService(serviceControl.getService().)
                 }
 
                 Constants.MSG_MEASURE_DELAY -> {

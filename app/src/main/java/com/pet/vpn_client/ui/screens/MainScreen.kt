@@ -13,6 +13,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -26,7 +28,6 @@ import com.pet.vpn_client.ui.composable_elements.SubscriptionsList
 import com.pet.vpn_client.ui.composable_elements.SwitchVpnProxy
 
 //Изучить библиотеку для создания моковых объектов
-
 //Принято использовать отдельные Preview функций
 @Preview(
     name = "VPNScreen Preview",
@@ -35,6 +36,7 @@ import com.pet.vpn_client.ui.composable_elements.SwitchVpnProxy
 )
 @Composable
 fun VpnScreen(modifier: Modifier = Modifier, viewModel: VpnScreenViewModel = hiltViewModel()) {
+    val state by viewModel.state.collectAsState()
     Column(
         modifier = modifier
             .padding(horizontal = 8.dp)
@@ -55,7 +57,7 @@ fun VpnScreen(modifier: Modifier = Modifier, viewModel: VpnScreenViewModel = hil
         }
 
         Column(modifier = Modifier.weight(1f)) {
-            SubscriptionsList(viewModel.serverItemList)
+            SubscriptionsList(state.serverItemList)
         }
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             StartVpnButton(viewModel)
