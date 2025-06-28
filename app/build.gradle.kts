@@ -84,7 +84,9 @@ dependencies {
     implementation(libs.scanner)
 
     // Test
+    testImplementation(libs.mockK)
     testImplementation(libs.junit)
+    androidTestImplementation(libs.mockk.android)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))

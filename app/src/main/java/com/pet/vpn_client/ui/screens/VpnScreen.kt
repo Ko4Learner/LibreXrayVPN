@@ -20,6 +20,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.pet.vpn_client.presentation.intent.VpnScreenIntent
+import com.pet.vpn_client.presentation.state.VpnScreenState
 import com.pet.vpn_client.presentation.view_model.VpnScreenViewModel
 import com.pet.vpn_client.ui.composable_elements.ConfigDropDownMenu
 import com.pet.vpn_client.ui.composable_elements.ConnectionButton
@@ -28,19 +30,29 @@ import com.pet.vpn_client.ui.composable_elements.SubscriptionsList
 import com.pet.vpn_client.ui.composable_elements.SwitchVpnProxy
 
 //Изучить библиотеку для создания моковых объектов
-//Принято использовать отдельные Preview функций
-//@Preview(
-//    name = "VPNScreen Preview",
-//    showBackground = true,
-//    uiMode = Configuration.UI_MODE_NIGHT_YES
-//)
+
 @Composable
 fun VpnScreen(
     modifier: Modifier = Modifier,
-    onQrCodeClick: () -> Unit,
-    viewModel: VpnScreenViewModel = hiltViewModel()
+    onQrCodeClick: () -> Unit
 ) {
+    val viewModel: VpnScreenViewModel = hiltViewModel()
     val state by viewModel.state.collectAsState()
+    VpnScreenContent(
+        modifier = modifier,
+        state = state,
+        onIntent = viewModel::onIntent,
+        onQrCodeClick = onQrCodeClick
+    )
+}
+
+@Composable
+fun VpnScreenContent(
+    modifier: Modifier = Modifier,
+    state: VpnScreenState,
+    onIntent: (VpnScreenIntent) -> Unit,
+    onQrCodeClick: () -> Unit
+) {
     Column(
         modifier = modifier
             .padding(horizontal = 8.dp)
@@ -56,23 +68,23 @@ fun VpnScreen(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            SwitchVpnProxy(viewModel)
-            ConfigDropDownMenu(viewModel,onQrCodeClick)
+            SwitchVpnProxy(onIntent)
+            ConfigDropDownMenu(onIntent, onQrCodeClick)
         }
 
         Column(modifier = Modifier.weight(1f)) {
             SubscriptionsList(state.serverItemList)
         }
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            StartVpnButton(viewModel)
+            StartVpnButton(onIntent)
             Row(
                 modifier = Modifier
                     .fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                ConnectionButton("R", viewModel)
-                ConnectionButton("T", viewModel)
+                ConnectionButton("R", onIntent)
+                ConnectionButton("T", onIntent)
             }
             Text(
                 text = "Успешно: Соединение заняло 60 ms",
@@ -80,4 +92,10 @@ fun VpnScreen(
             )
         }
     }
+}
+
+@Preview(name = "Light Mode", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+fun PreviewVpnScreen() {
+    VpnScreenContent(state = VpnScreenState(), onQrCodeClick = {}, onIntent = {})
 }

@@ -13,16 +13,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.pet.vpn_client.presentation.intent.VpnScreenIntent
-import com.pet.vpn_client.presentation.view_model.VpnScreenViewModel
 
 @Composable
-fun ConnectionButton(text: String, viewModel: VpnScreenViewModel) {
+fun ConnectionButton(text: String, onIntent: (VpnScreenIntent) -> Unit) {
     Box(
         modifier = Modifier
             .size(32.dp)
             .background(color = colorScheme.secondary, shape = CircleShape)
             .clickable {
-                viewModel.onIntent(VpnScreenIntent.TestConnection)
+                onIntent(VpnScreenIntent.TestConnection)
             },
         contentAlignment = Alignment.Center
 

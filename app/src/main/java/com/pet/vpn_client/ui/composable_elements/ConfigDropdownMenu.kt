@@ -17,10 +17,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import com.pet.vpn_client.R
 import com.pet.vpn_client.presentation.intent.VpnScreenIntent
-import com.pet.vpn_client.presentation.view_model.VpnScreenViewModel
 
 @Composable
-fun ConfigDropDownMenu(viewModel: VpnScreenViewModel, onQrCodeClick: () -> Unit) {
+fun ConfigDropDownMenu(onIntent: (VpnScreenIntent) -> Unit, onQrCodeClick: () -> Unit) {
     var expanded by remember { mutableStateOf(false) }
     Column(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
         Image(
@@ -34,7 +33,7 @@ fun ConfigDropDownMenu(viewModel: VpnScreenViewModel, onQrCodeClick: () -> Unit)
                 expanded = false
             })
             DropdownMenuItem(text = { Text(text = "Буфер обмена") }, onClick = {
-                viewModel.onIntent(VpnScreenIntent.ImportConfigFromClipboard)
+                onIntent(VpnScreenIntent.ImportConfigFromClipboard)
                 expanded = false
             })
             DropdownMenuItem(text = { Text(text = "Файл") }, onClick = { expanded = false })
