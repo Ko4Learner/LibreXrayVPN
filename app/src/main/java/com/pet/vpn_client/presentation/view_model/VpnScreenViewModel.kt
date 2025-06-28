@@ -21,8 +21,7 @@ import javax.inject.Inject
 class VpnScreenViewModel @Inject constructor(
     private val configInteractor: ConfigInteractor,
     private val connectionInteractor: ConnectionInteractor
-) :
-    ViewModel() {
+) : ViewModel() {
 
     private val _state = MutableStateFlow(VpnScreenState())
     val state: StateFlow<VpnScreenState> = _state.asStateFlow()

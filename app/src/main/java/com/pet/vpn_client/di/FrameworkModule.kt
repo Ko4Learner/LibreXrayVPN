@@ -14,6 +14,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import javax.inject.Provider
 import javax.inject.Singleton
 
 @Module
@@ -24,10 +25,10 @@ object FrameworkModule {
     @Singleton
     fun provideServiceManager(
         storage: KeyValueStorage,
-        coreVpnBridge: CoreVpnBridge,
+        coreVpnBridgeProvider: Provider<CoreVpnBridge>,
         @ApplicationContext context: Context
     ): ServiceManager =
-        ServiceManagerImpl(storage, coreVpnBridge, context)
+        ServiceManagerImpl(storage, coreVpnBridgeProvider, context)
 
     @Provides
     @Singleton

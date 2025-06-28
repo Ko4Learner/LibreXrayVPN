@@ -29,7 +29,7 @@ fun ConfigDropDownMenu(onIntent: (VpnScreenIntent) -> Unit, onQrCodeClick: () ->
         )
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             DropdownMenuItem(text = { Text(text = "QR") }, onClick = {
-                onQrCodeClick
+                onQrCodeClick()
                 expanded = false
             })
             DropdownMenuItem(text = { Text(text = "Буфер обмена") }, onClick = {

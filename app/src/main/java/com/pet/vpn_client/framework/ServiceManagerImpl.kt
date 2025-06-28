@@ -17,13 +17,15 @@ import com.pet.vpn_client.framework.services.VPNService
 import com.pet.vpn_client.utils.Utils
 import java.lang.ref.SoftReference
 import javax.inject.Inject
+import javax.inject.Provider
 
 class ServiceManagerImpl @Inject constructor(
     val storage: KeyValueStorage,
-    val coreVpnBridge: CoreVpnBridge,
+    val coreVpnBridgeProvider: Provider<CoreVpnBridge>,
     val context: Context
 ) : ServiceManager {
 
+    private val coreVpnBridge: CoreVpnBridge by lazy { coreVpnBridgeProvider.get() }
     var serviceControl: SoftReference<ServiceControl>? = null
     private val mMsgReceive = ReceiveMessageHandler()
     private var currentConfig: ConfigProfileItem? = null
@@ -208,7 +210,7 @@ class ServiceManagerImpl @Inject constructor(
                 Constants.MSG_STATE_RESTART -> {
                     serviceControl.stopService()
                     Thread.sleep(500L)
-                   // startService(serviceControl.getService().)
+                    // startService(serviceControl.getService().)
                 }
 
                 Constants.MSG_MEASURE_DELAY -> {

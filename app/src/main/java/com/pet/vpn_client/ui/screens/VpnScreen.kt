@@ -34,9 +34,9 @@ import com.pet.vpn_client.ui.composable_elements.SwitchVpnProxy
 @Composable
 fun VpnScreen(
     modifier: Modifier = Modifier,
-    onQrCodeClick: () -> Unit
+    onQrCodeClick: () -> Unit,
+    viewModel: VpnScreenViewModel = hiltViewModel()
 ) {
-    val viewModel: VpnScreenViewModel = hiltViewModel()
     val state by viewModel.state.collectAsState()
     VpnScreenContent(
         modifier = modifier,

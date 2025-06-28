@@ -21,7 +21,7 @@ fun QrCodeScreen(
     viewModel: VpnScreenViewModel = hiltViewModel()
 ) {
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -29,13 +29,13 @@ fun QrCodeScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Button(onClick = { /* запустить камеру */ }) {
+        Button(onClick = { onResult() }) {
             Text("Сканировать с камеры")
         }
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        Button(onClick = { /* выбрать из галереи */ }) {
+        Button(onClick = {  onResult() }) {
             Text("Выбрать изображение")
         }
     }
