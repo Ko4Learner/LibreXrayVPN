@@ -24,9 +24,10 @@ object FrameworkModule {
     @Singleton
     fun provideServiceManager(
         storage: KeyValueStorage,
-        coreVpnBridge: CoreVpnBridge
+        coreVpnBridge: CoreVpnBridge,
+        @ApplicationContext context: Context
     ): ServiceManager =
-        ServiceManagerImpl(storage, coreVpnBridge)
+        ServiceManagerImpl(storage, coreVpnBridge, context)
 
     @Provides
     @Singleton

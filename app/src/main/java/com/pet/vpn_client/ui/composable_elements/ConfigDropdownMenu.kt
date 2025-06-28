@@ -20,7 +20,7 @@ import com.pet.vpn_client.presentation.intent.VpnScreenIntent
 import com.pet.vpn_client.presentation.view_model.VpnScreenViewModel
 
 @Composable
-fun ConfigDropDownMenu(viewModel: VpnScreenViewModel) {
+fun ConfigDropDownMenu(viewModel: VpnScreenViewModel, onQrCodeClick: () -> Unit) {
     var expanded by remember { mutableStateOf(false) }
     Column(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
         Image(
@@ -29,7 +29,10 @@ fun ConfigDropDownMenu(viewModel: VpnScreenViewModel) {
             contentDescription = "Settings"
         )
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            DropdownMenuItem(text = { Text(text = "QR") }, onClick = { expanded = false })
+            DropdownMenuItem(text = { Text(text = "QR") }, onClick = {
+                onQrCodeClick
+                expanded = false
+            })
             DropdownMenuItem(text = { Text(text = "Буфер обмена") }, onClick = {
                 viewModel.onIntent(VpnScreenIntent.ImportConfigFromClipboard)
                 expanded = false

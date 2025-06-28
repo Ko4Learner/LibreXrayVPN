@@ -29,13 +29,17 @@ import com.pet.vpn_client.ui.composable_elements.SwitchVpnProxy
 
 //Изучить библиотеку для создания моковых объектов
 //Принято использовать отдельные Preview функций
-@Preview(
-    name = "VPNScreen Preview",
-    showBackground = true,
-    uiMode = Configuration.UI_MODE_NIGHT_YES
-)
+//@Preview(
+//    name = "VPNScreen Preview",
+//    showBackground = true,
+//    uiMode = Configuration.UI_MODE_NIGHT_YES
+//)
 @Composable
-fun VpnScreen(modifier: Modifier = Modifier, viewModel: VpnScreenViewModel = hiltViewModel()) {
+fun VpnScreen(
+    modifier: Modifier = Modifier,
+    onQrCodeClick: () -> Unit,
+    viewModel: VpnScreenViewModel = hiltViewModel()
+) {
     val state by viewModel.state.collectAsState()
     Column(
         modifier = modifier
@@ -53,7 +57,7 @@ fun VpnScreen(modifier: Modifier = Modifier, viewModel: VpnScreenViewModel = hil
             verticalAlignment = Alignment.CenterVertically
         ) {
             SwitchVpnProxy(viewModel)
-            ConfigDropDownMenu(viewModel)
+            ConfigDropDownMenu(viewModel,onQrCodeClick)
         }
 
         Column(modifier = Modifier.weight(1f)) {
