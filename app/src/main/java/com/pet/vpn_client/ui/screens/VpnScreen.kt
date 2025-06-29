@@ -29,8 +29,6 @@ import com.pet.vpn_client.ui.composable_elements.StartVpnButton
 import com.pet.vpn_client.ui.composable_elements.SubscriptionsList
 import com.pet.vpn_client.ui.composable_elements.SwitchVpnProxy
 
-//Изучить библиотеку для создания моковых объектов
-
 @Composable
 fun VpnScreen(
     modifier: Modifier = Modifier,

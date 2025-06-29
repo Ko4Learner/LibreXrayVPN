@@ -17,6 +17,8 @@ gson = "2.12.1"
 mmkvStatic = "2.1.0"
 workRuntimeKtx = "2.10.1"
 scanner = "4.3.0"
+cameraX = "1.4.2"
+mlkit = "17.3.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -47,7 +49,12 @@ work-multiprocess = { module = "androidx.work:work-multiprocess", version.ref = 
 scanner = { group = "com.journeyapps", name = "zxing-android-embedded", version.ref = "scanner" }
 mockK = { group = "io.mockk", name = "mockk", version.ref = "junitVersion" }
 mockk-android = { group = "io.mockk", name = "mockk-android", version.ref = "junitVersion" }
-
+cameraX = { group = "androidx.camera", name = "camera-camera2", version.ref = "cameraX" }
+cameraX-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "cameraX" }
+cameraX-view = { group = "androidx.camera", name = "camera-view", version.ref = "cameraX" }
+cameraX-core = { group = "androidx.camera", name = "camera-core", version.ref = "cameraX" }
+mlkit = { group = "com.google.mlkit", name = "barcode-scanning", version.ref = "mlkit" }
+activity-ktx = { module = "androidx.activity:activity-ktx", version.ref = "activityCompose" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

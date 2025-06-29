@@ -1,42 +1,56 @@
 package com.pet.vpn_client.ui.screens
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
+import androidx.camera.core.ImageProxy
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.material3.Button
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
-import com.pet.vpn_client.presentation.view_model.VpnScreenViewModel
+import com.pet.vpn_client.presentation.state.QrCodeScreenState
+import com.pet.vpn_client.ui.composable_elements.CameraView
 
 @Composable
 fun QrCodeScreen(
-    modifier: Modifier = Modifier,
-    onResult: () -> Unit,
-    viewModel: VpnScreenViewModel = hiltViewModel()
+//    modifier: Modifier = Modifier,
+//    onResult: () -> Unit,
+    //viewModel: VpnScreenViewModel = hiltViewModel(),
+    state: QrCodeScreenState,
+//    onEvent: (QrCodeScreenIntent) -> Unit,
+    onAnalyze: (ImageProxy) -> Unit
 ) {
-    Column(
-        modifier = modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text("Выберите источник")
+    Box(modifier = Modifier.fillMaxSize()) {
+        CameraView(
+            modifier = Modifier.fillMaxSize(),
+            onFrame = onAnalyze
+        )
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Button(onClick = { onResult() }) {
-            Text("Сканировать с камеры")
+        if (state.result != null) {
+            Text(
+                text = "Результат: ${state.result}",
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(16.dp),
+                color = Color.Green
+            )
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Button(onClick = {  onResult() }) {
-            Text("Выбрать изображение")
+        if (state.error != null) {
+            Text(
+                text = "Ошибка: ${state.error}",
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(16.dp),
+                color = Color.Red
+            )
         }
+
+        CircularProgressIndicator(
+            modifier = Modifier.align(Alignment.Center).takeIf { state.isLoading } ?: Modifier
+        )
     }
 }

@@ -4,6 +4,7 @@ import com.pet.vpn_client.domain.interfaces.KeyValueStorage
 import com.pet.vpn_client.domain.interfaces.SubscriptionManager
 import com.pet.vpn_client.domain.interfaces.interactor.ConfigInteractor
 import com.pet.vpn_client.domain.models.ConfigProfileItem
+import com.pet.vpn_client.domain.models.FrameData
 import javax.inject.Inject
 
 class ConfigInteractorImpl @Inject constructor(
@@ -12,6 +13,10 @@ class ConfigInteractorImpl @Inject constructor(
 ) : ConfigInteractor {
     override suspend fun importClipboardConfig(): Int {
         return subscriptionManager.importClipboard()
+    }
+
+    override suspend fun importQrCodeConfig(frameData: FrameData): Int {
+        return subscriptionManager.importQrCode(frameData)
     }
 
     override suspend fun getServerList(): List<String> {

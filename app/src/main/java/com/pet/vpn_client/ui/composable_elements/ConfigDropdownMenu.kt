@@ -36,7 +36,6 @@ fun ConfigDropDownMenu(onIntent: (VpnScreenIntent) -> Unit, onQrCodeClick: () ->
                 onIntent(VpnScreenIntent.ImportConfigFromClipboard)
                 expanded = false
             })
-            DropdownMenuItem(text = { Text(text = "Файл") }, onClick = { expanded = false })
         }
     }
 }

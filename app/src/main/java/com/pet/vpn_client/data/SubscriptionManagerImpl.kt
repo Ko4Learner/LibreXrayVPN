@@ -5,6 +5,8 @@ import android.graphics.Bitmap
 import android.text.TextUtils
 import android.util.Log
 import com.google.gson.Gson
+import com.google.mlkit.vision.barcode.BarcodeScanning
+import com.google.mlkit.vision.common.InputImage
 import com.pet.vpn_client.app.Constants
 import com.pet.vpn_client.data.config_formatter.HttpFormatter
 import com.pet.vpn_client.data.config_formatter.ShadowsocksFormatter
@@ -20,11 +22,15 @@ import com.pet.vpn_client.domain.interfaces.SettingsManager
 import com.pet.vpn_client.domain.interfaces.SubscriptionManager
 import com.pet.vpn_client.domain.models.ConfigProfileItem
 import com.pet.vpn_client.domain.models.EConfigType
+import com.pet.vpn_client.domain.models.FrameData
 import com.pet.vpn_client.domain.models.SubscriptionItem
 import com.pet.vpn_client.utils.HttpUtil
 import com.pet.vpn_client.utils.Utils
+import kotlinx.coroutines.suspendCancellableCoroutine
 import java.net.URI
 import javax.inject.Inject
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 class SubscriptionManagerImpl @Inject constructor(
     val storage: KeyValueStorage,
@@ -142,6 +148,38 @@ class SubscriptionManagerImpl @Inject constructor(
             return -1
         }
     }
+
+    override suspend fun importQrCode(frameData: FrameData): Int =
+        suspendCancellableCoroutine { cont ->
+            val inputImage = InputImage.fromByteArray(
+                frameData.bytes,
+                frameData.width,
+                frameData.height,
+                frameData.rotationDegrees,
+                frameData.imageFormat
+            )
+
+            val scanner = BarcodeScanning.getClient()
+
+            scanner.process(inputImage)
+                .addOnSuccessListener { barcodes ->
+                    val result = barcodes.firstOrNull()?.rawValue
+                    if (result != null) {
+                        try {
+                            val count = importBatchConfig(result, true)
+                            cont.resume(count)
+                        } catch (e: Exception) {
+                            cont.resume(-1)
+                        }
+                    } else {
+                        cont.resume(-1)
+                    }
+                }
+                .addOnFailureListener {
+                    cont.resume(-1)
+                }
+        }
+
 
     private fun importBatchConfig(
         server: String?,
