@@ -6,5 +6,4 @@ sealed interface VpnScreenIntent {
     object TestConnection : VpnScreenIntent
     object RestartConnection : VpnScreenIntent
     object ImportConfigFromClipboard : VpnScreenIntent
-
 }

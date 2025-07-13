@@ -10,6 +10,7 @@ import com.pet.vpn_client.presentation.intent.VpnScreenIntent
 import com.pet.vpn_client.presentation.models.ServerItemModel
 import com.pet.vpn_client.presentation.state.VpnScreenState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -65,7 +66,7 @@ class VpnScreenViewModel @Inject constructor(
     }
 
     private fun importConfigFromClipboard() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             //TODO добавить проверку на -1 и 0
             if (configInteractor.importClipboardConfig() >= 0) {
                 updateServerList(configInteractor.getServerList())

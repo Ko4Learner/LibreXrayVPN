@@ -1,7 +1,6 @@
 package com.pet.vpn_client.data
 
 import android.content.Context
-import android.graphics.Bitmap
 import android.text.TextUtils
 import android.util.Log
 import com.google.gson.Gson
@@ -15,7 +14,6 @@ import com.pet.vpn_client.data.config_formatter.TrojanFormatter
 import com.pet.vpn_client.data.config_formatter.VlessFormatter
 import com.pet.vpn_client.data.config_formatter.VmessFormatter
 import com.pet.vpn_client.data.config_formatter.WireguardFormatter
-import com.pet.vpn_client.data.qr_code.QRCodeDecoder
 import com.pet.vpn_client.domain.interfaces.ConfigManager
 import com.pet.vpn_client.domain.interfaces.KeyValueStorage
 import com.pet.vpn_client.domain.interfaces.SettingsManager
@@ -30,7 +28,6 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import java.net.URI
 import javax.inject.Inject
 import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
 
 class SubscriptionManagerImpl @Inject constructor(
     val storage: KeyValueStorage,
@@ -44,7 +41,6 @@ class SubscriptionManagerImpl @Inject constructor(
     val vlessFormatter: VlessFormatter,
     val vmessFormatter: VmessFormatter,
     val wireguardFormatter: WireguardFormatter,
-    val qrCodeDecoder: QRCodeDecoder,
     val context: Context
 ) : SubscriptionManager {
 
@@ -85,19 +81,19 @@ class SubscriptionManagerImpl @Inject constructor(
         }
     }
 
-    fun shareToQRCode(guid: String): Bitmap? {
-        try {
-            val conf = shareConfig(guid)
-            if (TextUtils.isEmpty(conf)) {
-                return null
-            }
-            return qrCodeDecoder.createQRCode(conf)
-
-        } catch (e: Exception) {
-            Log.e(Constants.TAG, "Failed to share config as QR code", e)
-            return null
-        }
-    }
+//    fun shareToQRCode(guid: String): Bitmap? {
+//        try {
+//            val conf = shareConfig(guid)
+//            if (TextUtils.isEmpty(conf)) {
+//                return null
+//            }
+//            return qrCodeDecoder.createQRCode(conf)
+//
+//        } catch (e: Exception) {
+//            Log.e(Constants.TAG, "Failed to share config as QR code", e)
+//            return null
+//        }
+//    }
 
     fun shareFullContentToClipboard(guid: String?): Int {
         try {
@@ -168,7 +164,7 @@ class SubscriptionManagerImpl @Inject constructor(
                         try {
                             val count = importBatchConfig(result, true)
                             cont.resume(count)
-                        } catch (e: Exception) {
+                        } catch (_: Exception) {
                             cont.resume(-1)
                         }
                     } else {

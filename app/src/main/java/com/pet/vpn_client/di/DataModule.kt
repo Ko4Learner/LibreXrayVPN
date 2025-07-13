@@ -13,7 +13,6 @@ import com.pet.vpn_client.data.config_formatter.VlessFormatter
 import com.pet.vpn_client.data.config_formatter.VmessFormatter
 import com.pet.vpn_client.data.config_formatter.WireguardFormatter
 import com.pet.vpn_client.data.mmkv.MMKVStorage
-import com.pet.vpn_client.data.qr_code.QRCodeDecoder
 import com.pet.vpn_client.domain.interfaces.ConfigManager
 import com.pet.vpn_client.domain.interfaces.KeyValueStorage
 import com.pet.vpn_client.domain.interfaces.SettingsManager
@@ -83,7 +82,6 @@ object DataModule {
         vlessFormatter: VlessFormatter,
         vmessFormatter: VmessFormatter,
         wireguardFormatter: WireguardFormatter,
-        qrCodeDecoder: QRCodeDecoder,
         @ApplicationContext context: Context
     ): SubscriptionManager = SubscriptionManagerImpl(
         storage,
@@ -97,7 +95,6 @@ object DataModule {
         vlessFormatter,
         vmessFormatter,
         wireguardFormatter,
-        qrCodeDecoder,
         context
     )
 
