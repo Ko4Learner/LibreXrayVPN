@@ -8,4 +8,5 @@ interface ConfigInteractor {
     suspend fun importQrCodeConfig(frameData: FrameData): Int
     suspend fun getServerList(): List<String>
     suspend fun getServerConfig(guid: String): ConfigProfileItem?
+    suspend fun deleteItem(id: String)
 }

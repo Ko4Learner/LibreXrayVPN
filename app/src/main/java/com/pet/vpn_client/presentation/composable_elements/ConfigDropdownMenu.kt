@@ -1,4 +1,4 @@
-package com.pet.vpn_client.ui.composable_elements
+package com.pet.vpn_client.presentation.composable_elements
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background

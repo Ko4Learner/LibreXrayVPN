@@ -1,4 +1,4 @@
-package com.pet.vpn_client.ui.navigation
+package com.pet.vpn_client.presentation.navigation
 
 
 sealed class NavItem(val route: String) {

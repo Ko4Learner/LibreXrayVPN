@@ -40,6 +40,8 @@ class VpnScreenViewModel @Inject constructor(
             VpnScreenIntent.SwitchVpnProxy -> switchVpnProxy()
             VpnScreenIntent.TestConnection -> testConnection()
             VpnScreenIntent.ToggleVpnProxy -> toggleVpnProxy()
+            is VpnScreenIntent.DeleteItem -> deleteItem(intent.id)
+            VpnScreenIntent.RefreshItemList -> refreshItemList()
         }
     }
 
@@ -51,6 +53,19 @@ class VpnScreenViewModel @Inject constructor(
                 startConnection()
             }
         }
+    }
+
+    private fun deleteItem(id: String) {
+        _state.update {
+            it.copy(
+                isLoading = true,
+                serverItemList = it.serverItemList - it.serverItemList.first { it.guid == id }
+            )
+        }
+        viewModelScope.launch(Dispatchers.IO) {
+            configInteractor.deleteItem(id)
+        }
+        _state.update { it.copy(isLoading = false) }
     }
 
     private fun switchVpnProxy() {
@@ -79,6 +94,12 @@ class VpnScreenViewModel @Inject constructor(
                     )
                 }
             }
+        }
+    }
+
+    private fun refreshItemList() {
+        viewModelScope.launch(Dispatchers.IO) {
+            updateServerList(configInteractor.getServerList())
         }
     }
 

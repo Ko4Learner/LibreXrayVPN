@@ -26,4 +26,8 @@ class ConfigInteractorImpl @Inject constructor(
     override suspend fun getServerConfig(guid: String): ConfigProfileItem? {
         return keyValueStorage.decodeServerConfig(guid)
     }
+
+    override suspend fun deleteItem(id: String) {
+        keyValueStorage.removeServer(id)
+    }
 }

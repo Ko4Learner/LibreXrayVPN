@@ -6,4 +6,6 @@ sealed interface VpnScreenIntent {
     object TestConnection : VpnScreenIntent
     object RestartConnection : VpnScreenIntent
     object ImportConfigFromClipboard : VpnScreenIntent
+    data class DeleteItem(val id: String) : VpnScreenIntent
+    object RefreshItemList : VpnScreenIntent
 }

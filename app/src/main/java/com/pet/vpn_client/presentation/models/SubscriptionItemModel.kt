@@ -1,7 +1,7 @@
 package com.pet.vpn_client.presentation.models
 
 data class SubscriptionItemModel(
-//    val id: Int = 0,
+    val id: String = "",
 //    val imageCountryId: Int,
     val name: String,
     val ip: String,

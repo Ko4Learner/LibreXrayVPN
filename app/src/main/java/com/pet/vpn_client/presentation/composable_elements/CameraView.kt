@@ -1,4 +1,4 @@
-package com.pet.vpn_client.ui.composable_elements
+package com.pet.vpn_client.presentation.composable_elements
 
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis

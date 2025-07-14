@@ -1,9 +1,8 @@
-package com.pet.vpn_client.ui.composable_elements
+package com.pet.vpn_client.presentation.composable_elements
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
@@ -16,22 +15,21 @@ import androidx.compose.ui.unit.dp
 import com.pet.vpn_client.presentation.intent.VpnScreenIntent
 
 @Composable
-fun StartVpnButton(onIntent: (VpnScreenIntent) -> Unit) {
+fun ConnectionButton(text: String, onIntent: (VpnScreenIntent) -> Unit) {
     Box(
         modifier = Modifier
-            .padding(16.dp)
+            .size(32.dp)
             .background(color = colorScheme.secondary, shape = CircleShape)
-            .size(80.dp)
             .clickable {
-                onIntent(VpnScreenIntent.ToggleVpnProxy)
+                onIntent(VpnScreenIntent.TestConnection)
             },
         contentAlignment = Alignment.Center
 
     ) {
         Text(
-            text = "Start",
+            text = text,
             color = colorScheme.onSecondary,
-            style = MaterialTheme.typography.titleMedium
+            style = MaterialTheme.typography.titleSmall
         )
         //TODO Add VPN icon
     }

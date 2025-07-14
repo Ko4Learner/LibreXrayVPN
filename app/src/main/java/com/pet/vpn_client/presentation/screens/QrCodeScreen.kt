@@ -1,4 +1,4 @@
-package com.pet.vpn_client.ui.screens
+package com.pet.vpn_client.presentation.screens
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -20,16 +20,18 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.pet.vpn_client.presentation.intent.QrCodeScreenIntent
 import com.pet.vpn_client.presentation.view_model.QrCodeScreenViewModel
-import com.pet.vpn_client.ui.composable_elements.CameraView
+import com.pet.vpn_client.presentation.composable_elements.CameraView
 import android.Manifest
 import android.content.pm.PackageManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
+import kotlinx.coroutines.delay
 
 @Composable
 fun QrCodeScreen(
     modifier: Modifier = Modifier,
     viewModel: QrCodeScreenViewModel = hiltViewModel(),
+    onBackClick: () -> Unit,
     onResult: () -> Unit
 ) {
     var hasCameraPermission by remember { mutableStateOf(false) }
@@ -59,8 +61,6 @@ fun QrCodeScreen(
                 modifier = Modifier.fillMaxSize(),
                 onFrame = viewModel::onAnalyzeFrame
             )
-            //TODO разрешения
-
             if (state.error != null) {
                 Text(
                     text = "Ошибка: ${state.error}",
@@ -78,6 +78,7 @@ fun QrCodeScreen(
     LaunchedEffect(state.configFound) {
         //TODO возможно необходимо обработать UX считывания конфигурации или возможных ошибок
         if (state.configFound) {
+            delay(300)
             viewModel.onIntent(QrCodeScreenIntent.ResetState)
             onResult()
         }

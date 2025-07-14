@@ -1,4 +1,4 @@
-package com.pet.vpn_client.ui.screens
+package com.pet.vpn_client.presentation.screens
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
@@ -13,6 +13,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -20,22 +21,35 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
 import com.pet.vpn_client.presentation.intent.VpnScreenIntent
 import com.pet.vpn_client.presentation.state.VpnScreenState
 import com.pet.vpn_client.presentation.view_model.VpnScreenViewModel
-import com.pet.vpn_client.ui.composable_elements.ConfigDropDownMenu
-import com.pet.vpn_client.ui.composable_elements.ConnectionButton
-import com.pet.vpn_client.ui.composable_elements.StartVpnButton
-import com.pet.vpn_client.ui.composable_elements.SubscriptionsList
-import com.pet.vpn_client.ui.composable_elements.SwitchVpnProxy
+import com.pet.vpn_client.presentation.composable_elements.ConfigDropDownMenu
+import com.pet.vpn_client.presentation.composable_elements.ConnectionButton
+import com.pet.vpn_client.presentation.composable_elements.StartVpnButton
+import com.pet.vpn_client.presentation.composable_elements.SubscriptionsList
+import com.pet.vpn_client.presentation.composable_elements.SwitchVpnProxy
 
 @Composable
 fun VpnScreen(
     modifier: Modifier = Modifier,
+    navController: NavHostController,
     onQrCodeClick: () -> Unit,
     viewModel: VpnScreenViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
+    val savedStateHandle = navController.currentBackStackEntry?.savedStateHandle
+    val qrCodeImported =
+        savedStateHandle?.getStateFlow<Boolean>("qrCodeImported", false)?.collectAsState()
+
+    LaunchedEffect(qrCodeImported?.value) {
+        if (qrCodeImported?.value == true) {
+            viewModel.onIntent(VpnScreenIntent.RefreshItemList)
+            savedStateHandle.remove<Boolean>("qrCodeImported")
+        }
+    }
+
     VpnScreenContent(
         modifier = modifier,
         state = state,
@@ -71,7 +85,7 @@ fun VpnScreenContent(
         }
 
         Column(modifier = Modifier.weight(1f)) {
-            SubscriptionsList(state.serverItemList)
+            SubscriptionsList(onIntent, state.serverItemList)
         }
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             StartVpnButton(onIntent)

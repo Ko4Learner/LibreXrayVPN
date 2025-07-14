@@ -16,7 +16,6 @@ navigationCom = "2.8.9"
 gson = "2.12.1"
 mmkvStatic = "2.1.0"
 workRuntimeKtx = "2.10.1"
-scanner = "4.3.0"
 cameraX = "1.4.2"
 mlkit = "17.3.0"
 
@@ -46,7 +45,6 @@ gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 mmkv-static = { module = "com.tencent:mmkv-static", version.ref = "mmkvStatic" }
 work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workRuntimeKtx" }
 work-multiprocess = { module = "androidx.work:work-multiprocess", version.ref = "workRuntimeKtx" }
-scanner = { group = "com.journeyapps", name = "zxing-android-embedded", version.ref = "scanner" }
 mockK = { group = "io.mockk", name = "mockk", version.ref = "junitVersion" }
 mockk-android = { group = "io.mockk", name = "mockk-android", version.ref = "junitVersion" }
 cameraX = { group = "androidx.camera", name = "camera-camera2", version.ref = "cameraX" }

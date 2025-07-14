@@ -1,4 +1,4 @@
-package com.pet.vpn_client.ui.composable_elements
+package com.pet.vpn_client.presentation.composable_elements
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding

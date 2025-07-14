@@ -36,8 +36,10 @@ class QrCodeScreenViewModel @Inject constructor(
         }
     }
 
+    //TODO выглядит как костыль + нужно сбрасывать при пересоздании экрана
+    private var hasProcessed = false
     fun onAnalyzeFrame(imageProxy: ImageProxy) {
-        if (state.value.configFound) {
+        if (hasProcessed) {
             imageProxy.close()
             return
         }
@@ -60,17 +62,19 @@ class QrCodeScreenViewModel @Inject constructor(
                             )
                         }
 
-                    else -> _state.update {
-                        it.copy(
-                            configFound = true,
-                            error = null
-                        )
+                    else -> {
+                        hasProcessed = true
+                        _state.update {
+                            it.copy(
+                                configFound = true,
+                                error = null
+                            )
+                        }
                     }
                 }
             } finally {
                 imageProxy.close()
             }
         }
-
     }
 }

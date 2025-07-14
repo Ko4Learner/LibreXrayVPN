@@ -30,7 +30,8 @@ private val LightColorScheme = lightColorScheme(
 
 @Composable
 fun VPN_ClientTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    //isSystemInDarkTheme()
+    darkTheme: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {

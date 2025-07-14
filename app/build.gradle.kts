@@ -81,7 +81,6 @@ dependencies {
     implementation(libs.gson)
 
     //QR scanner
-    implementation(libs.scanner) // убрать
     implementation(libs.mlkit)
     implementation(libs.cameraX)
     implementation(libs.cameraX.core)

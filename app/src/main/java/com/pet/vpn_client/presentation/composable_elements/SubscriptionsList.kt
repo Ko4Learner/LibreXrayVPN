@@ -1,18 +1,20 @@
-package com.pet.vpn_client.ui.composable_elements
+package com.pet.vpn_client.presentation.composable_elements
 
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.runtime.Composable
 import com.pet.vpn_client.domain.models.ConfigProfileItem
+import com.pet.vpn_client.presentation.intent.VpnScreenIntent
 import com.pet.vpn_client.presentation.models.ServerItemModel
 import com.pet.vpn_client.presentation.models.SubscriptionItemModel
 
 @Composable
-fun SubscriptionsList(itemList: List<ServerItemModel>) {
+fun SubscriptionsList(onIntent: (VpnScreenIntent) -> Unit, itemList: List<ServerItemModel>) {
     val list: MutableList<SubscriptionItemModel> = mutableListOf()
     for (item in itemList) {
         list.add(
             SubscriptionItemModel(
+                id = item.guid,
                 name = item.profile.remarks,
                 ip = getAddress(item.profile),
                 protocol = item.profile.configType.name,
@@ -24,7 +26,7 @@ fun SubscriptionsList(itemList: List<ServerItemModel>) {
             items = list
         )
         { _, item ->
-            SubscriptionItem(item = item)
+            SubscriptionItem(onIntent = onIntent, item = item)
         }
     }
 }
