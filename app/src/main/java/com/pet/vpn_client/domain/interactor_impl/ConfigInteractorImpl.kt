@@ -30,4 +30,8 @@ class ConfigInteractorImpl @Inject constructor(
     override suspend fun deleteItem(id: String) {
         keyValueStorage.removeServer(id)
     }
+
+    override suspend fun getSelectedServer(): String? {
+        return keyValueStorage.getSelectServer()
+    }
 }

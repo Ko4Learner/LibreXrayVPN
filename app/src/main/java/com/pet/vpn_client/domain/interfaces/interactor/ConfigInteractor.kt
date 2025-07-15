@@ -9,4 +9,5 @@ interface ConfigInteractor {
     suspend fun getServerList(): List<String>
     suspend fun getServerConfig(guid: String): ConfigProfileItem?
     suspend fun deleteItem(id: String)
+    suspend fun getSelectedServer(): String?
 }

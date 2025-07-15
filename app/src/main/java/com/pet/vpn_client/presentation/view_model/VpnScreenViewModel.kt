@@ -120,11 +120,15 @@ class VpnScreenViewModel @Inject constructor(
     }
 
     private suspend fun startConnection() {
+        val selectedConfig = configInteractor.getSelectedServer()
+        Log.d(Constants.TAG, "Selected config: $selectedConfig")
         //TODO разрешения
         if (connectionInteractor.startConnection()) {
             _state.update { it.copy(isRunning = true) }
+            Log.d(Constants.TAG, "Connection")
         } else {
             _state.update { it.copy(isRunning = false, error = "Connection error") }
+            Log.d(Constants.TAG, "Connection error")
         }
 
     }

@@ -39,7 +39,6 @@
 
         <service
             android:name=".framework.services.VPNService"
-            android:enabled="true"
             android:exported="false"
             android:foregroundServiceType="specialUse"
             android:label="@string/app_name"

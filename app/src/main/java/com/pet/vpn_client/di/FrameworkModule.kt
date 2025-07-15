@@ -32,15 +32,6 @@ object FrameworkModule {
 
     @Provides
     @Singleton
-    fun provideVPNService(
-        storage: KeyValueStorage,
-        serviceManager: ServiceManager,
-        settingsManager: SettingsManagerImpl
-    ): VPNService =
-        VPNService(storage, serviceManager, settingsManager)
-
-    @Provides
-    @Singleton
     fun provideCoreVpnBridge(
         @ApplicationContext context: Context,
         storage: KeyValueStorage,

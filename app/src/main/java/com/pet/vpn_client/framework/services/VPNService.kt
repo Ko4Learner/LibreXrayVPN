@@ -1,5 +1,7 @@
 package com.pet.vpn_client.framework.services
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
 import android.net.ConnectivityManager
@@ -13,6 +15,7 @@ import android.net.VpnService
 import android.os.ParcelFileDescriptor
 import android.os.StrictMode
 import android.util.Log
+import androidx.core.app.NotificationCompat
 import com.pet.vpn_client.app.Constants
 import com.pet.vpn_client.domain.interfaces.KeyValueStorage
 import com.pet.vpn_client.domain.interfaces.ServiceControl
@@ -27,12 +30,16 @@ import java.io.File
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class VPNService @Inject constructor(
-    val storage: KeyValueStorage,
-    val serviceManager: ServiceManager,
-    val settingsManager: SettingsManager
-) : VpnService(),
-    ServiceControl {
+class VPNService : VpnService(), ServiceControl {
+
+    @Inject
+    lateinit var storage: KeyValueStorage
+
+    @Inject
+    lateinit var serviceManager: ServiceManager
+
+    @Inject
+    lateinit var settingsManager: SettingsManager
 
     private lateinit var mInterface: ParcelFileDescriptor
     private var isRunning = false
@@ -71,7 +78,28 @@ class VPNService @Inject constructor(
         val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
         StrictMode.setThreadPolicy(policy)
         serviceManager.setService(this)
+        showNotification()
     }
+
+    private fun showNotification() {
+        val channelId = "vpn_channel"
+        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        val channel = NotificationChannel(
+            channelId,
+            "VPN",
+            NotificationManager.IMPORTANCE_LOW
+        )
+        notificationManager.createNotificationChannel(channel)
+
+        val notification = NotificationCompat.Builder(this, channelId)
+            .setContentTitle("VPN")
+            .setContentText("VPN сервис запущен")
+            .setOngoing(true)
+            .build()
+
+        startForeground(1, notification)
+    }
+
 
     override fun onRevoke() {
         stopVpn()
@@ -79,11 +107,12 @@ class VPNService @Inject constructor(
 
     override fun onDestroy() {
         super.onDestroy()
+        stopForeground(true)
         //NotificationService.stopNotification()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        return super.onStartCommand(intent, flags, startId)
+        //super.onStartCommand(intent, flags, startId)
 
         if (serviceManager.startCoreLoop()) {
             startService()
@@ -109,35 +138,40 @@ class VPNService @Inject constructor(
     }
 
     private fun setup() {
-        if (prepare(this) != null || setupVpnService() != true) return
+        if (prepare(this) != null || setupVpnService() != true) {
+            Log.d(Constants.TAG, "Failed to setup VPN")
+            return
+        }
         runTun2socks()
     }
 
     private fun setupVpnService(): Boolean {
+        Log.d(Constants.TAG, "Start setup VPN")
         val builder = Builder()
         builder.setMtu(VPN_MTU)
             .addAddress(PRIVATE_VLAN4_CLIENT, 30)
             .addRoute(DEFAULT_ROUTE, 0)
-            .setSession(serviceManager.getRunningServerName())
-            //надо переделать
-            .addDisallowedApplication("com.pet.vpn_client")
 
         //нужно ли мне это?
-        settingsManager.getVpnDnsServers()
-            .forEach {
-                if (Utils.isPureIpAddress(it)) {
-                    builder.addDnsServer(it)
-                }
-            }
+//        settingsManager.getVpnDnsServers()
+//            .forEach {
+//                if (Utils.isPureIpAddress(it)) {
+        builder.addDnsServer("1.1.1.1")
+//                }
+//            }
+        builder.setSession(serviceManager.getRunningServerName())
+        //TODO разобраться с запретом на использование приложением впн
+//        builder.addDisallowedApplication("com.pet.vpn_client")
         try {
-            mInterface.close()
-        } catch (_: Exception) {
+            if (::mInterface.isInitialized) mInterface.close()
+        } catch (e: Exception) {
+            Log.e(Constants.TAG, "Failed to request network___: ${e.message}")
         }
 
         try {
             connectivityManager.requestNetwork(networkRequest, networkCallback)
         } catch (e: Exception) {
-            Log.e("VPNService", "Failed to request network: ${e.message}")
+            Log.e(Constants.TAG, "Failed to request network: ${e.message}")
         }
         builder.setMetered(false)
         if (storage.decodeSettingsBool(Constants.PREF_APPEND_HTTP_PROXY)) {
@@ -150,10 +184,11 @@ class VPNService @Inject constructor(
         }
         try {
             mInterface = builder.establish()!!
+            Log.d(Constants.TAG, "builder.establish() returned: $mInterface")
             isRunning = true
             return true
         } catch (e: Exception) {
-            Log.e("VPNService", "Failed to establish network: ${e.message}")
+            Log.e(Constants.TAG, "Failed to establish network: ${e.message}")
             stopVpn()
         }
         return false
@@ -189,12 +224,12 @@ class VPNService @Inject constructor(
             }.start()
             sendFd()
         } catch (e: Exception) {
-            Log.e("VPNService", "Failed to run tun2socks: ${e.message}")
+            Log.e(Constants.TAG, "Failed to run tun2socks: ${e.message}")
         }
-
     }
 
     private fun sendFd() {
+        Log.d(Constants.TAG, "Trying sendFd")
         val fd = mInterface.fileDescriptor
         val path = File(applicationContext.filesDir, "sock_path").absolutePath
 
@@ -202,6 +237,7 @@ class VPNService @Inject constructor(
             var failsCount = 0
             while (true) try {
                 Thread.sleep(50L shl failsCount)
+                Log.d(Constants.TAG, "Trying to connect to tun2socks via $path with fd=$fd")
                 LocalSocket().use { localSocket ->
                     localSocket.connect(
                         LocalSocketAddress(
@@ -210,6 +246,7 @@ class VPNService @Inject constructor(
                         )
                     )
                     localSocket.setFileDescriptorsForSend(arrayOf(fd))
+                    Log.d(Constants.TAG, "Sent fd $fd to tun2socks")
                     localSocket.outputStream.write(0)
                 }
                 break
@@ -221,6 +258,7 @@ class VPNService @Inject constructor(
     }
 
     private fun stopVpn(isForcedStop: Boolean = false) {
+        Log.d(Constants.TAG, "Stop service VPNService")
         isRunning = false
         try {
             connectivityManager.unregisterNetworkCallback(networkCallback)

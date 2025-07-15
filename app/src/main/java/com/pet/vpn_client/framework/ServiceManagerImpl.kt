@@ -145,6 +145,7 @@ class ServiceManagerImpl @Inject constructor(
 
     private fun startContextService() {
         if (coreVpnBridge.isRunning()) {
+            Log.d(Constants.TAG, "Service is already running")
             return
         }
         val guid = storage.getSelectServer() ?: return
@@ -153,19 +154,21 @@ class ServiceManagerImpl @Inject constructor(
             && !Utils.isIpAddress(config.server)
         ) return
 
-        //определяет возможность использования впн туннеля из Lan сети другими устройствами
-        if (storage.decodeSettingsBool(Constants.PREF_PROXY_SHARING) == true) {
-            //context.toast(R.string.toast_warning_pref_proxysharing_short)
-        } else {
-            //!!!_Оставить только это
-            //context.toast(R.string.toast_services_start)
-        }
+//        //определяет возможность использования впн туннеля из Lan сети другими устройствами
+//        if (storage.decodeSettingsBool(Constants.PREF_PROXY_SHARING) == true) {
+//            //context.toast(R.string.toast_warning_pref_proxysharing_short)
+//        } else {
+//            //!!!_Оставить только это
+//            //context.toast(R.string.toast_services_start)
+//        }
 
         val intent = if ((storage.decodeSettingsString(Constants.PREF_MODE)
                 ?: Constants.VPN) == Constants.VPN
         ) {
+            Log.d(Constants.TAG, "VPN")
             Intent(context, VPNService::class.java)
         } else {
+            Log.d(Constants.TAG, "Proxy")
             Intent(context, ProxyService::class.java)
         }
 
