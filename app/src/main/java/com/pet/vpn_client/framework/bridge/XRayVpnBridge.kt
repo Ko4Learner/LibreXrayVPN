@@ -43,6 +43,7 @@ class XRayVpnBridge @Inject constructor(
 //        currentConfig = config
 
         try {
+            Log.d(Constants.TAG, "Start Core loop")
             coreController.startLoop(result.content)
         } catch (e: Exception) {
             Log.e(Constants.TAG, "Failed to start Core loop", e)

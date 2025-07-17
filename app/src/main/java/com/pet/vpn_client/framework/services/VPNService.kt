@@ -142,6 +142,7 @@ class VPNService : VpnService(), ServiceControl {
             Log.d(Constants.TAG, "Failed to setup VPN")
             return
         }
+
         runTun2socks()
     }
 
@@ -211,6 +212,8 @@ class VPNService : VpnService(), ServiceControl {
         )
 
         try {
+            Log.d(Constants.TAG, "Native lib dir: ${applicationContext.applicationInfo.nativeLibraryDir}")
+            Log.d(Constants.TAG, "Exists: ${File(applicationContext.applicationInfo.nativeLibraryDir, "libtun2socks.so").exists()}")
             val processBuilder = ProcessBuilder(cmd)
             processBuilder.redirectErrorStream(true)
             process = processBuilder
