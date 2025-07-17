@@ -19,7 +19,6 @@ class ProxyService @Inject constructor(
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        return super.onStartCommand(intent, flags, startId)
         serviceManager.startCoreLoop()
         return START_STICKY
     }

@@ -112,12 +112,9 @@ class VPNService : VpnService(), ServiceControl {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        //super.onStartCommand(intent, flags, startId)
-
         if (serviceManager.startCoreLoop()) {
             startService()
         }
-
         return START_STICKY
     }
 
@@ -138,7 +135,7 @@ class VPNService : VpnService(), ServiceControl {
     }
 
     private fun setup() {
-        if (prepare(this) != null || setupVpnService() != true) {
+        if (prepare(this) != null || !setupVpnService()) {
             Log.d(Constants.TAG, "Failed to setup VPN")
             return
         }
@@ -162,7 +159,7 @@ class VPNService : VpnService(), ServiceControl {
 //            }
         builder.setSession(serviceManager.getRunningServerName())
         //TODO разобраться с запретом на использование приложением впн
-//        builder.addDisallowedApplication("com.pet.vpn_client")
+        builder.addDisallowedApplication("com.pet.vpn_client")
         try {
             if (::mInterface.isInitialized) mInterface.close()
         } catch (e: Exception) {
@@ -210,10 +207,7 @@ class VPNService : VpnService(), ServiceControl {
             "--enable-udprelay",
             "--loglevel", "notice"
         )
-
         try {
-            Log.d(Constants.TAG, "Native lib dir: ${applicationContext.applicationInfo.nativeLibraryDir}")
-            Log.d(Constants.TAG, "Exists: ${File(applicationContext.applicationInfo.nativeLibraryDir, "libtun2socks.so").exists()}")
             val processBuilder = ProcessBuilder(cmd)
             processBuilder.redirectErrorStream(true)
             process = processBuilder
@@ -254,7 +248,7 @@ class VPNService : VpnService(), ServiceControl {
                 }
                 break
             } catch (e: Exception) {
-                Log.e("VPNService", "Failed to send fd: ${e.message}")
+                Log.e(Constants.TAG, "Failed to send fd: ${e.message}")
                 if (++failsCount > 5) break
             }
         }
@@ -270,7 +264,7 @@ class VPNService : VpnService(), ServiceControl {
         try {
             process.destroy()
         } catch (e: Exception) {
-            Log.e("VPNService", "Failed to destroy process: ${e.message}")
+            Log.e(Constants.TAG, "Failed to destroy process: ${e.message}")
         }
 
         serviceManager.stopCoreLoop()
@@ -280,7 +274,7 @@ class VPNService : VpnService(), ServiceControl {
             try {
                 mInterface.close()
             } catch (e: Exception) {
-                Log.e("VPNService", "Failed to close interface: ${e.message}")
+                Log.e(Constants.TAG, "Failed to close interface: ${e.message}")
             }
         }
     }
