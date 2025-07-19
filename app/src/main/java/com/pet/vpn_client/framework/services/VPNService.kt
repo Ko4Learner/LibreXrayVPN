@@ -112,8 +112,14 @@ class VPNService : VpnService(), ServiceControl {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (serviceManager.startCoreLoop()) {
-            startService()
+        when (intent?.getStringExtra("COMMAND")) {
+            "START_VPN" -> {
+                if (serviceManager.startCoreLoop()) startService()
+            }
+
+            "STOP_VPN" -> {
+                stopService()
+            }
         }
         return START_STICKY
     }
@@ -271,8 +277,10 @@ class VPNService : VpnService(), ServiceControl {
 
         if (isForcedStop) {
             stopSelf()
+            Log.d(Constants.TAG, "Stop service VPNService")
             try {
                 mInterface.close()
+                Log.d(Constants.TAG, "Stop service VPNService")
             } catch (e: Exception) {
                 Log.e(Constants.TAG, "Failed to close interface: ${e.message}")
             }

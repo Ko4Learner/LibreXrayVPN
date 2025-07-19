@@ -59,10 +59,27 @@ class ServiceManagerImpl @Inject constructor(
     }
 
     override fun stopService() {
-        //context.toast(R.string.toast_services_stop)
-        val service = serviceControl?.get() ?: return
-        service.stopService()
+        val intent = Intent(context, VPNService::class.java).apply {
+            putExtra("COMMAND", "STOP_VPN")
+        }
+        context.startForegroundService(intent)
     }
+//    override fun stopService() {
+//        Log.d(Constants.TAG, "Try stop service: $serviceControl")
+//        val service = serviceControl?.get()
+//        if (service == null) {
+//            Log.d(Constants.TAG, "Service reference is null!")
+//            return
+//        }
+//        Log.d(Constants.TAG, "Service is not null: $service")
+//        service.stopService()
+//    }
+//    override fun stopService() {
+//        //context.toast(R.string.toast_services_stop)
+//        val service = serviceControl?.get() ?: return
+//        Log.d(Constants.TAG, service.toString())
+//        service.stopService()
+//    }
 
     override fun getRunningServerName() = currentConfig?.remarks.orEmpty()
 
@@ -166,7 +183,9 @@ class ServiceManagerImpl @Inject constructor(
                 ?: Constants.VPN) == Constants.VPN
         ) {
             Log.d(Constants.TAG, "VPN")
-            Intent(context, VPNService::class.java)
+            Intent(context, VPNService::class.java).apply {
+                putExtra("COMMAND", "START_VPN")
+            }
         } else {
             Log.d(Constants.TAG, "Proxy")
             Intent(context, ProxyService::class.java)

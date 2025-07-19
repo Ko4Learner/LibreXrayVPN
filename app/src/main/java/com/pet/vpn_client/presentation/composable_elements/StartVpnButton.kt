@@ -47,13 +47,12 @@ fun StartVpnButton(onIntent: (VpnScreenIntent) -> Unit, isRunning: Boolean) {
                 } else {
                     vpnPermissionLauncher.launch(intent)
                 }
-                onIntent(VpnScreenIntent.ToggleVpnProxy)
             },
         contentAlignment = Alignment.Center
 
     ) {
         Text(
-            text = if (isRunning) "Start" else "Stop",
+            text = if (!isRunning) "Start" else "Stop",
             color = colorScheme.onSecondary,
             style = MaterialTheme.typography.titleMedium
         )

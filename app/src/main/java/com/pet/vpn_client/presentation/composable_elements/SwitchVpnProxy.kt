@@ -7,6 +7,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -19,15 +20,20 @@ import com.pet.vpn_client.presentation.intent.VpnScreenIntent
 
 @Composable
 fun SwitchVpnProxy(onIntent: (VpnScreenIntent) -> Unit, isVpnMode: Boolean) {
+    var isChecked by remember {
+        mutableStateOf(isVpnMode)
+    }
+
     val text by remember {
         derivedStateOf {
-            if (isVpnMode) "VPN" else "Proxy"
+            if (isChecked) "VPN" else "Proxy"
         }
     }
     Row(verticalAlignment = Alignment.CenterVertically) {
         Switch(
-            checked = isVpnMode,
+            checked = isChecked,
             onCheckedChange = {
+                isChecked = it
                 onIntent(VpnScreenIntent.SwitchVpnProxy)
             },
             colors = SwitchDefaults.colors()

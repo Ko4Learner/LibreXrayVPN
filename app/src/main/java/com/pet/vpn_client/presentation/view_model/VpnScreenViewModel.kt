@@ -132,9 +132,6 @@ class VpnScreenViewModel @Inject constructor(
     }
 
     private suspend fun startConnection() {
-        val selectedConfig = configInteractor.getSelectedServer()
-        Log.d(Constants.TAG, "Selected config: $selectedConfig")
-        //TODO разрешения
         if (connectionInteractor.startConnection()) {
             _state.update { it.copy(isRunning = true) }
             Log.d(Constants.TAG, "Connection")
@@ -147,5 +144,6 @@ class VpnScreenViewModel @Inject constructor(
     private suspend fun stopConnection() {
         connectionInteractor.stopConnection()
         _state.update { it.copy(isRunning = false) }
+        Log.d(Constants.TAG,"Stop connection")
     }
 }
