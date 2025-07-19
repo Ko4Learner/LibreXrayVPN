@@ -32,6 +32,18 @@ class MMKVStorage @Inject constructor(private val gson: Gson) : KeyValueStorage 
     private val assetStorage by lazy { MMKV.mmkvWithID(ID_ASSET, MMKV.MULTI_PROCESS_MODE) }
     private val settingsStorage by lazy { MMKV.mmkvWithID(ID_SETTING, MMKV.MULTI_PROCESS_MODE) }
 
+    override fun setProxyMode() {
+        encodeSettings(Constants.PREF_MODE, Constants.PROXY)
+    }
+
+    override fun setVpnMode() {
+        encodeSettings(Constants.PREF_MODE, Constants.VPN)
+    }
+
+    override fun getMode(): String {
+        return decodeSettingsString(Constants.PREF_MODE) ?: Constants.VPN
+    }
+
     override fun getSelectServer(): String? {
         return mainStorage.decodeString(KEY_SELECTED_SERVER)
     }

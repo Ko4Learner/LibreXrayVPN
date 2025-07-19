@@ -80,7 +80,7 @@ fun VpnScreenContent(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            SwitchVpnProxy(onIntent)
+            SwitchVpnProxy(onIntent, state.isVpnMode)
             ConfigDropDownMenu(onIntent, onQrCodeClick)
         }
 
@@ -88,7 +88,7 @@ fun VpnScreenContent(
             SubscriptionsList(onIntent, state.serverItemList)
         }
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            StartVpnButton(onIntent)
+            StartVpnButton(onIntent, state.isRunning)
             Row(
                 modifier = Modifier
                     .fillMaxWidth(),

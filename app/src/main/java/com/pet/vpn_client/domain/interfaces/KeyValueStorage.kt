@@ -8,6 +8,10 @@ import com.pet.vpn_client.domain.models.SubscriptionItem
 
 interface KeyValueStorage {
 
+    fun setProxyMode()
+    fun setVpnMode()
+    fun getMode(): String
+
     fun getSelectServer(): String?
 
     fun setSelectServer(guid: String)

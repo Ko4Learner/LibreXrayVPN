@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.pet.vpn_client.app.Constants
 import com.pet.vpn_client.domain.interfaces.interactor.ConfigInteractor
 import com.pet.vpn_client.domain.interfaces.interactor.ConnectionInteractor
+import com.pet.vpn_client.domain.interfaces.interactor.SettingsInteractor
 import com.pet.vpn_client.presentation.intent.VpnScreenIntent
 import com.pet.vpn_client.presentation.models.ServerItemModel
 import com.pet.vpn_client.presentation.state.VpnScreenState
@@ -21,7 +22,8 @@ import javax.inject.Inject
 @HiltViewModel
 class VpnScreenViewModel @Inject constructor(
     private val configInteractor: ConfigInteractor,
-    private val connectionInteractor: ConnectionInteractor
+    private val connectionInteractor: ConnectionInteractor,
+    private val settingsInteractor: SettingsInteractor
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(VpnScreenState())
@@ -30,6 +32,7 @@ class VpnScreenViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             updateServerList(configInteractor.getServerList())
+            _state.update { it.copy(isVpnMode = settingsInteractor.getMode() == Constants.VPN) }
         }
     }
 
@@ -69,7 +72,16 @@ class VpnScreenViewModel @Inject constructor(
     }
 
     private fun switchVpnProxy() {
-        //TODO: Implement VPN/Proxy switching logic
+        //TODO добавить перезапуск Vpn/Proxy с нужным модом
+        viewModelScope.launch {
+            if (state.value.isVpnMode) {
+                settingsInteractor.setProxyMode()
+                _state.update { it.copy(isVpnMode = false) }
+            } else {
+                settingsInteractor.setVpnMode()
+                _state.update { it.copy(isVpnMode = true) }
+            }
+        }
     }
 
     private fun testConnection() {
@@ -130,7 +142,6 @@ class VpnScreenViewModel @Inject constructor(
             _state.update { it.copy(isRunning = false, error = "Connection error") }
             Log.d(Constants.TAG, "Connection error")
         }
-
     }
 
     private suspend fun stopConnection() {

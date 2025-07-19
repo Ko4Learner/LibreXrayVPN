@@ -18,20 +18,16 @@ import androidx.compose.ui.unit.dp
 import com.pet.vpn_client.presentation.intent.VpnScreenIntent
 
 @Composable
-fun SwitchVpnProxy(onIntent: (VpnScreenIntent) -> Unit) {
-    var isChecked by remember {
-        mutableStateOf(false)
-    }
+fun SwitchVpnProxy(onIntent: (VpnScreenIntent) -> Unit, isVpnMode: Boolean) {
     val text by remember {
         derivedStateOf {
-            if (isChecked) "VPN" else "Proxy"
+            if (isVpnMode) "VPN" else "Proxy"
         }
     }
     Row(verticalAlignment = Alignment.CenterVertically) {
         Switch(
-            checked = isChecked,
+            checked = isVpnMode,
             onCheckedChange = {
-                isChecked = it
                 onIntent(VpnScreenIntent.SwitchVpnProxy)
             },
             colors = SwitchDefaults.colors()

@@ -23,7 +23,7 @@ import com.pet.vpn_client.app.Constants
 import com.pet.vpn_client.presentation.intent.VpnScreenIntent
 
 @Composable
-fun StartVpnButton(onIntent: (VpnScreenIntent) -> Unit) {
+fun StartVpnButton(onIntent: (VpnScreenIntent) -> Unit, isRunning: Boolean) {
     val context = LocalContext.current
     val vpnPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
@@ -53,7 +53,7 @@ fun StartVpnButton(onIntent: (VpnScreenIntent) -> Unit) {
 
     ) {
         Text(
-            text = "Start",
+            text = if (isRunning) "Start" else "Stop",
             color = colorScheme.onSecondary,
             style = MaterialTheme.typography.titleMedium
         )

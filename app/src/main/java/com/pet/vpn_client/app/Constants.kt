@@ -160,6 +160,7 @@ object Constants {
 
     /** Give a good name to this, IDK*/
     const val VPN = "VPN"
+    const val PROXY = "PROXY"
 
     // Google API rule constants
     const val GOOGLEAPIS_CN_DOMAIN = "domain:googleapis.cn"
