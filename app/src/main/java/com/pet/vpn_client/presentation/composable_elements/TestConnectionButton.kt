@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.dp
 import com.pet.vpn_client.presentation.intent.VpnScreenIntent
 
 @Composable
-fun ConnectionButton(text: String, onIntent: (VpnScreenIntent) -> Unit) {
+fun TestConnectionButton(onIntent: (VpnScreenIntent) -> Unit) {
     Box(
         modifier = Modifier
             .size(32.dp)
@@ -27,7 +27,7 @@ fun ConnectionButton(text: String, onIntent: (VpnScreenIntent) -> Unit) {
 
     ) {
         Text(
-            text = text,
+            text = "T",
             color = colorScheme.onSecondary,
             style = MaterialTheme.typography.titleSmall
         )

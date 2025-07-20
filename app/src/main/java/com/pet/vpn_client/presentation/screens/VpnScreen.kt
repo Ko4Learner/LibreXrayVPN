@@ -26,7 +26,8 @@ import com.pet.vpn_client.presentation.intent.VpnScreenIntent
 import com.pet.vpn_client.presentation.state.VpnScreenState
 import com.pet.vpn_client.presentation.view_model.VpnScreenViewModel
 import com.pet.vpn_client.presentation.composable_elements.ConfigDropDownMenu
-import com.pet.vpn_client.presentation.composable_elements.ConnectionButton
+import com.pet.vpn_client.presentation.composable_elements.RestartButton
+import com.pet.vpn_client.presentation.composable_elements.TestConnectionButton
 import com.pet.vpn_client.presentation.composable_elements.StartVpnButton
 import com.pet.vpn_client.presentation.composable_elements.SubscriptionsList
 import com.pet.vpn_client.presentation.composable_elements.SwitchVpnProxy
@@ -95,8 +96,8 @@ fun VpnScreenContent(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                ConnectionButton("R", onIntent)
-                ConnectionButton("T", onIntent)
+                RestartButton(onIntent)
+                TestConnectionButton(onIntent)
             }
             Text(
                 text = "Успешно: Соединение заняло 60 ms",

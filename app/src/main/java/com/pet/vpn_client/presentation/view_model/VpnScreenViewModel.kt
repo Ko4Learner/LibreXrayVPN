@@ -12,6 +12,7 @@ import com.pet.vpn_client.presentation.models.ServerItemModel
 import com.pet.vpn_client.presentation.state.VpnScreenState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -85,11 +86,19 @@ class VpnScreenViewModel @Inject constructor(
     }
 
     private fun testConnection() {
-        //TODO: Implement testing connection
+        //TODO
     }
 
     private fun restartConnection() {
-        //TODO: Implement restarting connection
+        if (state.value.isRunning) {
+            viewModelScope.launch {
+                stopConnection()
+                delay(500)
+                startConnection()
+            }
+        } else {
+            _state.update { it.copy(error = "Connection is not running") }
+        }
     }
 
     private fun importConfigFromClipboard() {
@@ -144,6 +153,6 @@ class VpnScreenViewModel @Inject constructor(
     private suspend fun stopConnection() {
         connectionInteractor.stopConnection()
         _state.update { it.copy(isRunning = false) }
-        Log.d(Constants.TAG,"Stop connection")
+        Log.d(Constants.TAG, "Stop connection")
     }
 }
