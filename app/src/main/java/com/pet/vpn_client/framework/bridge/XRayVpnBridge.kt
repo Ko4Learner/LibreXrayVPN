@@ -45,10 +45,12 @@ class XRayVpnBridge @Inject constructor(
         try {
             Log.d(Constants.TAG, "Start Core loop")
             coreController.startLoop(result.content)
+            coreController.isRunning = true
         } catch (e: Exception) {
             Log.e(Constants.TAG, "Failed to start Core loop", e)
             return false
         }
+        Log.d(Constants.TAG,coreController.isRunning.toString())
         return true
     }
 
@@ -69,33 +71,27 @@ class XRayVpnBridge @Inject constructor(
         return coreController.queryStats(tag, link)
     }
 
-    override fun measureV2rayDelay() {
-        if (coreController.isRunning == false) {
-            return
+    override suspend fun measureDelay(): Long? {
+        Log.d(Constants.TAG, coreController.isRunning.toString())
+        if (!coreController.isRunning) return null
+
+        var time = -1L
+
+        try {
+            time = coreController.measureDelay(settingsManager.getDelayTestUrl())
+        } catch (e: Exception) {
+            Log.e(Constants.TAG, "Failed to measure delay with primary URL", e)
         }
 
-        CoroutineScope(Dispatchers.IO).launch {
-            serviceManager.getService() ?: return@launch
-            var time = -1L
-            //var errorStr = ""
-
+        if (time == -1L) {
             try {
-                time = coreController.measureDelay(settingsManager.getDelayTestUrl())
+                time = coreController.measureDelay(settingsManager.getDelayTestUrl(true))
             } catch (e: Exception) {
-                Log.e(Constants.TAG, "Failed to measure delay with primary URL", e)
-                //errorStr = e.message?.substringAfter("\":") ?: "empty message"
+                Log.e(Constants.TAG, "Failed to measure delay with alternative URL", e)
             }
-
-            if (time == -1L) {
-                try {
-                    time = coreController.measureDelay(settingsManager.getDelayTestUrl(true))
-                } catch (e: Exception) {
-                    Log.e(Constants.TAG, "Failed to measure delay with alternative URL", e)
-                    //errorStr = e.message?.substringAfter("\":") ?: "empty message"
-                }
-            }
-            serviceManager.measureDelay(time)
         }
+        Log.d(Constants.TAG, "Delay: $time")
+        return time
     }
 
     private inner class CoreCallback : CoreCallbackHandler {

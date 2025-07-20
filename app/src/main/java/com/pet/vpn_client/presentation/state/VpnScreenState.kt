@@ -7,5 +7,6 @@ data class VpnScreenState(
     val isRunning: Boolean = false,
     val isVpnMode: Boolean = true,
     val serverItemList: List<ServerItemModel> = listOf(),
+    val delay: Long? = null,
     val error: String? = null,
 )

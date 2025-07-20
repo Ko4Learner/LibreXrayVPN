@@ -18,6 +18,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -68,9 +69,8 @@ fun VpnScreenContent(
 ) {
     Column(
         modifier = modifier
-            .padding(horizontal = 8.dp)
             .fillMaxSize()
-            .background(colorScheme.background),
+            .background(Color.Gray),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top
     ) {
@@ -100,8 +100,8 @@ fun VpnScreenContent(
                 TestConnectionButton(onIntent)
             }
             Text(
-                text = "Успешно: Соединение заняло 60 ms",
-                style = MaterialTheme.typography.titleMedium
+                text = if (state.delay != null) "Delay: ${state.delay} ms" else "ERROR",
+                color = Color.Black
             )
         }
     }

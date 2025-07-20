@@ -28,11 +28,11 @@ fun ConfigDropDownMenu(onIntent: (VpnScreenIntent) -> Unit, onQrCodeClick: () ->
             contentDescription = "Settings"
         )
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            DropdownMenuItem(text = { Text(text = "QR") }, onClick = {
+            DropdownMenuItem(text = { Text(text = "QR", color = MaterialTheme.colorScheme.onBackground) }, onClick = {
                 onQrCodeClick()
                 expanded = false
             })
-            DropdownMenuItem(text = { Text(text = "Буфер обмена") }, onClick = {
+            DropdownMenuItem(text = { Text(text = "Буфер обмена", color = MaterialTheme.colorScheme.onBackground) }, onClick = {
                 onIntent(VpnScreenIntent.ImportConfigFromClipboard)
                 expanded = false
             })

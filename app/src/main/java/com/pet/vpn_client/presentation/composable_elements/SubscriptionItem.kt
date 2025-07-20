@@ -35,7 +35,7 @@ fun SubscriptionItem(onIntent: (VpnScreenIntent) -> Unit, item: SubscriptionItem
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 8.dp)
-                .background(color = MaterialTheme.colorScheme.background),
+                .background(color = Color.Gray),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {

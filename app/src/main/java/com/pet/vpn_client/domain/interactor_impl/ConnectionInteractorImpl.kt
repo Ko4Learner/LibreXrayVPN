@@ -17,11 +17,7 @@ class ConnectionInteractorImpl @Inject constructor(val serviceManager: ServiceMa
         serviceManager.stopService()
     }
 
-    override suspend fun restartConnection(): Boolean {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun testConnection(): Boolean {
-        TODO("Not yet implemented")
+    override suspend fun testConnection(): Long? {
+        return serviceManager.measureDelay()
     }
 }

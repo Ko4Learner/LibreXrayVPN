@@ -59,8 +59,18 @@ class ServiceManagerImpl @Inject constructor(
     }
 
     override fun stopService() {
-        val intent = Intent(context, VPNService::class.java).apply {
-            putExtra("COMMAND", "STOP_VPN")
+        val intent = if ((storage.decodeSettingsString(Constants.PREF_MODE)
+                ?: Constants.VPN) == Constants.VPN
+        ) {
+            Log.d(Constants.TAG, "VPN")
+            Intent(context, VPNService::class.java).apply {
+                putExtra("COMMAND", "STOP_VPN")
+            }
+        } else {
+            Log.d(Constants.TAG, "Proxy")
+            Intent(context, ProxyService::class.java).apply {
+                putExtra("COMMAND", "STOP_PROXY")
+            }
         }
         context.startForegroundService(intent)
     }
@@ -86,7 +96,7 @@ class ServiceManagerImpl @Inject constructor(
     override fun startCoreLoop(): Boolean {
         if (coreVpnBridge.startCoreLoop()) {
 //            registerReceiver()
-            if (coreVpnBridge.isRunning() == false) {
+            if (!coreVpnBridge.isRunning()) {
                 //IntentUtil.sendMsg2UI(context, Constants.MSG_STATE_START_FAILURE, "")
                 //NotificationService.cancelNotification()
                 return false
@@ -112,21 +122,8 @@ class ServiceManagerImpl @Inject constructor(
         return true
     }
 
-    override fun measureDelay(time: Long) {
-        val result = if (time >= 0) {
-            // context.getString(R.string.connection_test_available, time)
-            ""
-        } else {
-            //context.getString(R.string.connection_test_error, errorStr)
-            ""
-        }
-        //IntentUtil.sendMsg2UI(context, Constants.MSG_MEASURE_DELAY_SUCCESS, result)
-        if (time >= 0) {
-            // показывает после успешной проверки в том числе и ip удаленного сервера
-//                SpeedtestManager.getRemoteIPInfo()?.let { ip ->
-//                    IntentUtil.sendMsg2UI(context, Constants.MSG_MEASURE_DELAY_SUCCESS, "$result\n$ip")
-//                }
-        }
+    override suspend fun measureDelay(): Long? {
+        return coreVpnBridge.measureDelay()
     }
 
     override fun registerReceiver(): Boolean {
@@ -188,7 +185,9 @@ class ServiceManagerImpl @Inject constructor(
             }
         } else {
             Log.d(Constants.TAG, "Proxy")
-            Intent(context, ProxyService::class.java)
+            Intent(context, ProxyService::class.java).apply {
+                putExtra("COMMAND", "START_PROXY")
+            }
         }
 
         context.startForegroundService(intent)
@@ -236,7 +235,7 @@ class ServiceManagerImpl @Inject constructor(
                 }
 
                 Constants.MSG_MEASURE_DELAY -> {
-                    coreVpnBridge.measureV2rayDelay()
+//                    coreVpnBridge.measureXrayDelay()
                 }
             }
 

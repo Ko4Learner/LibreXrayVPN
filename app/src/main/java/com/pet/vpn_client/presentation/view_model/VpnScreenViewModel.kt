@@ -86,7 +86,11 @@ class VpnScreenViewModel @Inject constructor(
     }
 
     private fun testConnection() {
-        //TODO
+        viewModelScope.launch(Dispatchers.IO) {
+            Log.d(Constants.TAG, "Test connection")
+            val delay = connectionInteractor.testConnection()
+            _state.update { it.copy(delay = delay) }
+        }
     }
 
     private fun restartConnection() {

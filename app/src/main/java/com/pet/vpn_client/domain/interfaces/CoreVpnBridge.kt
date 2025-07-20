@@ -5,5 +5,5 @@ interface CoreVpnBridge {
     fun startCoreLoop(): Boolean
     fun stopCoreLoop(): Boolean
     fun queryStats(tag: String, link: String): Long
-    fun measureV2rayDelay()
+    suspend fun measureDelay(): Long?
 }
