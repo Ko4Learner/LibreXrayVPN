@@ -1,6 +1,5 @@
 package com.pet.vpn_client.presentation.view_model
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pet.vpn_client.app.Constants
@@ -73,7 +72,6 @@ class VpnScreenViewModel @Inject constructor(
     }
 
     private fun switchVpnProxy() {
-        //TODO добавить перезапуск Vpn/Proxy с нужным модом
         viewModelScope.launch {
             if (state.value.isVpnMode) {
                 settingsInteractor.setProxyMode()
@@ -82,12 +80,14 @@ class VpnScreenViewModel @Inject constructor(
                 settingsInteractor.setVpnMode()
                 _state.update { it.copy(isVpnMode = true) }
             }
+            //TODO выполнять код после окончания изменения
+            delay(500)
+            restartConnection()
         }
     }
 
     private fun testConnection() {
         viewModelScope.launch(Dispatchers.IO) {
-            Log.d(Constants.TAG, "Test connection")
             val delay = connectionInteractor.testConnection()
             _state.update { it.copy(delay = delay) }
         }
@@ -107,11 +107,9 @@ class VpnScreenViewModel @Inject constructor(
 
     private fun importConfigFromClipboard() {
         viewModelScope.launch(Dispatchers.IO) {
-            //TODO добавить проверку на -1 и 0
             if (configInteractor.importClipboardConfig() >= 0) {
                 updateServerList(configInteractor.getServerList())
             } else {
-                Log.d(Constants.TAG, "Config imported error")
                 _state.update {
                     it.copy(
                         serverItemList = listOf(),
@@ -147,16 +145,13 @@ class VpnScreenViewModel @Inject constructor(
     private suspend fun startConnection() {
         if (connectionInteractor.startConnection()) {
             _state.update { it.copy(isRunning = true) }
-            Log.d(Constants.TAG, "Connection")
         } else {
             _state.update { it.copy(isRunning = false, error = "Connection error") }
-            Log.d(Constants.TAG, "Connection error")
         }
     }
 
     private suspend fun stopConnection() {
         connectionInteractor.stopConnection()
         _state.update { it.copy(isRunning = false) }
-        Log.d(Constants.TAG, "Stop connection")
     }
 }

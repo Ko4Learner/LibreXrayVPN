@@ -44,7 +44,6 @@ class ServiceManagerImpl @Inject constructor(
 
     override fun startServiceFromToggle(): Boolean {
         if (storage.getSelectServer().isNullOrEmpty()) {
-            //context.toast(R.string.app_tile_first_use)
             return false
         }
         startContextService()
@@ -74,22 +73,6 @@ class ServiceManagerImpl @Inject constructor(
         }
         context.startForegroundService(intent)
     }
-//    override fun stopService() {
-//        Log.d(Constants.TAG, "Try stop service: $serviceControl")
-//        val service = serviceControl?.get()
-//        if (service == null) {
-//            Log.d(Constants.TAG, "Service reference is null!")
-//            return
-//        }
-//        Log.d(Constants.TAG, "Service is not null: $service")
-//        service.stopService()
-//    }
-//    override fun stopService() {
-//        //context.toast(R.string.toast_services_stop)
-//        val service = serviceControl?.get() ?: return
-//        Log.d(Constants.TAG, service.toString())
-//        service.stopService()
-//    }
 
     override fun getRunningServerName() = currentConfig?.remarks.orEmpty()
 
@@ -116,8 +99,6 @@ class ServiceManagerImpl @Inject constructor(
 
     override fun stopCoreLoop(): Boolean {
         coreVpnBridge.stopCoreLoop()
-        //IntentUtil.sendMsg2UI(context, Constants.MSG_STATE_STOP_SUCCESS, "")
-        //NotificationService.cancelNotification()
         unregisterReceiver()
         return true
     }
@@ -168,14 +149,6 @@ class ServiceManagerImpl @Inject constructor(
             && !Utils.isIpAddress(config.server)
         ) return
 
-//        //определяет возможность использования впн туннеля из Lan сети другими устройствами
-//        if (storage.decodeSettingsBool(Constants.PREF_PROXY_SHARING) == true) {
-//            //context.toast(R.string.toast_warning_pref_proxysharing_short)
-//        } else {
-//            //!!!_Оставить только это
-//            //context.toast(R.string.toast_services_start)
-//        }
-
         val intent = if ((storage.decodeSettingsString(Constants.PREF_MODE)
                 ?: Constants.VPN) == Constants.VPN
         ) {
@@ -193,7 +166,6 @@ class ServiceManagerImpl @Inject constructor(
         context.startForegroundService(intent)
     }
 
-    //TODO ПОЧЕМУ НЕТ СТАРТА СЕРВИСА?
     private inner class ReceiveMessageHandler : BroadcastReceiver() {
 
         override fun onReceive(ctx: Context?, intent: Intent?) {

@@ -21,7 +21,6 @@ import com.pet.vpn_client.domain.interfaces.KeyValueStorage
 import com.pet.vpn_client.domain.interfaces.ServiceControl
 import com.pet.vpn_client.domain.interfaces.ServiceManager
 import com.pet.vpn_client.domain.interfaces.SettingsManager
-import com.pet.vpn_client.utils.Utils
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -155,17 +154,9 @@ class VPNService : VpnService(), ServiceControl {
         builder.setMtu(VPN_MTU)
             .addAddress(PRIVATE_VLAN4_CLIENT, 30)
             .addRoute(DEFAULT_ROUTE, 0)
-
-        //нужно ли мне это?
-//        settingsManager.getVpnDnsServers()
-//            .forEach {
-//                if (Utils.isPureIpAddress(it)) {
-        builder.addDnsServer("1.1.1.1")
-//                }
-//            }
-        builder.setSession(serviceManager.getRunningServerName())
-        //TODO разобраться с запретом на использование приложением впн
-        builder.addDisallowedApplication("com.pet.vpn_client")
+            .addDnsServer("1.1.1.1")
+            .setSession(serviceManager.getRunningServerName())
+            .addDisallowedApplication("com.pet.vpn_client")
         try {
             if (::mInterface.isInitialized) mInterface.close()
         } catch (e: Exception) {
