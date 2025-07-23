@@ -20,4 +20,8 @@ class ConnectionInteractorImpl @Inject constructor(val serviceManager: ServiceMa
     override suspend fun testConnection(): Long? {
         return serviceManager.measureDelay()
     }
+
+    override fun restartConnection() {
+        serviceManager.restartService()
+    }
 }

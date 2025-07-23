@@ -6,6 +6,8 @@ import com.pet.vpn_client.app.Constants
 import com.pet.vpn_client.domain.interfaces.interactor.ConfigInteractor
 import com.pet.vpn_client.domain.interfaces.interactor.ConnectionInteractor
 import com.pet.vpn_client.domain.interfaces.interactor.SettingsInteractor
+import com.pet.vpn_client.domain.interfaces.repository.ServiceStateRepository
+import com.pet.vpn_client.domain.state.ServiceState
 import com.pet.vpn_client.presentation.intent.VpnScreenIntent
 import com.pet.vpn_client.presentation.models.ServerItemModel
 import com.pet.vpn_client.presentation.state.VpnScreenState
@@ -13,8 +15,10 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -23,16 +27,27 @@ import javax.inject.Inject
 class VpnScreenViewModel @Inject constructor(
     private val configInteractor: ConfigInteractor,
     private val connectionInteractor: ConnectionInteractor,
-    private val settingsInteractor: SettingsInteractor
+    private val settingsInteractor: SettingsInteractor,
+    stateRepository: ServiceStateRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(VpnScreenState())
     val state: StateFlow<VpnScreenState> = _state.asStateFlow()
 
+    val serviceState: StateFlow<ServiceState> =
+        stateRepository.serviceState.stateIn(
+            viewModelScope,
+            SharingStarted.Lazily,
+            ServiceState.Idle
+        )
+
     init {
         viewModelScope.launch {
             updateServerList(configInteractor.getServerList())
             _state.update { it.copy(isVpnMode = settingsInteractor.getMode() == Constants.VPN) }
+            serviceState.collect { serviceState ->
+                _state.update { it.copy(isRunning = serviceState == ServiceState.Connected) }
+            }
         }
     }
 
@@ -59,7 +74,7 @@ class VpnScreenViewModel @Inject constructor(
     }
 
     private fun deleteItem(id: String) {
-        _state.update {
+        _state.update { it ->
             it.copy(
                 isLoading = true,
                 serverItemList = it.serverItemList - it.serverItemList.first { it.guid == id }
@@ -95,11 +110,7 @@ class VpnScreenViewModel @Inject constructor(
 
     private fun restartConnection() {
         if (state.value.isRunning) {
-            viewModelScope.launch {
-                stopConnection()
-                delay(500)
-                startConnection()
-            }
+            connectionInteractor.restartConnection()
         } else {
             _state.update { it.copy(error = "Connection is not running") }
         }
@@ -143,15 +154,10 @@ class VpnScreenViewModel @Inject constructor(
     }
 
     private suspend fun startConnection() {
-        if (connectionInteractor.startConnection()) {
-            _state.update { it.copy(isRunning = true) }
-        } else {
-            _state.update { it.copy(isRunning = false, error = "Connection error") }
-        }
+        connectionInteractor.startConnection()
     }
 
     private suspend fun stopConnection() {
         connectionInteractor.stopConnection()
-        _state.update { it.copy(isRunning = false) }
     }
 }

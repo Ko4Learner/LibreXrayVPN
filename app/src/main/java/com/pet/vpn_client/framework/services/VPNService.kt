@@ -1,7 +1,5 @@
 package com.pet.vpn_client.framework.services
 
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
 import android.net.ConnectivityManager
@@ -15,12 +13,14 @@ import android.net.VpnService
 import android.os.ParcelFileDescriptor
 import android.os.StrictMode
 import android.util.Log
-import androidx.core.app.NotificationCompat
 import com.pet.vpn_client.app.Constants
 import com.pet.vpn_client.domain.interfaces.KeyValueStorage
 import com.pet.vpn_client.domain.interfaces.ServiceControl
 import com.pet.vpn_client.domain.interfaces.ServiceManager
 import com.pet.vpn_client.domain.interfaces.SettingsManager
+import com.pet.vpn_client.domain.interfaces.repository.ServiceStateRepository
+import com.pet.vpn_client.domain.state.ServiceState
+import com.pet.vpn_client.framework.notification.NotificationFactory
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -39,6 +39,12 @@ class VPNService : VpnService(), ServiceControl {
 
     @Inject
     lateinit var settingsManager: SettingsManager
+
+    @Inject
+    lateinit var notificationFactory: NotificationFactory
+
+    @Inject
+    lateinit var serviceStateRepository: ServiceStateRepository
 
     private lateinit var mInterface: ParcelFileDescriptor
     private var isRunning = false
@@ -77,47 +83,27 @@ class VPNService : VpnService(), ServiceControl {
         val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
         StrictMode.setThreadPolicy(policy)
         serviceManager.setService(this)
-        showNotification()
+        startForeground(1, notificationFactory.createNotification("Vpn"))
     }
-
-    private fun showNotification() {
-        val channelId = "vpn_channel"
-        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-        val channel = NotificationChannel(
-            channelId,
-            "VPN",
-            NotificationManager.IMPORTANCE_LOW
-        )
-        notificationManager.createNotificationChannel(channel)
-
-        val notification = NotificationCompat.Builder(this, channelId)
-            .setContentTitle("VPN")
-            .setContentText("VPN сервис запущен")
-            .setOngoing(true)
-            .build()
-
-        startForeground(1, notification)
-    }
-
 
     override fun onRevoke() {
         stopVpn()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        stopForeground(true)
-        //NotificationService.stopNotification()
-    }
-
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.getStringExtra("COMMAND")) {
-            "START_VPN" -> {
+            "START_SERVICE" -> {
                 if (serviceManager.startCoreLoop()) startService()
             }
 
-            "STOP_VPN" -> {
+            "STOP_SERVICE" -> {
                 stopService()
+                //TODO разобраться
+                return START_NOT_STICKY
+            }
+
+            "RESTART_SERVICE" -> {
+                serviceManager.restartService()
             }
         }
         return START_STICKY
@@ -217,6 +203,8 @@ class VPNService : VpnService(), ServiceControl {
                 }
             }.start()
             sendFd()
+            Log.d(Constants.TAG, "Started tun2socks")
+            serviceStateRepository.updateState(ServiceState.Connected)
         } catch (e: Exception) {
             Log.e(Constants.TAG, "Failed to run tun2socks: ${e.message}")
         }
@@ -252,7 +240,6 @@ class VPNService : VpnService(), ServiceControl {
     }
 
     private fun stopVpn(isForcedStop: Boolean = false) {
-        Log.d(Constants.TAG, "Stop service VPNService")
         isRunning = false
         try {
             connectivityManager.unregisterNetworkCallback(networkCallback)
@@ -268,14 +255,14 @@ class VPNService : VpnService(), ServiceControl {
 
         if (isForcedStop) {
             stopSelf()
-            Log.d(Constants.TAG, "Stop service VPNService")
             try {
                 mInterface.close()
-                Log.d(Constants.TAG, "Stop service VPNService")
             } catch (e: Exception) {
                 Log.e(Constants.TAG, "Failed to close interface: ${e.message}")
             }
         }
+        serviceStateRepository.updateState(ServiceState.Stopped)
+        Log.d(Constants.TAG, "Stop service VPNService")
     }
 
     //    //применение локали (язык) приложения

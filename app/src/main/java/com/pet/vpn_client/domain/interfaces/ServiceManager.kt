@@ -1,7 +1,5 @@
 package com.pet.vpn_client.domain.interfaces
 
-import android.content.Context
-
 interface ServiceManager {
     fun setService(service: ServiceControl)
     fun getService(): ServiceControl?
@@ -16,5 +14,5 @@ interface ServiceManager {
     suspend fun measureDelay(): Long?
     fun registerReceiver(): Boolean
     fun unregisterReceiver()
-
+    fun restartService()
 }

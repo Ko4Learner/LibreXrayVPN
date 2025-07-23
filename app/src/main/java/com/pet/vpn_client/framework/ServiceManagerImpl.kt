@@ -11,24 +11,33 @@ import com.pet.vpn_client.domain.interfaces.CoreVpnBridge
 import com.pet.vpn_client.domain.interfaces.KeyValueStorage
 import com.pet.vpn_client.domain.interfaces.ServiceControl
 import com.pet.vpn_client.domain.interfaces.ServiceManager
+import com.pet.vpn_client.domain.interfaces.repository.ServiceStateRepository
 import com.pet.vpn_client.domain.models.ConfigProfileItem
+import com.pet.vpn_client.domain.state.ServiceState
 import com.pet.vpn_client.framework.services.ProxyService
 import com.pet.vpn_client.framework.services.VPNService
 import com.pet.vpn_client.utils.Utils
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import java.lang.ref.SoftReference
 import javax.inject.Inject
 import javax.inject.Provider
 
 class ServiceManagerImpl @Inject constructor(
-    val storage: KeyValueStorage,
-    val coreVpnBridgeProvider: Provider<CoreVpnBridge>,
-    val context: Context
+    private val storage: KeyValueStorage,
+    private val coreVpnBridgeProvider: Provider<CoreVpnBridge>,
+    private val stateRepository: ServiceStateRepository,
+    private val context: Context
 ) : ServiceManager {
 
     private val coreVpnBridge: CoreVpnBridge by lazy { coreVpnBridgeProvider.get() }
     var serviceControl: SoftReference<ServiceControl>? = null
     private val mMsgReceive = ReceiveMessageHandler()
     private var currentConfig: ConfigProfileItem? = null
+    private val scope = CoroutineScope(Dispatchers.Default)
 
     override fun setService(service: ServiceControl) {
         serviceControl = SoftReference(service)
@@ -63,15 +72,25 @@ class ServiceManagerImpl @Inject constructor(
         ) {
             Log.d(Constants.TAG, "VPN")
             Intent(context, VPNService::class.java).apply {
-                putExtra("COMMAND", "STOP_VPN")
+                putExtra("COMMAND", "STOP_SERVICE")
             }
         } else {
             Log.d(Constants.TAG, "Proxy")
             Intent(context, ProxyService::class.java).apply {
-                putExtra("COMMAND", "STOP_PROXY")
+                putExtra("COMMAND", "STOP_SERVICE")
             }
         }
         context.startForegroundService(intent)
+    }
+
+    override fun restartService() {
+        stopService()
+        scope.launch {
+            stateRepository.serviceState
+                .filter { it is ServiceState.Idle || it is ServiceState.Stopped }
+                .first()
+            startContextService()
+        }
     }
 
     override fun getRunningServerName() = currentConfig?.remarks.orEmpty()
@@ -154,15 +173,14 @@ class ServiceManagerImpl @Inject constructor(
         ) {
             Log.d(Constants.TAG, "VPN")
             Intent(context, VPNService::class.java).apply {
-                putExtra("COMMAND", "START_VPN")
+                putExtra("COMMAND", "START_SERVICE")
             }
         } else {
             Log.d(Constants.TAG, "Proxy")
             Intent(context, ProxyService::class.java).apply {
-                putExtra("COMMAND", "START_PROXY")
+                putExtra("COMMAND", "START_SERVICE")
             }
         }
-
         context.startForegroundService(intent)
     }
 

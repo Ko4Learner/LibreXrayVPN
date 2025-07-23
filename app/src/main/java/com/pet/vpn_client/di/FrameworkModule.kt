@@ -6,7 +6,9 @@ import com.pet.vpn_client.domain.interfaces.ConfigManager
 import com.pet.vpn_client.domain.interfaces.CoreVpnBridge
 import com.pet.vpn_client.domain.interfaces.KeyValueStorage
 import com.pet.vpn_client.domain.interfaces.ServiceManager
+import com.pet.vpn_client.domain.interfaces.repository.ServiceStateRepository
 import com.pet.vpn_client.framework.ServiceManagerImpl
+import com.pet.vpn_client.framework.ServiceStateRepositoryImpl
 import com.pet.vpn_client.framework.bridge.XRayVpnBridge
 import com.pet.vpn_client.framework.services.VPNService
 import dagger.Module
@@ -26,9 +28,10 @@ object FrameworkModule {
     fun provideServiceManager(
         storage: KeyValueStorage,
         coreVpnBridgeProvider: Provider<CoreVpnBridge>,
+        serviceStateRepository: ServiceStateRepository,
         @ApplicationContext context: Context
     ): ServiceManager =
-        ServiceManagerImpl(storage, coreVpnBridgeProvider, context)
+        ServiceManagerImpl(storage, coreVpnBridgeProvider, serviceStateRepository, context)
 
     @Provides
     @Singleton
@@ -40,4 +43,8 @@ object FrameworkModule {
         settingsManager: SettingsManagerImpl
     ): CoreVpnBridge =
         XRayVpnBridge(context, storage, serviceManager, configManager, settingsManager)
+
+    @Provides
+    @Singleton
+    fun provideServiceStateRepository(): ServiceStateRepository = ServiceStateRepositoryImpl()
 }

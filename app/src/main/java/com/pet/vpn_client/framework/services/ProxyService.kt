@@ -1,15 +1,13 @@
 package com.pet.vpn_client.framework.services
 
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
-import android.util.Log
-import androidx.core.app.NotificationCompat
-import com.pet.vpn_client.app.Constants
 import com.pet.vpn_client.domain.interfaces.ServiceControl
 import com.pet.vpn_client.domain.interfaces.ServiceManager
+import com.pet.vpn_client.domain.interfaces.repository.ServiceStateRepository
+import com.pet.vpn_client.domain.state.ServiceState
+import com.pet.vpn_client.framework.notification.NotificationFactory
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -17,41 +15,34 @@ import javax.inject.Inject
 class ProxyService : Service(), ServiceControl {
     @Inject
     lateinit var serviceManager: ServiceManager
+
+    @Inject
+    lateinit var notificationFactory: NotificationFactory
+
+    @Inject
+    lateinit var serviceStateRepository: ServiceStateRepository
+
     override fun onCreate() {
         super.onCreate()
         serviceManager.setService(this)
-        showNotification()
-    }
-
-    private fun showNotification() {
-        val channelId = "proxy_channel"
-        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-        val channel = NotificationChannel(
-            channelId,
-            "PROXY",
-            NotificationManager.IMPORTANCE_LOW
-        )
-        notificationManager.createNotificationChannel(channel)
-
-        val notification = NotificationCompat.Builder(this, channelId)
-            .setContentTitle("PROXY")
-            .setContentText("PROXY сервис запущен")
-            .setOngoing(true)
-            .build()
-
-        startForeground(1, notification)
+        startForeground(1, notificationFactory.createNotification("Proxy"))
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.getStringExtra("COMMAND")) {
-            "START_PROXY" -> {
-                Log.d(Constants.TAG, "START_PROXY")
+            "START_SERVICE" -> {
                 serviceManager.startCoreLoop()
+                serviceStateRepository.updateState(ServiceState.Connected)
             }
 
-            "STOP_PROXY" -> {
-                Log.d(Constants.TAG, "STOP_PROXY")
+            "STOP_SERVICE" -> {
+                serviceStateRepository.updateState(ServiceState.Stopped)
                 onDestroy()
+                return START_NOT_STICKY
+            }
+
+            "RESTART_SERVICE" -> {
+                serviceManager.restartService()
             }
         }
         return START_STICKY
