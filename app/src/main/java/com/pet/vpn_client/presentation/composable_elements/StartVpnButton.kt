@@ -29,7 +29,7 @@ fun StartVpnButton(onIntent: (VpnScreenIntent) -> Unit, isRunning: Boolean) {
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
-            onIntent(VpnScreenIntent.ToggleVpnProxy)
+            onIntent(VpnScreenIntent.ToggleConnection)
         } else {
             Log.d(Constants.TAG, "Permission denied")
         }
@@ -43,7 +43,7 @@ fun StartVpnButton(onIntent: (VpnScreenIntent) -> Unit, isRunning: Boolean) {
             .clickable {
                 val intent = VpnService.prepare(context)
                 if (intent == null) {
-                    onIntent(VpnScreenIntent.ToggleVpnProxy)
+                    onIntent(VpnScreenIntent.ToggleConnection)
                 } else {
                     vpnPermissionLauncher.launch(intent)
                 }

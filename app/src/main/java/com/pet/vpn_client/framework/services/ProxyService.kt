@@ -25,7 +25,7 @@ class ProxyService : Service(), ServiceControl {
     override fun onCreate() {
         super.onCreate()
         serviceManager.setService(this)
-        startForeground(1, notificationFactory.createNotification("Proxy"))
+        startForeground(2, notificationFactory.createNotification("Proxy"))
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -36,8 +36,9 @@ class ProxyService : Service(), ServiceControl {
             }
 
             "STOP_SERVICE" -> {
+                serviceManager.stopCoreLoop()
+                stopSelf()
                 serviceStateRepository.updateState(ServiceState.Stopped)
-                onDestroy()
                 return START_NOT_STICKY
             }
 
@@ -46,11 +47,6 @@ class ProxyService : Service(), ServiceControl {
             }
         }
         return START_STICKY
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        serviceManager.stopService()
     }
 
     override fun onBind(intent: Intent?): IBinder? {

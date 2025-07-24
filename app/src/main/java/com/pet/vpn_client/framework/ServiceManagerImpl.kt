@@ -70,12 +70,10 @@ class ServiceManagerImpl @Inject constructor(
         val intent = if ((storage.decodeSettingsString(Constants.PREF_MODE)
                 ?: Constants.VPN) == Constants.VPN
         ) {
-            Log.d(Constants.TAG, "VPN")
             Intent(context, VPNService::class.java).apply {
                 putExtra("COMMAND", "STOP_SERVICE")
             }
         } else {
-            Log.d(Constants.TAG, "Proxy")
             Intent(context, ProxyService::class.java).apply {
                 putExtra("COMMAND", "STOP_SERVICE")
             }
@@ -118,7 +116,8 @@ class ServiceManagerImpl @Inject constructor(
 
     override fun stopCoreLoop(): Boolean {
         coreVpnBridge.stopCoreLoop()
-        unregisterReceiver()
+        Log.d(Constants.TAG, "stopCoreLoop")
+//        unregisterReceiver()
         return true
     }
 
@@ -171,12 +170,10 @@ class ServiceManagerImpl @Inject constructor(
         val intent = if ((storage.decodeSettingsString(Constants.PREF_MODE)
                 ?: Constants.VPN) == Constants.VPN
         ) {
-            Log.d(Constants.TAG, "VPN")
             Intent(context, VPNService::class.java).apply {
                 putExtra("COMMAND", "START_SERVICE")
             }
         } else {
-            Log.d(Constants.TAG, "Proxy")
             Intent(context, ProxyService::class.java).apply {
                 putExtra("COMMAND", "START_SERVICE")
             }

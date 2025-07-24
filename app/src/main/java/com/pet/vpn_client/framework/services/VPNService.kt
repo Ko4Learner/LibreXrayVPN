@@ -30,7 +30,6 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class VPNService : VpnService(), ServiceControl {
-
     @Inject
     lateinit var storage: KeyValueStorage
 
@@ -86,6 +85,7 @@ class VPNService : VpnService(), ServiceControl {
         startForeground(1, notificationFactory.createNotification("Vpn"))
     }
 
+    //вызывается при ручном отзыве разрешения пользователем
     override fun onRevoke() {
         stopVpn()
     }
@@ -97,8 +97,8 @@ class VPNService : VpnService(), ServiceControl {
             }
 
             "STOP_SERVICE" -> {
-                stopService()
-                //TODO разобраться
+                stopVpn(true)
+                serviceStateRepository.updateState(ServiceState.Stopped)
                 return START_NOT_STICKY
             }
 

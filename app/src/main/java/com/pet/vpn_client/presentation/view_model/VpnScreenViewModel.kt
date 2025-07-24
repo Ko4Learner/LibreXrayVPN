@@ -13,11 +13,12 @@ import com.pet.vpn_client.presentation.models.ServerItemModel
 import com.pet.vpn_client.presentation.state.VpnScreenState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -57,13 +58,13 @@ class VpnScreenViewModel @Inject constructor(
             VpnScreenIntent.RestartConnection -> restartConnection()
             VpnScreenIntent.SwitchVpnProxy -> switchVpnProxy()
             VpnScreenIntent.TestConnection -> testConnection()
-            VpnScreenIntent.ToggleVpnProxy -> toggleVpnProxy()
+            VpnScreenIntent.ToggleConnection -> toggleConnection()
             is VpnScreenIntent.DeleteItem -> deleteItem(intent.id)
             VpnScreenIntent.RefreshItemList -> refreshItemList()
         }
     }
 
-    private fun toggleVpnProxy() {
+    private fun toggleConnection() {
         viewModelScope.launch {
             if (state.value.isRunning) {
                 stopConnection()
@@ -72,6 +73,7 @@ class VpnScreenViewModel @Inject constructor(
             }
         }
     }
+
 
     private fun deleteItem(id: String) {
         _state.update { it ->
@@ -87,17 +89,20 @@ class VpnScreenViewModel @Inject constructor(
     }
 
     private fun switchVpnProxy() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.Default) {
             if (state.value.isVpnMode) {
-                settingsInteractor.setProxyMode()
                 _state.update { it.copy(isVpnMode = false) }
+                connectionInteractor.stopConnection()
+                settingsInteractor.setProxyMode()
             } else {
-                settingsInteractor.setVpnMode()
                 _state.update { it.copy(isVpnMode = true) }
+                connectionInteractor.stopConnection()
+                settingsInteractor.setVpnMode()
             }
-            //TODO выполнять код после окончания изменения
-            delay(500)
-            restartConnection()
+            serviceState
+                .filter { it is ServiceState.Idle || it is ServiceState.Stopped }
+                .first()
+            connectionInteractor.startConnection()
         }
     }
 
