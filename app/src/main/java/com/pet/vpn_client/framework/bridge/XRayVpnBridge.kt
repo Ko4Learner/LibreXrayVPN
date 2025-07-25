@@ -38,8 +38,6 @@ class XRayVpnBridge @Inject constructor(
         val result = configManager.getCoreConfig(guid)
         if (!result.status) return false
 
-        if (!serviceManager.registerReceiver()) return false
-
 //        currentConfig = config
 
         try {
@@ -54,7 +52,7 @@ class XRayVpnBridge @Inject constructor(
         return true
     }
 
-    override fun stopCoreLoop(): Boolean {
+    override fun stopCoreLoop() {
         if (coreController.isRunning) {
             CoroutineScope(Dispatchers.IO).launch {
                 try {
@@ -64,7 +62,6 @@ class XRayVpnBridge @Inject constructor(
                 }
             }
         }
-        return true
     }
 
     override fun queryStats(tag: String, link: String): Long {
@@ -95,13 +92,11 @@ class XRayVpnBridge @Inject constructor(
     }
 
     private inner class CoreCallback : CoreCallbackHandler {
-
         override fun startup(): Long {
             return 0
         }
 
         override fun shutdown(): Long {
-            serviceManager.getService() ?: return -1
             return try {
                 serviceManager.stopService()
                 0

@@ -32,16 +32,12 @@ import javax.inject.Inject
 class VPNService : VpnService(), ServiceControl {
     @Inject
     lateinit var storage: KeyValueStorage
-
     @Inject
     lateinit var serviceManager: ServiceManager
-
     @Inject
     lateinit var settingsManager: SettingsManager
-
     @Inject
     lateinit var notificationFactory: NotificationFactory
-
     @Inject
     lateinit var serviceStateRepository: ServiceStateRepository
 
@@ -81,7 +77,6 @@ class VPNService : VpnService(), ServiceControl {
         super.onCreate()
         val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
         StrictMode.setThreadPolicy(policy)
-        serviceManager.setService(this)
         startForeground(1, notificationFactory.createNotification("Vpn"))
     }
 

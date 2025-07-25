@@ -1,15 +1,11 @@
 package com.pet.vpn_client.framework
 
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.util.Log
-import androidx.core.content.ContextCompat
 import com.pet.vpn_client.app.Constants
 import com.pet.vpn_client.domain.interfaces.CoreVpnBridge
 import com.pet.vpn_client.domain.interfaces.KeyValueStorage
-import com.pet.vpn_client.domain.interfaces.ServiceControl
 import com.pet.vpn_client.domain.interfaces.ServiceManager
 import com.pet.vpn_client.domain.interfaces.repository.ServiceStateRepository
 import com.pet.vpn_client.domain.models.ConfigProfileItem
@@ -22,7 +18,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import java.lang.ref.SoftReference
 import javax.inject.Inject
 import javax.inject.Provider
 
@@ -34,22 +29,8 @@ class ServiceManagerImpl @Inject constructor(
 ) : ServiceManager {
 
     private val coreVpnBridge: CoreVpnBridge by lazy { coreVpnBridgeProvider.get() }
-    var serviceControl: SoftReference<ServiceControl>? = null
-    private val mMsgReceive = ReceiveMessageHandler()
     private var currentConfig: ConfigProfileItem? = null
     private val scope = CoroutineScope(Dispatchers.Default)
-
-    override fun setService(service: ServiceControl) {
-        serviceControl = SoftReference(service)
-    }
-
-    override fun getService(): ServiceControl? {
-        return serviceControl?.get()?.getService() as ServiceControl?
-    }
-
-//    override fun getMsgReceive(): BroadcastReceiver {
-//        return mMsgReceive
-//    }
 
     override fun startServiceFromToggle(): Boolean {
         if (storage.getSelectServer().isNullOrEmpty()) {
@@ -95,15 +76,10 @@ class ServiceManagerImpl @Inject constructor(
 
     override fun startCoreLoop(): Boolean {
         if (coreVpnBridge.startCoreLoop()) {
-//            registerReceiver()
             if (!coreVpnBridge.isRunning()) {
-                //IntentUtil.sendMsg2UI(context, Constants.MSG_STATE_START_FAILURE, "")
-                //NotificationService.cancelNotification()
                 return false
             }
-
             try {
-                //IntentUtil.sendMsg2UI(context, Constants.MSG_STATE_START_SUCCESS, "")
 //            NotificationService.startSpeedNotification(currentConfig)
 //            NotificationService.showNotification(currentConfig)
             } catch (e: Exception) {
@@ -114,46 +90,12 @@ class ServiceManagerImpl @Inject constructor(
         } else return false
     }
 
-    override fun stopCoreLoop(): Boolean {
+    override fun stopCoreLoop() {
         coreVpnBridge.stopCoreLoop()
-        Log.d(Constants.TAG, "stopCoreLoop")
-//        unregisterReceiver()
-        return true
     }
 
     override suspend fun measureDelay(): Long? {
         return coreVpnBridge.measureDelay()
-    }
-
-    override fun registerReceiver(): Boolean {
-        val guid = storage.getSelectServer() ?: return false
-        currentConfig = storage.decodeServerConfig(guid) ?: return false
-        val service = serviceControl?.get() ?: return false
-        try {
-            val mFilter = IntentFilter(Constants.BROADCAST_ACTION_SERVICE)
-            mFilter.addAction(Intent.ACTION_SCREEN_ON)
-            mFilter.addAction(Intent.ACTION_SCREEN_OFF)
-            mFilter.addAction(Intent.ACTION_USER_PRESENT)
-            ContextCompat.registerReceiver(
-                service as Context,
-                mMsgReceive,
-                mFilter,
-                Utils.receiverFlags()
-            )
-        } catch (e: Exception) {
-            Log.e(Constants.TAG, "Failed to register broadcast receiver", e)
-            return false
-        }
-        return true
-    }
-
-    override fun unregisterReceiver() {
-        val service = serviceControl?.get() ?: return
-        try {
-            (service as Context).unregisterReceiver(mMsgReceive)
-        } catch (e: Exception) {
-            Log.e(Constants.TAG, "Failed to unregister broadcast receiver", e)
-        }
     }
 
     private fun startContextService() {
@@ -179,62 +121,5 @@ class ServiceManagerImpl @Inject constructor(
             }
         }
         context.startForegroundService(intent)
-    }
-
-    private inner class ReceiveMessageHandler : BroadcastReceiver() {
-
-        override fun onReceive(ctx: Context?, intent: Intent?) {
-            val serviceControl = serviceControl?.get() ?: return
-
-            when (intent?.getIntExtra("key", 0)) {
-                Constants.MSG_REGISTER_CLIENT -> {
-                    if (coreVpnBridge.isRunning()) {
-//                        IntentUtil.sendMsg2UI(
-//                            serviceControl.getService(),
-//                            Constants.MSG_STATE_RUNNING,
-//                            ""
-//                        )
-                    } else {
-//                        IntentUtil.sendMsg2UI(
-//                            serviceControl.getService(),
-//                            Constants.MSG_STATE_NOT_RUNNING,
-//                            ""
-//                        )
-                    }
-                }
-
-                Constants.MSG_UNREGISTER_CLIENT -> {
-                    // nothing to do
-                }
-
-                Constants.MSG_STATE_START -> {
-                    // nothing to do
-                }
-
-                Constants.MSG_STATE_STOP -> {
-                    serviceControl.stopService()
-                }
-
-                Constants.MSG_STATE_RESTART -> {
-                    serviceControl.stopService()
-                    Thread.sleep(500L)
-                    // startService(serviceControl.getService().)
-                }
-
-                Constants.MSG_MEASURE_DELAY -> {
-//                    coreVpnBridge.measureXrayDelay()
-                }
-            }
-
-//            when (intent?.action) {
-//                Intent.ACTION_SCREEN_OFF -> {
-//                    NotificationService.stopSpeedNotification(currentConfig)
-//                }
-//
-//                Intent.ACTION_SCREEN_ON -> {
-//                    NotificationService.startSpeedNotification(currentConfig)
-//                }
-//            }
-        }
     }
 }

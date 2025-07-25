@@ -15,16 +15,13 @@ import javax.inject.Inject
 class ProxyService : Service(), ServiceControl {
     @Inject
     lateinit var serviceManager: ServiceManager
-
     @Inject
     lateinit var notificationFactory: NotificationFactory
-
     @Inject
     lateinit var serviceStateRepository: ServiceStateRepository
 
     override fun onCreate() {
         super.onCreate()
-        serviceManager.setService(this)
         startForeground(2, notificationFactory.createNotification("Proxy"))
     }
 
