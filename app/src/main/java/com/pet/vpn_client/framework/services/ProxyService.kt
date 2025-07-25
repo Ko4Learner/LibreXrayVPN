@@ -3,7 +3,6 @@ package com.pet.vpn_client.framework.services
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
-import com.pet.vpn_client.domain.interfaces.ServiceControl
 import com.pet.vpn_client.domain.interfaces.ServiceManager
 import com.pet.vpn_client.domain.interfaces.repository.ServiceStateRepository
 import com.pet.vpn_client.domain.state.ServiceState
@@ -12,7 +11,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class ProxyService : Service(), ServiceControl {
+class ProxyService : Service() {
     @Inject
     lateinit var serviceManager: ServiceManager
     @Inject
@@ -48,22 +47,6 @@ class ProxyService : Service(), ServiceControl {
 
     override fun onBind(intent: Intent?): IBinder? {
         return null
-    }
-
-    override fun getService(): Service {
-        return this
-    }
-
-    override fun startService() {
-        //empty
-    }
-
-    override fun stopService() {
-        stopSelf()
-    }
-
-    override fun vpnProtect(socket: Int): Boolean {
-        return true
     }
 
     //    //применение локали (язык) приложения

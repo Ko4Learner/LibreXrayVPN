@@ -47,6 +47,41 @@ class ServiceManagerImpl @Inject constructor(
         startContextService()
     }
 
+    override fun restartService() {
+        stopService()
+        scope.launch {
+            stateRepository.serviceState
+                .filter { it is ServiceState.Idle || it is ServiceState.Stopped }
+                .first()
+            startContextService()
+        }
+    }
+
+    private fun startContextService() {
+        if (coreVpnBridge.isRunning()) {
+            Log.d(Constants.TAG, "Service is already running")
+            return
+        }
+        val guid = storage.getSelectServer() ?: return
+        val config = storage.decodeServerConfig(guid) ?: return
+        if (!Utils.isValidUrl(config.server)
+            && !Utils.isIpAddress(config.server)
+        ) return
+
+        val intent = if ((storage.decodeSettingsString(Constants.PREF_MODE)
+                ?: Constants.VPN) == Constants.VPN
+        ) {
+            Intent(context, VPNService::class.java).apply {
+                putExtra("COMMAND", "START_SERVICE")
+            }
+        } else {
+            Intent(context, ProxyService::class.java).apply {
+                putExtra("COMMAND", "START_SERVICE")
+            }
+        }
+        context.startForegroundService(intent)
+    }
+
     override fun stopService() {
         val intent = if ((storage.decodeSettingsString(Constants.PREF_MODE)
                 ?: Constants.VPN) == Constants.VPN
@@ -60,16 +95,6 @@ class ServiceManagerImpl @Inject constructor(
             }
         }
         context.startForegroundService(intent)
-    }
-
-    override fun restartService() {
-        stopService()
-        scope.launch {
-            stateRepository.serviceState
-                .filter { it is ServiceState.Idle || it is ServiceState.Stopped }
-                .first()
-            startContextService()
-        }
     }
 
     override fun getRunningServerName() = currentConfig?.remarks.orEmpty()
@@ -96,30 +121,5 @@ class ServiceManagerImpl @Inject constructor(
 
     override suspend fun measureDelay(): Long? {
         return coreVpnBridge.measureDelay()
-    }
-
-    private fun startContextService() {
-        if (coreVpnBridge.isRunning()) {
-            Log.d(Constants.TAG, "Service is already running")
-            return
-        }
-        val guid = storage.getSelectServer() ?: return
-        val config = storage.decodeServerConfig(guid) ?: return
-        if (!Utils.isValidUrl(config.server)
-            && !Utils.isIpAddress(config.server)
-        ) return
-
-        val intent = if ((storage.decodeSettingsString(Constants.PREF_MODE)
-                ?: Constants.VPN) == Constants.VPN
-        ) {
-            Intent(context, VPNService::class.java).apply {
-                putExtra("COMMAND", "START_SERVICE")
-            }
-        } else {
-            Intent(context, ProxyService::class.java).apply {
-                putExtra("COMMAND", "START_SERVICE")
-            }
-        }
-        context.startForegroundService(intent)
     }
 }

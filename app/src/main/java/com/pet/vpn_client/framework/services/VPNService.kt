@@ -1,6 +1,5 @@
 package com.pet.vpn_client.framework.services
 
-import android.app.Service
 import android.content.Intent
 import android.net.ConnectivityManager
 import android.net.LocalSocket
@@ -15,7 +14,6 @@ import android.os.StrictMode
 import android.util.Log
 import com.pet.vpn_client.app.Constants
 import com.pet.vpn_client.domain.interfaces.KeyValueStorage
-import com.pet.vpn_client.domain.interfaces.ServiceControl
 import com.pet.vpn_client.domain.interfaces.ServiceManager
 import com.pet.vpn_client.domain.interfaces.SettingsManager
 import com.pet.vpn_client.domain.interfaces.repository.ServiceStateRepository
@@ -29,7 +27,7 @@ import java.io.File
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class VPNService : VpnService(), ServiceControl {
+class VPNService : VpnService(){
     @Inject
     lateinit var storage: KeyValueStorage
     @Inject
@@ -88,7 +86,7 @@ class VPNService : VpnService(), ServiceControl {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.getStringExtra("COMMAND")) {
             "START_SERVICE" -> {
-                if (serviceManager.startCoreLoop()) startService()
+                if (serviceManager.startCoreLoop()) setup()
             }
 
             "STOP_SERVICE" -> {
@@ -102,22 +100,6 @@ class VPNService : VpnService(), ServiceControl {
             }
         }
         return START_STICKY
-    }
-
-    override fun getService(): Service {
-        return this
-    }
-
-    override fun startService() {
-        setup()
-    }
-
-    override fun stopService() {
-        stopVpn(true)
-    }
-
-    override fun vpnProtect(socket: Int): Boolean {
-        return protect(socket)
     }
 
     private fun setup() {

@@ -90,19 +90,22 @@ class VpnScreenViewModel @Inject constructor(
 
     private fun switchVpnProxy() {
         viewModelScope.launch(Dispatchers.Default) {
+            val isRunning = state.value.isRunning
             if (state.value.isVpnMode) {
                 _state.update { it.copy(isVpnMode = false) }
-                connectionInteractor.stopConnection()
+                if (isRunning) connectionInteractor.stopConnection()
                 settingsInteractor.setProxyMode()
             } else {
                 _state.update { it.copy(isVpnMode = true) }
-                connectionInteractor.stopConnection()
+                if (isRunning) connectionInteractor.stopConnection()
                 settingsInteractor.setVpnMode()
             }
-            serviceState
-                .filter { it is ServiceState.Idle || it is ServiceState.Stopped }
-                .first()
-            connectionInteractor.startConnection()
+            if (isRunning) {
+                serviceState
+                    .filter { it is ServiceState.Idle || it is ServiceState.Stopped }
+                    .first()
+                connectionInteractor.startConnection()
+            }
         }
     }
 
