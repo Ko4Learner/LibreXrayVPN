@@ -53,15 +53,5 @@
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
                 android:value="vpn" />
         </service>
-
-        <service
-            android:name=".framework.services.ProxyService"
-            android:exported="false"
-            android:foregroundServiceType="specialUse"
-            android:label="@string/app_name">
-            <property
-                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
-                android:value="proxy" />
-        </service>
     </application>
 </manifest>

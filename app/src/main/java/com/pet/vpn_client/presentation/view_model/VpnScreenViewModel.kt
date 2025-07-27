@@ -2,7 +2,6 @@ package com.pet.vpn_client.presentation.view_model
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.pet.vpn_client.app.Constants
 import com.pet.vpn_client.domain.interfaces.interactor.ConfigInteractor
 import com.pet.vpn_client.domain.interfaces.interactor.ConnectionInteractor
 import com.pet.vpn_client.domain.interfaces.interactor.SettingsInteractor
@@ -17,8 +16,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -28,7 +25,6 @@ import javax.inject.Inject
 class VpnScreenViewModel @Inject constructor(
     private val configInteractor: ConfigInteractor,
     private val connectionInteractor: ConnectionInteractor,
-    private val settingsInteractor: SettingsInteractor,
     stateRepository: ServiceStateRepository
 ) : ViewModel() {
 
@@ -45,7 +41,6 @@ class VpnScreenViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             updateServerList(configInteractor.getServerList())
-            _state.update { it.copy(isVpnMode = settingsInteractor.getMode() == Constants.VPN) }
             serviceState.collect { serviceState ->
                 _state.update { it.copy(isRunning = serviceState == ServiceState.Connected) }
             }
@@ -56,7 +51,6 @@ class VpnScreenViewModel @Inject constructor(
         when (intent) {
             VpnScreenIntent.ImportConfigFromClipboard -> importConfigFromClipboard()
             VpnScreenIntent.RestartConnection -> restartConnection()
-            VpnScreenIntent.SwitchVpnProxy -> switchVpnProxy()
             VpnScreenIntent.TestConnection -> testConnection()
             VpnScreenIntent.ToggleConnection -> toggleConnection()
             is VpnScreenIntent.DeleteItem -> deleteItem(intent.id)
@@ -86,27 +80,6 @@ class VpnScreenViewModel @Inject constructor(
             configInteractor.deleteItem(id)
         }
         _state.update { it.copy(isLoading = false) }
-    }
-
-    private fun switchVpnProxy() {
-        viewModelScope.launch(Dispatchers.Default) {
-            val isRunning = state.value.isRunning
-            if (state.value.isVpnMode) {
-                _state.update { it.copy(isVpnMode = false) }
-                if (isRunning) connectionInteractor.stopConnection()
-                settingsInteractor.setProxyMode()
-            } else {
-                _state.update { it.copy(isVpnMode = true) }
-                if (isRunning) connectionInteractor.stopConnection()
-                settingsInteractor.setVpnMode()
-            }
-            if (isRunning) {
-                serviceState
-                    .filter { it is ServiceState.Idle || it is ServiceState.Stopped }
-                    .first()
-                connectionInteractor.startConnection()
-            }
-        }
     }
 
     private fun testConnection() {

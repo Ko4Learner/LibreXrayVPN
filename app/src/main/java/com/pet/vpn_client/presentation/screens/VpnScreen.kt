@@ -8,9 +8,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -31,7 +28,6 @@ import com.pet.vpn_client.presentation.composable_elements.RestartButton
 import com.pet.vpn_client.presentation.composable_elements.TestConnectionButton
 import com.pet.vpn_client.presentation.composable_elements.StartVpnButton
 import com.pet.vpn_client.presentation.composable_elements.SubscriptionsList
-import com.pet.vpn_client.presentation.composable_elements.SwitchVpnProxy
 
 @Composable
 fun VpnScreen(
@@ -43,7 +39,7 @@ fun VpnScreen(
     val state by viewModel.state.collectAsState()
     val savedStateHandle = navController.currentBackStackEntry?.savedStateHandle
     val qrCodeImported =
-        savedStateHandle?.getStateFlow<Boolean>("qrCodeImported", false)?.collectAsState()
+        savedStateHandle?.getStateFlow("qrCodeImported", false)?.collectAsState()
 
     LaunchedEffect(qrCodeImported?.value) {
         if (qrCodeImported?.value == true) {
@@ -78,10 +74,9 @@ fun VpnScreenContent(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(64.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
+            horizontalArrangement = Arrangement.End,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            SwitchVpnProxy(onIntent, state.isVpnMode)
             ConfigDropDownMenu(onIntent, onQrCodeClick)
         }
 

@@ -9,7 +9,6 @@ import android.content.Context.NOTIFICATION_SERVICE
 import android.content.Intent
 import androidx.core.app.NotificationCompat
 import com.pet.vpn_client.R
-import com.pet.vpn_client.framework.services.ProxyService
 import com.pet.vpn_client.framework.services.VPNService
 import com.pet.vpn_client.presentation.MainActivity
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -36,12 +35,12 @@ class NotificationFactory @Inject constructor(@ApplicationContext private val co
             .addAction(
                 R.drawable.outline_3d_rotation_24,
                 "Перезапустить",
-                createRestartServicePendingIntent(title)
+                createRestartServicePendingIntent()
             )
             .addAction(
                 R.drawable.baseline_stop_24,
                 "Выключить",
-                createStopServicePendingIntent(title)
+                createStopServicePendingIntent()
             )
             .setOngoing(true)
             .build()
@@ -59,19 +58,9 @@ class NotificationFactory @Inject constructor(@ApplicationContext private val co
         )
     }
 
-    private fun createStopServicePendingIntent(title: String): PendingIntent {
-        val intent = when (title) {
-            "Proxy" -> {
-                Intent(context, ProxyService::class.java).apply {
-                    putExtra("COMMAND", "STOP_SERVICE")
-                }
-            }
-
-            else -> {
-                Intent(context, VPNService::class.java).apply {
-                    putExtra("COMMAND", "STOP_SERVICE")
-                }
-            }
+    private fun createStopServicePendingIntent(): PendingIntent {
+        val intent = Intent(context, VPNService::class.java).apply {
+            putExtra("COMMAND", "STOP_SERVICE")
         }
         return PendingIntent.getService(
             context,
@@ -81,19 +70,9 @@ class NotificationFactory @Inject constructor(@ApplicationContext private val co
         )
     }
 
-    private fun createRestartServicePendingIntent(title: String): PendingIntent {
-        val intent = when (title) {
-            "Proxy" -> {
-                Intent(context, ProxyService::class.java).apply {
-                    putExtra("COMMAND", "RESTART_SERVICE")
-                }
-            }
-
-            else -> {
-                Intent(context, VPNService::class.java).apply {
-                    putExtra("COMMAND", "RESTART_SERVICE")
-                }
-            }
+    private fun createRestartServicePendingIntent(): PendingIntent {
+        val intent = Intent(context, VPNService::class.java).apply {
+            putExtra("COMMAND", "RESTART_SERVICE")
         }
         return PendingIntent.getService(
             context,

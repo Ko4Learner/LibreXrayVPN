@@ -10,7 +10,6 @@ import com.pet.vpn_client.domain.interfaces.ServiceManager
 import com.pet.vpn_client.domain.interfaces.repository.ServiceStateRepository
 import com.pet.vpn_client.domain.models.ConfigProfileItem
 import com.pet.vpn_client.domain.state.ServiceState
-import com.pet.vpn_client.framework.services.ProxyService
 import com.pet.vpn_client.framework.services.VPNService
 import com.pet.vpn_client.utils.Utils
 import kotlinx.coroutines.CoroutineScope
@@ -68,31 +67,15 @@ class ServiceManagerImpl @Inject constructor(
             && !Utils.isIpAddress(config.server)
         ) return
 
-        val intent = if ((storage.decodeSettingsString(Constants.PREF_MODE)
-                ?: Constants.VPN) == Constants.VPN
-        ) {
-            Intent(context, VPNService::class.java).apply {
-                putExtra("COMMAND", "START_SERVICE")
-            }
-        } else {
-            Intent(context, ProxyService::class.java).apply {
-                putExtra("COMMAND", "START_SERVICE")
-            }
+        val intent = Intent(context, VPNService::class.java).apply {
+            putExtra("COMMAND", "START_SERVICE")
         }
         context.startForegroundService(intent)
     }
 
     override fun stopService() {
-        val intent = if ((storage.decodeSettingsString(Constants.PREF_MODE)
-                ?: Constants.VPN) == Constants.VPN
-        ) {
-            Intent(context, VPNService::class.java).apply {
-                putExtra("COMMAND", "STOP_SERVICE")
-            }
-        } else {
-            Intent(context, ProxyService::class.java).apply {
-                putExtra("COMMAND", "STOP_SERVICE")
-            }
+        val intent = Intent(context, VPNService::class.java).apply {
+            putExtra("COMMAND", "STOP_SERVICE")
         }
         context.startForegroundService(intent)
     }
