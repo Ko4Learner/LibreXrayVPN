@@ -1,10 +1,9 @@
 package com.pet.vpn_client.presentation.view_model
 
-import androidx.lifecycle.ViewModel
+import  androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pet.vpn_client.domain.interfaces.interactor.ConfigInteractor
 import com.pet.vpn_client.domain.interfaces.interactor.ConnectionInteractor
-import com.pet.vpn_client.domain.interfaces.interactor.SettingsInteractor
 import com.pet.vpn_client.domain.interfaces.repository.ServiceStateRepository
 import com.pet.vpn_client.domain.state.ServiceState
 import com.pet.vpn_client.presentation.intent.VpnScreenIntent

@@ -9,7 +9,6 @@ import libv2ray.Libv2ray
 
 @HiltAndroidApp
 class MyApp : Application() {
-
     override fun onCreate() {
         super.onCreate()
         MMKV.initialize(this)

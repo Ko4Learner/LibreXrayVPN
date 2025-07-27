@@ -232,7 +232,11 @@ class SettingsManagerImpl @Inject constructor(val storage: KeyValueStorage, val 
         }
     }
 
-    fun getLocale(): Locale {
+    override fun setLocale(locale: Locale) {
+        storage.encodeSettings(Constants.PREF_LANGUAGE, locale.language)
+    }
+
+    override fun getLocale(): Locale {
         val langCode =
             storage.decodeSettingsString(Constants.PREF_LANGUAGE) ?: Language.AUTO.code
         val language = Language.fromCode(langCode)
