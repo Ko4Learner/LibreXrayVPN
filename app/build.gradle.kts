@@ -59,11 +59,14 @@ android {
 
 dependencies {
 
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(project(":domain"))
+    implementation(project(":core"))
+    implementation(project(":data"))
+    implementation(project(":framework"))
+    implementation(project(":presentation"))
 
-    // XrayCore libs
-    implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.aar", "*.jar"))))
+
+    implementation(libs.androidx.core.ktx)
 
     // Compose
     implementation(libs.androidx.activity.compose)
@@ -73,17 +76,6 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
 
-    // Background Task Libraries (WorkManager)
-    implementation(libs.work.runtime.ktx)
-    implementation(libs.work.multiprocess)
-
-    // Coroutines
-    implementation(libs.kotlinx.coroutines.android)
-
-    // ViewModel
-    implementation(libs.androidx.lifecycle.viewmodel.compose)
-    implementation(libs.lifecycle.runtime.compose)
-
     // Navigation
     implementation(libs.androidx.navigation.compose)
 
@@ -92,22 +84,7 @@ dependencies {
     implementation(libs.androidx.hilt.navigation.compose)
     ksp(libs.hilt.compiler)
 
-    // MMKV and Gson for local storage
-    implementation(libs.mmkv.static)
-    implementation(libs.gson)
-
-    //QR scanner
-    implementation(libs.mlkit)
-    implementation(libs.cameraX)
-    implementation(libs.cameraX.core)
-    implementation(libs.cameraX.lifecycle)
-    implementation(libs.cameraX.view)
-    implementation(libs.activity.ktx)
-
-    // Test
-    testImplementation(libs.mockK)
     testImplementation(libs.junit)
-    androidTestImplementation(libs.mockk.android)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
