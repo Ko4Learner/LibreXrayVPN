@@ -9,19 +9,23 @@ import android.content.Context.NOTIFICATION_SERVICE
 import android.content.Intent
 import androidx.core.app.NotificationCompat
 import com.pet.vpn_client.core.R
+import com.pet.vpn_client.core.utils.LocaleHelper
+import com.pet.vpn_client.domain.interfaces.SettingsManager
 import com.pet.vpn_client.framework.services.VPNService
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
 class NotificationFactory @Inject constructor(
     @ApplicationContext private val context: Context,
-    val pendingIntentProvider: PendingIntentProvider
+    val pendingIntentProvider: PendingIntentProvider,
+    val settingsManager: SettingsManager
 ) {
-
     fun createNotification(title: String): Notification {
+        val locale = settingsManager.getLocale()
+        val localizedContext = LocaleHelper.updateLocale(context, locale)
         val channelId = "Vpn_Client"
         val notificationManager =
-            context.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+            localizedContext.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         val channel = NotificationChannel(
             channelId,
             title,
@@ -29,30 +33,30 @@ class NotificationFactory @Inject constructor(
         )
         notificationManager.createNotificationChannel(channel)
 
-        return NotificationCompat.Builder(context, channelId)
+        return NotificationCompat.Builder(localizedContext, channelId)
             .setSmallIcon(R.drawable.ic_launcher_background)
             .setContentTitle(title)
             .setContentText("$title запущен")
-            .setContentIntent(createMainActivityPendingIntent())
+            .setContentIntent(createMainActivityPendingIntent(localizedContext))
             .addAction(
                 R.drawable.outline_3d_rotation_24,
                 "Перезапустить",
-                createRestartServicePendingIntent()
+                createRestartServicePendingIntent(localizedContext)
             )
             .addAction(
                 R.drawable.baseline_stop_24,
                 "Выключить",
-                createStopServicePendingIntent()
+                createStopServicePendingIntent(localizedContext)
             )
             .setOngoing(true)
             .build()
     }
 
-    private fun createMainActivityPendingIntent(): PendingIntent {
-        return pendingIntentProvider.createMainActivityPendingIntent()
+    private fun createMainActivityPendingIntent(context: Context): PendingIntent {
+        return pendingIntentProvider.createMainActivityPendingIntent(context)
     }
 
-    private fun createStopServicePendingIntent(): PendingIntent {
+    private fun createStopServicePendingIntent(context: Context): PendingIntent {
         val intent = Intent(context, VPNService::class.java).apply {
             putExtra("COMMAND", "STOP_SERVICE")
         }
@@ -64,7 +68,7 @@ class NotificationFactory @Inject constructor(
         )
     }
 
-    private fun createRestartServicePendingIntent(): PendingIntent {
+    private fun createRestartServicePendingIntent(context: Context): PendingIntent {
         val intent = Intent(context, VPNService::class.java).apply {
             putExtra("COMMAND", "RESTART_SERVICE")
         }

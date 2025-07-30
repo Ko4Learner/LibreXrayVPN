@@ -13,14 +13,17 @@ import com.pet.vpn_client.presentation.screens.VpnScreen
 @Composable
 fun Navigation(
     navController: NavHostController,
-    innerPadding: PaddingValues
+    innerPadding: PaddingValues,
+    getString: (Int) -> String
 ) {
     NavHost(navController, startDestination = NavItem.VpnScreen.route) {
         composable(NavItem.VpnScreen.route) {
             VpnScreen(
                 Modifier.padding(innerPadding),
                 navController,
-                onQrCodeClick = { navController.navigate(NavItem.QrCodeScreen.route) })
+                onQrCodeClick = { navController.navigate(NavItem.QrCodeScreen.route) },
+                getString = getString
+            )
         }
 
         composable(NavItem.QrCodeScreen.route) {
@@ -33,7 +36,9 @@ fun Navigation(
                         true
                     )
                     navController.popBackStack()
-                })
+                },
+                getString = getString
+            )
         }
     }
 }

@@ -13,7 +13,7 @@ import com.pet.vpn_client.domain.models.ConfigProfileItem
 import com.pet.vpn_client.domain.models.RoutingType
 import com.pet.vpn_client.domain.models.RulesetItem
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import java.io.File
 import java.io.FileOutputStream
 import java.util.Collections
@@ -22,6 +22,22 @@ import javax.inject.Inject
 
 class SettingsManagerImpl @Inject constructor(val storage: KeyValueStorage, val gson: Gson) :
     SettingsManager {
+
+    private val _localeFlow = MutableStateFlow(getLocale())
+    override fun observeLocale(): Flow<Locale> = _localeFlow
+
+    override suspend fun setLocale(localeTag: String) {
+        storage.encodeSettings(Constants.PREF_LANGUAGE, localeTag)
+        _localeFlow.value = getLocale()
+    }
+
+    override fun getLocale(): Locale {
+        val tag = storage.decodeSettingsString(Constants.PREF_LANGUAGE)
+        return when {
+            tag.isNullOrEmpty() || tag == Constants.AUTO_LOCALE_TAG -> Locale.getDefault()
+            else -> Locale.forLanguageTag(tag)
+        }
+    }
 
     fun initRoutingRulesets(context: Context) {
         val exist = storage.decodeRoutingRulesets()
@@ -234,20 +250,6 @@ class SettingsManagerImpl @Inject constructor(val storage: KeyValueStorage, val 
         }
     }
 
-    override fun setLocale(locale: Locale) {
-        storage.encodeSettings(Constants.PREF_LANGUAGE, locale.language)
-    }
-
-    override fun observeLocale(): Flow<Locale> = flow {
-        storage.decodeSettingsString(Constants.PREF_LANGUAGE)?.let { tag ->
-            emit(
-                when (tag) {
-                    "auto", "" -> Locale.getDefault()
-                    else -> Locale.forLanguageTag(tag)
-                }
-            )
-        } ?: emit(Locale.getDefault())
-    }
 
     fun setNightMode() {
 //        when (storage.decodeSettingsString(Constants.PREF_UI_MODE_NIGHT, "0")) {

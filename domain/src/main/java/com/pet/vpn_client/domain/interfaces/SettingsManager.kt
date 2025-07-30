@@ -13,5 +13,6 @@ interface SettingsManager {
     fun getVpnDnsServers(): List<String>
     fun getDelayTestUrl(second: Boolean = false): String
     fun observeLocale(): Flow<Locale>
-    fun setLocale(locale: Locale)
+    fun getLocale(): Locale
+    suspend fun setLocale(localeTag: String)
 }

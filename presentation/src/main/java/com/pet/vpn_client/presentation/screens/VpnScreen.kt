@@ -34,7 +34,8 @@ fun VpnScreen(
     modifier: Modifier = Modifier,
     navController: NavHostController,
     onQrCodeClick: () -> Unit,
-    viewModel: VpnScreenViewModel = hiltViewModel()
+    viewModel: VpnScreenViewModel = hiltViewModel(),
+    getString: (Int) -> String
 ) {
     val state by viewModel.state.collectAsState()
     val savedStateHandle = navController.currentBackStackEntry?.savedStateHandle

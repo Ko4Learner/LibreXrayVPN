@@ -42,8 +42,11 @@ object DataModule {
 
     @Provides
     @Singleton
-    fun provideSettingsInteractor(keyValueStorage: KeyValueStorage): SettingsInteractor =
-        SettingsInteractorImpl(keyValueStorage)
+    fun provideSettingsInteractor(
+        keyValueStorage: KeyValueStorage,
+        settingsManager: SettingsManager
+    ): SettingsInteractor =
+        SettingsInteractorImpl(keyValueStorage, settingsManager)
 
     @Provides
     @Singleton
