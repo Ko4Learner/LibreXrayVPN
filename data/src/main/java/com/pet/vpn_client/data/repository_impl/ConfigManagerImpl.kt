@@ -43,8 +43,6 @@ class ConfigManagerImpl @Inject constructor(
 
     private var initConfigCache: String? = null
 
-    //region get config function
-
     override fun getCoreConfig(guid: String): ConfigResult {
         try {
             val config = storage.decodeServerConfig(guid) ?: return ConfigResult(false)
@@ -55,17 +53,6 @@ class ConfigManagerImpl @Inject constructor(
             return ConfigResult(false)
         }
     }
-
-    fun getV2rayConfig4Speedtest(context: Context, guid: String): ConfigResult {
-        try {
-            val config = storage.decodeServerConfig(guid) ?: return ConfigResult(false)
-            return getV2rayNormalConfig4Speedtest(context, guid, config)
-        } catch (e: Exception) {
-            Log.e(Constants.TAG, "Failed to get V2ray config for speedtest", e)
-            return ConfigResult(false)
-        }
-    }
-
 
     private fun getV2rayNormalConfig(
         context: Context,
@@ -114,45 +101,6 @@ class ConfigManagerImpl @Inject constructor(
         return result
     }
 
-    private fun getV2rayNormalConfig4Speedtest(
-        context: Context,
-        guid: String,
-        config: ConfigProfileItem
-    ): ConfigResult {
-        val result = ConfigResult(false)
-
-        val address = config.server ?: return result
-        if (!Utils.isIpAddress(address)) {
-            if (!Utils.isValidUrl(address)) {
-                Log.w(Constants.TAG, "$address is an invalid ip or domain")
-                return result
-            }
-        }
-
-        val v2rayConfig = initV2rayConfig(context) ?: return result
-
-        getOutbounds(v2rayConfig, config) ?: return result
-        getMoreOutbounds(v2rayConfig)
-
-        v2rayConfig.log.loglevel =
-            storage.decodeSettingsString(Constants.PREF_LOGLEVEL) ?: "warning"
-        v2rayConfig.inbounds.clear()
-        v2rayConfig.routing.rules.clear()
-        v2rayConfig.dns = null
-        v2rayConfig.fakedns = null
-        v2rayConfig.stats = null
-        v2rayConfig.policy = null
-
-        v2rayConfig.outbounds.forEach { key ->
-            key.mux = null
-        }
-
-        result.status = true
-        result.content = JsonUtil.toJsonPretty(v2rayConfig) ?: ""
-        result.guid = guid
-        return result
-    }
-
     private fun initV2rayConfig(context: Context): XrayConfig? {
         val assets = initConfigCache ?: Utils.readTextFromAssets(context, "v2ray_config.json")
         if (TextUtils.isEmpty(assets)) {
@@ -162,12 +110,6 @@ class ConfigManagerImpl @Inject constructor(
         val config = gson.fromJson(assets, XrayConfig::class.java)
         return config
     }
-
-
-    //endregion
-
-
-    //region some sub function
 
     private fun getInbounds(xrayConfig: XrayConfig): Boolean {
         try {
@@ -388,7 +330,7 @@ class ConfigManagerImpl @Inject constructor(
             try {
                 val userHosts = storage.decodeSettingsString(Constants.PREF_DNS_HOSTS)
                 if (userHosts.isNotNullEmpty()) {
-                    var userHostsMap = userHosts?.split(",")
+                    val userHostsMap = userHosts?.split(",")
                         ?.filter { it.isNotEmpty() }
                         ?.filter { it.contains(":") }
                         ?.associate { it.split(":").let { (k, v) -> k to v } }
@@ -459,35 +401,6 @@ class ConfigManagerImpl @Inject constructor(
 
         updateOutboundFragment(xrayConfig)
         return true
-    }
-
-    private fun getPlusOutbounds(xrayConfig: XrayConfig): Int? {
-        try {
-            val socksPort = Utils.findFreePort(listOf(100 + settingsManager.getSocksPort(), 0))
-
-            val outboundNew = XrayConfig.OutboundBean(
-                mux = null,
-                protocol = EConfigType.SOCKS.name.lowercase(),
-                settings = XrayConfig.OutboundBean.OutSettingsBean(
-                    servers = listOf(
-                        XrayConfig.OutboundBean.OutSettingsBean.ServersBean(
-                            address = Constants.LOOPBACK,
-                            port = socksPort
-                        )
-                    )
-                )
-            )
-            if (xrayConfig.outbounds.isNotEmpty()) {
-                xrayConfig.outbounds[0] = outboundNew
-            } else {
-                xrayConfig.outbounds.add(outboundNew)
-            }
-
-            return socksPort
-        } catch (e: Exception) {
-            Log.e(Constants.TAG, "Failed to configure plusOutbound", e)
-            return null
-        }
     }
 
     private fun getMoreOutbounds(xrayConfig: XrayConfig): Boolean {

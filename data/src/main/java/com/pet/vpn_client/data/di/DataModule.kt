@@ -43,10 +43,9 @@ object DataModule {
     @Provides
     @Singleton
     fun provideSettingsInteractor(
-        keyValueStorage: KeyValueStorage,
         settingsManager: SettingsManager
     ): SettingsInteractor =
-        SettingsInteractorImpl(keyValueStorage, settingsManager)
+        SettingsInteractorImpl(settingsManager)
 
     @Provides
     @Singleton
@@ -91,9 +90,7 @@ object DataModule {
     fun provideSubscriptionManager(
         storage: KeyValueStorage,
         gson: Gson,
-        settingsManager: SettingsManager,
         configManager: ConfigManager,
-        httpFormatter: HttpFormatter,
         shadowsocksFormatter: ShadowsocksFormatter,
         socksFormatter: SocksFormatter,
         trojanFormatter: TrojanFormatter,
@@ -104,9 +101,7 @@ object DataModule {
     ): SubscriptionManager = SubscriptionManagerImpl(
         storage,
         gson,
-        settingsManager,
         configManager,
-        httpFormatter,
         shadowsocksFormatter,
         socksFormatter,
         trojanFormatter,

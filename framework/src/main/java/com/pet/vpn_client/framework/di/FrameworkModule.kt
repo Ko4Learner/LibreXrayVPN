@@ -23,7 +23,6 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object FrameworkModule {
-
     @Provides
     @Singleton
     fun provideConnectionInteractor(serviceManager: ServiceManager): ConnectionInteractor =

@@ -10,7 +10,6 @@ interface SettingsManager {
     fun getRemoteDnsServers(): List<String>
     fun getDomesticDnsServers(): List<String>
     fun getServerViaRemarks(remarks: String?): ConfigProfileItem?
-    fun getVpnDnsServers(): List<String>
     fun getDelayTestUrl(second: Boolean = false): String
     fun observeLocale(): Flow<Locale>
     fun getLocale(): Locale

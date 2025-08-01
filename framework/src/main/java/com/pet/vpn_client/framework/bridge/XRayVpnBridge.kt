@@ -23,32 +23,22 @@ class XRayVpnBridge @Inject constructor(
     val configManager: ConfigManager,
     val settingsManager: SettingsManager
 ) : CoreVpnBridge {
-
     private val coreController: CoreController = Libv2ray.newCoreController(CoreCallback())
-//    private var currentConfig: ConfigProfileItem? = null
-
     override fun isRunning(): Boolean = coreController.isRunning
 
     override fun startCoreLoop(): Boolean {
-        if (coreController.isRunning) {
-            return false
-        }
+        if (coreController.isRunning) return false
         val guid = storage.getSelectServer() ?: return false
-//        val config = storage.decodeServerConfig(guid) ?: return false
         val result = configManager.getCoreConfig(guid)
         if (!result.status) return false
 
-//        currentConfig = config
-
         try {
-            Log.d(Constants.TAG, "Start Core loop")
             coreController.startLoop(result.content)
             coreController.isRunning = true
         } catch (e: Exception) {
             Log.e(Constants.TAG, "Failed to start Core loop", e)
             return false
         }
-        Log.d(Constants.TAG,coreController.isRunning.toString())
         return true
     }
 
@@ -64,14 +54,13 @@ class XRayVpnBridge @Inject constructor(
         }
     }
 
+    //TODO необходимость?
     override fun queryStats(tag: String, link: String): Long {
         return coreController.queryStats(tag, link)
     }
 
     override suspend fun measureDelay(): Long? {
-        Log.d(Constants.TAG, coreController.isRunning.toString())
         if (!coreController.isRunning) return null
-
         var time = -1L
 
         try {
@@ -87,7 +76,6 @@ class XRayVpnBridge @Inject constructor(
                 Log.e(Constants.TAG, "Failed to measure delay with alternative URL", e)
             }
         }
-        Log.d(Constants.TAG, "Delay: $time")
         return time
     }
 

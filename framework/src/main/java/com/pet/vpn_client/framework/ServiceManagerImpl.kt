@@ -2,8 +2,6 @@ package com.pet.vpn_client.framework
 
 import android.content.Context
 import android.content.Intent
-import android.util.Log
-import com.pet.vpn_client.core.utils.Constants
 import com.pet.vpn_client.domain.interfaces.CoreVpnBridge
 import com.pet.vpn_client.domain.interfaces.KeyValueStorage
 import com.pet.vpn_client.domain.interfaces.ServiceManager
@@ -31,19 +29,12 @@ class ServiceManagerImpl @Inject constructor(
     private var currentConfig: ConfigProfileItem? = null
     private val scope = CoroutineScope(Dispatchers.Default)
 
-    override fun startServiceFromToggle(): Boolean {
+    override fun startService(): Boolean {
         if (storage.getSelectServer().isNullOrEmpty()) {
             return false
         }
         startContextService()
         return true
-    }
-
-    override fun startService(guid: String?) {
-        if (guid != null) {
-            storage.setSelectServer(guid)
-        }
-        startContextService()
     }
 
     override fun restartService() {
@@ -57,10 +48,7 @@ class ServiceManagerImpl @Inject constructor(
     }
 
     private fun startContextService() {
-        if (coreVpnBridge.isRunning()) {
-            Log.d(Constants.TAG, "Service is already running")
-            return
-        }
+        if (coreVpnBridge.isRunning()) return
         val guid = storage.getSelectServer() ?: return
         val config = storage.decodeServerConfig(guid) ?: return
         if (!Utils.isValidUrl(config.server)
@@ -83,19 +71,9 @@ class ServiceManagerImpl @Inject constructor(
     override fun getRunningServerName() = currentConfig?.remarks.orEmpty()
 
     override fun startCoreLoop(): Boolean {
-        if (coreVpnBridge.startCoreLoop()) {
-            if (!coreVpnBridge.isRunning()) {
-                return false
-            }
-            try {
-//            NotificationService.startSpeedNotification(currentConfig)
-//            NotificationService.showNotification(currentConfig)
-            } catch (e: Exception) {
-                Log.e(Constants.TAG, "Failed to startup service", e)
-                return false
-            }
-            return true
-        } else return false
+        return if (coreVpnBridge.startCoreLoop()) {
+            coreVpnBridge.isRunning()
+        } else false
     }
 
     override fun stopCoreLoop() {

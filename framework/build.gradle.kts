@@ -51,28 +51,22 @@ android {
 }
 
 dependencies {
-
     implementation(project(":domain"))
     implementation(project(":core"))
 
     // XrayCore libs
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.aar", "*.jar"))))
 
-    // Background Task Libraries (WorkManager)
-    implementation(libs.work.runtime.ktx)
-    implementation(libs.work.multiprocess)
-
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)
 
     // Hilt
     implementation(libs.hilt.android)
-    implementation(libs.androidx.hilt.navigation.compose)
     ksp(libs.hilt.compiler)
 
     implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat)
-    implementation(libs.material)
+
+    // Test
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

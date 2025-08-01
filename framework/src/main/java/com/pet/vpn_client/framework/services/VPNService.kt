@@ -27,15 +27,19 @@ import java.io.File
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class VPNService : VpnService(){
+class VPNService : VpnService() {
     @Inject
     lateinit var storage: KeyValueStorage
+
     @Inject
     lateinit var serviceManager: ServiceManager
+
     @Inject
     lateinit var settingsManager: SettingsManager
+
     @Inject
     lateinit var notificationFactory: NotificationFactory
+
     @Inject
     lateinit var serviceStateRepository: ServiceStateRepository
 
@@ -43,6 +47,7 @@ class VPNService : VpnService(){
     private var isRunning = false
     private lateinit var process: Process
 
+    //TODO необходимость connectivityManager, networkRequest, networkCallback
     private val connectivityManager by lazy { getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager }
 
     private val networkRequest by lazy {
@@ -103,16 +108,11 @@ class VPNService : VpnService(){
     }
 
     private fun setup() {
-        if (prepare(this) != null || !setupVpnService()) {
-            Log.d(Constants.TAG, "Failed to setup VPN")
-            return
-        }
-
+        if (prepare(this) != null || !setupVpnService()) return
         runTun2socks()
     }
 
     private fun setupVpnService(): Boolean {
-        Log.d(Constants.TAG, "Start setup VPN")
         val builder = Builder()
         builder.setMtu(VPN_MTU)
             .addAddress(PRIVATE_VLAN4_CLIENT, 30)
@@ -142,7 +142,6 @@ class VPNService : VpnService(){
         }
         try {
             mInterface = builder.establish()!!
-            Log.d(Constants.TAG, "builder.establish() returned: $mInterface")
             isRunning = true
             return true
         } catch (e: Exception) {
@@ -180,7 +179,6 @@ class VPNService : VpnService(){
                 }
             }.start()
             sendFd()
-            Log.d(Constants.TAG, "Started tun2socks")
             serviceStateRepository.updateState(ServiceState.Connected)
         } catch (e: Exception) {
             Log.e(Constants.TAG, "Failed to run tun2socks: ${e.message}")
@@ -188,7 +186,6 @@ class VPNService : VpnService(){
     }
 
     private fun sendFd() {
-        Log.d(Constants.TAG, "Trying sendFd")
         val fd = mInterface.fileDescriptor
         val path = File(applicationContext.filesDir, "sock_path").absolutePath
 
@@ -196,7 +193,6 @@ class VPNService : VpnService(){
             var failsCount = 0
             while (true) try {
                 Thread.sleep(50L shl failsCount)
-                Log.d(Constants.TAG, "Trying to connect to tun2socks via $path with fd=$fd")
                 LocalSocket().use { localSocket ->
                     localSocket.connect(
                         LocalSocketAddress(
@@ -205,7 +201,6 @@ class VPNService : VpnService(){
                         )
                     )
                     localSocket.setFileDescriptorsForSend(arrayOf(fd))
-                    Log.d(Constants.TAG, "Sent fd $fd to tun2socks")
                     localSocket.outputStream.write(0)
                 }
                 break
@@ -229,7 +224,6 @@ class VPNService : VpnService(){
         }
 
         serviceManager.stopCoreLoop()
-
         if (isForcedStop) {
             stopSelf()
             try {
@@ -239,16 +233,7 @@ class VPNService : VpnService(){
             }
         }
         serviceStateRepository.updateState(ServiceState.Stopped)
-        Log.d(Constants.TAG, "Stop service VPNService")
     }
-
-    //    //применение локали (язык) приложения
-//    override fun attachBaseContext(newBase: Context?) {
-//        val context = newBase?.let {
-//            MyContextWrapper.wrap(newBase, settingsManager.getLocale())
-//        }
-//        super.attachBaseContext(context)
-//    }
 
     companion object {
         private const val VPN_MTU = 1500
