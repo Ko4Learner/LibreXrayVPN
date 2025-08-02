@@ -45,20 +45,15 @@ class SettingsManagerImpl @Inject constructor(val storage: KeyValueStorage, val 
     }
 
     override fun getSocksPort(): Int {
-        return Utils.parseInt(
-            storage.decodeSettingsString(Constants.PREF_SOCKS_PORT),
-            Constants.PORT_SOCKS.toInt()
-        )
+        return 10808
     }
 
     override fun getHttpPort(): Int {
         return getSocksPort() + 0
-        //return getSocksPort() + if (Utils.isXray()) 0 else 1
     }
 
     override fun getDomesticDnsServers(): List<String> {
-        val domesticDns =
-            storage.decodeSettingsString(Constants.PREF_DOMESTIC_DNS) ?: Constants.DNS_DIRECT
+        val domesticDns = Constants.DNS_DIRECT
         val ret = domesticDns.split(",")
             .filter { Utils.isPureIpAddress(it) || Utils.isCoreDNSAddress(it) }
         if (ret.isEmpty()) {
@@ -68,8 +63,7 @@ class SettingsManagerImpl @Inject constructor(val storage: KeyValueStorage, val 
     }
 
     override fun getRemoteDnsServers(): List<String> {
-        val remoteDns =
-            storage.decodeSettingsString(Constants.PREF_REMOTE_DNS) ?: Constants.DNS_PROXY
+        val remoteDns = Constants.DNS_PROXY
         val ret =
             remoteDns.split(",").filter { Utils.isPureIpAddress(it) || Utils.isCoreDNSAddress(it) }
         if (ret.isEmpty()) {
@@ -82,8 +76,7 @@ class SettingsManagerImpl @Inject constructor(val storage: KeyValueStorage, val 
         return if (second) {
             Constants.DELAY_TEST_URL2
         } else {
-            storage.decodeSettingsString(Constants.PREF_DELAY_TEST_URL)
-                ?: Constants.DELAY_TEST_URL
+            Constants.DELAY_TEST_URL
         }
     }
 }

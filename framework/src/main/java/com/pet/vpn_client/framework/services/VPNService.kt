@@ -7,7 +7,6 @@ import android.net.LocalSocketAddress
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
-import android.net.ProxyInfo
 import android.net.VpnService
 import android.os.ParcelFileDescriptor
 import android.os.StrictMode
@@ -132,14 +131,6 @@ class VPNService : VpnService() {
             Log.e(Constants.TAG, "Failed to request network: ${e.message}")
         }
         builder.setMetered(false)
-        if (storage.decodeSettingsBool(Constants.PREF_APPEND_HTTP_PROXY)) {
-            builder.setHttpProxy(
-                ProxyInfo.buildDirectProxy(
-                    "127.0.0.1",
-                    settingsManager.getHttpPort()
-                )
-            )
-        }
         try {
             mInterface = builder.establish()!!
             isRunning = true

@@ -20,7 +20,6 @@ import com.pet.vpn_client.domain.interfaces.SubscriptionManager
 import com.pet.vpn_client.domain.models.ConfigProfileItem
 import com.pet.vpn_client.domain.models.EConfigType
 import com.pet.vpn_client.domain.models.FrameData
-import com.pet.vpn_client.domain.models.SubscriptionItem
 import kotlinx.coroutines.suspendCancellableCoroutine
 import javax.inject.Inject
 import kotlin.coroutines.resume
@@ -98,14 +97,12 @@ class SubscriptionManagerImpl @Inject constructor(
             //TODO добавить проверку наличия серверов
             val removedSelectedServer =  null
 
-
-            val subItem = storage.decodeSubscription()
             var count = 0
             servers.lines()
                 .distinct()
                 .reversed()
                 .forEach {
-                    val resId = parseConfig(it, subItem, removedSelectedServer)
+                    val resId = parseConfig(it, removedSelectedServer)
                     if (resId == 0) {
                         count++
                     }
@@ -117,9 +114,9 @@ class SubscriptionManagerImpl @Inject constructor(
         return 0
     }
 
+    //TODO убрать subItem
     private fun parseConfig(
         str: String?,
-        subItem: SubscriptionItem?,
         removedSelectedServer: ConfigProfileItem?
     ): Int {
         try {
@@ -146,12 +143,7 @@ class SubscriptionManagerImpl @Inject constructor(
             if (config == null) {
                 return /*R.string.toast_incorrect_protocol*/ 1
             }
-            //TODO разобраться в необходимости фильтра
-            if (subItem?.filter != null && subItem.filter?.isNotEmpty() == true && config.remarks.isNotEmpty()) {
-                val matched = Regex(pattern = subItem.filter ?: "")
-                    .containsMatchIn(input = config.remarks)
-                if (!matched) return -1
-            }
+
             //TODO все сервера имеют один subId
             config.subscriptionId = "1"
             val guid = storage.encodeServerConfig("", config)

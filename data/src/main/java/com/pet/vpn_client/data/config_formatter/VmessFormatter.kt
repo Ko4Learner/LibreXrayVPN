@@ -29,7 +29,7 @@ class VmessFormatter @Inject constructor(
             return parseVmessStd(str)
         }
 
-        var allowInsecure = storage.decodeSettingsBool(Constants.PREF_ALLOW_INSECURE, false)
+        val allowInsecure = false
         val config = ConfigProfileItem.create(EConfigType.VMESS)
 
         var result = str.replace(EConfigType.VMESS.protocolScheme, "")
@@ -124,7 +124,7 @@ class VmessFormatter @Inject constructor(
     }
 
     fun parseVmessStd(str: String): ConfigProfileItem? {
-        val allowInsecure = storage.decodeSettingsBool(Constants.PREF_ALLOW_INSECURE, false)
+        val allowInsecure = false
         val config = ConfigProfileItem.create(EConfigType.VMESS)
 
         val uri = URI(Utils.fixIllegalUrl(str))

@@ -20,11 +20,9 @@ import com.pet.vpn_client.domain.models.ConfigProfileItem
 import com.pet.vpn_client.domain.models.ConfigResult
 import com.pet.vpn_client.domain.models.EConfigType
 import com.pet.vpn_client.domain.models.NetworkType
-import com.pet.vpn_client.domain.models.RulesetItem
 import com.pet.vpn_client.core.utils.HttpUtil
 import com.pet.vpn_client.core.utils.JsonUtil
 import com.pet.vpn_client.core.utils.Utils
-import com.pet.vpn_client.core.utils.isNotNullEmpty
 import javax.inject.Inject
 
 class ConfigManagerImpl @Inject constructor(
@@ -70,28 +68,20 @@ class ConfigManagerImpl @Inject constructor(
         }
 
         val v2rayConfig = initV2rayConfig(context) ?: return result
-        v2rayConfig.log.loglevel =
-            storage.decodeSettingsString(Constants.PREF_LOGLEVEL) ?: "warning"
+        v2rayConfig.log.loglevel = "warning"
         v2rayConfig.remarks = config.remarks
 
         getInbounds(v2rayConfig)
 
         getOutbounds(v2rayConfig, config) ?: return result
-        getMoreOutbounds(v2rayConfig)
 
         getRouting(v2rayConfig)
 
-        getFakeDns(v2rayConfig)
-
         getDns(v2rayConfig)
 
-        if (storage.decodeSettingsBool(Constants.PREF_LOCAL_DNS_ENABLED) == true) {
-            getCustomLocalDns(v2rayConfig)
-        }
-        if (storage.decodeSettingsBool(Constants.PREF_SPEED_ENABLED) != true) {
-            v2rayConfig.stats = null
-            v2rayConfig.policy = null
-        }
+        v2rayConfig.stats = null
+        v2rayConfig.policy = null
+
 
         resolveOutboundDomainsToHosts(v2rayConfig)
 
@@ -116,18 +106,13 @@ class ConfigManagerImpl @Inject constructor(
             val socksPort = settingsManager.getSocksPort()
 
             xrayConfig.inbounds.forEach { curInbound ->
-                if (storage.decodeSettingsBool(Constants.PREF_PROXY_SHARING) != true) {
-                    //bind all inbounds to localhost if the user requests
-                    curInbound.listen = Constants.LOOPBACK
-                }
+                curInbound.listen = Constants.LOOPBACK
             }
             xrayConfig.inbounds[0].port = socksPort
-            val fakedns = storage.decodeSettingsBool(Constants.PREF_FAKE_DNS_ENABLED) == true
-            val sniffAllTlsAndHttp =
-                storage.decodeSettingsBool(Constants.PREF_SNIFFING_ENABLED, true) != false
+            val fakedns = false
+            val sniffAllTlsAndHttp = true
             xrayConfig.inbounds[0].sniffing?.enabled = fakedns || sniffAllTlsAndHttp
-            xrayConfig.inbounds[0].sniffing?.routeOnly =
-                storage.decodeSettingsBool(Constants.PREF_ROUTE_ONLY_ENABLED, false)
+            xrayConfig.inbounds[0].sniffing?.routeOnly = false
             if (!sniffAllTlsAndHttp) {
                 xrayConfig.inbounds[0].sniffing?.destOverride?.clear()
             }
@@ -149,131 +134,11 @@ class ConfigManagerImpl @Inject constructor(
         return true
     }
 
-    private fun getFakeDns(xrayConfig: XrayConfig) {
-        if (storage.decodeSettingsBool(Constants.PREF_LOCAL_DNS_ENABLED) == true
-            && storage.decodeSettingsBool(Constants.PREF_FAKE_DNS_ENABLED) == true
-        ) {
-            xrayConfig.fakedns = listOf(XrayConfig.FakednsBean())
-        }
-    }
-
     private fun getRouting(xrayConfig: XrayConfig): Boolean {
         try {
-
-            xrayConfig.routing.domainStrategy =
-                storage.decodeSettingsString(Constants.PREF_ROUTING_DOMAIN_STRATEGY)
-                    ?: "IPIfNonMatch"
-
-            val rulesetItems = storage.decodeRoutingRulesets()
-            rulesetItems?.forEach { key ->
-                getRoutingUserRule(key, xrayConfig)
-            }
+            xrayConfig.routing.domainStrategy = "IPIfNonMatch"
         } catch (e: Exception) {
             Log.e(Constants.TAG, "Failed to configure routing", e)
-            return false
-        }
-        return true
-    }
-
-    private fun getRoutingUserRule(item: RulesetItem?, xrayConfig: XrayConfig) {
-        try {
-            if (item == null || !item.enabled) {
-                return
-            }
-
-            val rule =
-                gson.fromJson(gson.toJson(item), XrayConfig.RoutingBean.RulesBean::class.java)
-                    ?: return
-
-            xrayConfig.routing.rules.add(rule)
-
-        } catch (e: Exception) {
-            Log.e(Constants.TAG, "Failed to apply routing user rule", e)
-        }
-    }
-
-    private fun getUserRule2Domain(tag: String): ArrayList<String> {
-        val domain = ArrayList<String>()
-
-        val rulesetItems = storage.decodeRoutingRulesets()
-        rulesetItems?.forEach { key ->
-            if (key.enabled && key.outboundTag == tag && !key.domain.isNullOrEmpty()) {
-                key.domain?.forEach {
-                    if (it != Constants.GEOSITE_PRIVATE
-                        && (it.startsWith("geosite:") || it.startsWith("domain:"))
-                    ) {
-                        domain.add(it)
-                    }
-                }
-            }
-        }
-
-        return domain
-    }
-
-    private fun getCustomLocalDns(xrayConfig: XrayConfig): Boolean {
-        try {
-            if (storage.decodeSettingsBool(Constants.PREF_FAKE_DNS_ENABLED) == true) {
-                val geositeCn = arrayListOf(Constants.GEOSITE_CN)
-                val proxyDomain = getUserRule2Domain(Constants.TAG_PROXY)
-                val directDomain = getUserRule2Domain(Constants.TAG_DIRECT)
-                xrayConfig.dns?.servers?.add(
-                    0,
-                    XrayConfig.DnsBean.ServersBean(
-                        address = "fakedns",
-                        domains = geositeCn.plus(proxyDomain).plus(directDomain)
-                    )
-                )
-            }
-
-            // DNS inbound
-            val remoteDns = settingsManager.getRemoteDnsServers()
-            if (xrayConfig.inbounds.none { e -> e.protocol == "dokodemo-door" && e.tag == "dns-in" }) {
-                val dnsInboundSettings = XrayConfig.InboundBean.InSettingsBean(
-                    address = if (Utils.isPureIpAddress(remoteDns.first())) remoteDns.first() else Constants.DNS_PROXY,
-                    port = 53,
-                    network = "tcp,udp"
-                )
-
-                val localDnsPort = Utils.parseInt(
-                    storage.decodeSettingsString(Constants.PREF_LOCAL_DNS_PORT),
-                    Constants.PORT_LOCAL_DNS.toInt()
-                )
-                xrayConfig.inbounds.add(
-                    XrayConfig.InboundBean(
-                        tag = "dns-in",
-                        port = localDnsPort,
-                        listen = Constants.LOOPBACK,
-                        protocol = "dokodemo-door",
-                        settings = dnsInboundSettings,
-                        sniffing = null
-                    )
-                )
-            }
-
-            // DNS outbound
-            if (xrayConfig.outbounds.none { e -> e.protocol == "dns" && e.tag == "dns-out" }) {
-                xrayConfig.outbounds.add(
-                    XrayConfig.OutboundBean(
-                        protocol = "dns",
-                        tag = "dns-out",
-                        settings = null,
-                        streamSettings = null,
-                        mux = null
-                    )
-                )
-            }
-
-            // DNS routing tag
-            xrayConfig.routing.rules.add(
-                0, XrayConfig.RoutingBean.RulesBean(
-                    inboundTag = arrayListOf("dns-in"),
-                    outboundTag = "dns-out",
-                    domain = null
-                )
-            )
-        } catch (e: Exception) {
-            Log.e(Constants.TAG, "Failed to configure custom local DNS", e)
             return false
         }
         return true
@@ -286,34 +151,12 @@ class ConfigManagerImpl @Inject constructor(
 
             //remote Dns
             val remoteDns = settingsManager.getRemoteDnsServers()
-            val proxyDomain = getUserRule2Domain(Constants.TAG_PROXY)
             remoteDns.forEach {
                 servers.add(it)
-            }
-            if (proxyDomain.isNotEmpty()) {
-                servers.add(
-                    XrayConfig.DnsBean.ServersBean(
-                        address = remoteDns.first(),
-                        domains = proxyDomain,
-                    )
-                )
             }
 
             // domestic DNS
             val domesticDns = settingsManager.getDomesticDnsServers()
-            val directDomain = getUserRule2Domain(Constants.TAG_DIRECT)
-            val isCnRoutingMode = directDomain.contains(Constants.GEOSITE_CN)
-            val geoipCn = arrayListOf(Constants.GEOIP_CN)
-            if (directDomain.isNotEmpty()) {
-                servers.add(
-                    XrayConfig.DnsBean.ServersBean(
-                        address = domesticDns.first(),
-                        domains = directDomain,
-                        expectIPs = if (isCnRoutingMode) geoipCn else null,
-                        skipFallback = true
-                    )
-                )
-            }
 
             if (Utils.isPureIpAddress(domesticDns.first())) {
                 xrayConfig.routing.rules.add(
@@ -326,25 +169,6 @@ class ConfigManagerImpl @Inject constructor(
                 )
             }
 
-            //User DNS hosts
-            try {
-                val userHosts = storage.decodeSettingsString(Constants.PREF_DNS_HOSTS)
-                if (userHosts.isNotNullEmpty()) {
-                    val userHostsMap = userHosts?.split(",")
-                        ?.filter { it.isNotEmpty() }
-                        ?.filter { it.contains(":") }
-                        ?.associate { it.split(":").let { (k, v) -> k to v } }
-                    if (userHostsMap != null) hosts.putAll(userHostsMap)
-                }
-            } catch (e: Exception) {
-                Log.e(Constants.TAG, "Failed to configure user DNS hosts", e)
-            }
-
-            //block dns
-            val blkDomain = getUserRule2Domain(Constants.TAG_BLOCKED)
-            if (blkDomain.isNotEmpty()) {
-                hosts.putAll(blkDomain.map { it to Constants.LOOPBACK })
-            }
 
             // hardcode googleapi rule to fix play store problems
             hosts[Constants.GOOGLEAPIS_CN_DOMAIN] = Constants.GOOGLEAPIS_COM_DOMAIN
@@ -398,90 +222,14 @@ class ConfigManagerImpl @Inject constructor(
         } else {
             xrayConfig.outbounds.add(outbound)
         }
-
-        updateOutboundFragment(xrayConfig)
-        return true
-    }
-
-    private fun getMoreOutbounds(xrayConfig: XrayConfig): Boolean {
-        //fragment proxy
-        if (storage.decodeSettingsBool(Constants.PREF_FRAGMENT_ENABLED, false) == true) {
-            return false
-        }
-        try {
-            val subItem = storage.decodeSubscription() ?: return false
-
-            //current proxy
-            val outbound = xrayConfig.outbounds[0]
-
-            //Previous proxy
-            val prevNode = settingsManager.getServerViaRemarks(subItem.prevProfile)
-            if (prevNode != null) {
-                val prevOutbound = convertProfile2Outbound(prevNode)
-                if (prevOutbound != null) {
-                    updateOutboundWithGlobalSettings(prevOutbound)
-                    prevOutbound.tag = Constants.TAG_PROXY + "2"
-                    xrayConfig.outbounds.add(prevOutbound)
-                    outbound.ensureSockopt().dialerProxy = prevOutbound.tag
-                }
-            }
-
-            //Next proxy
-            val nextNode = settingsManager.getServerViaRemarks(subItem.nextProfile)
-            if (nextNode != null) {
-                val nextOutbound = convertProfile2Outbound(nextNode)
-                if (nextOutbound != null) {
-                    updateOutboundWithGlobalSettings(nextOutbound)
-                    nextOutbound.tag = Constants.TAG_PROXY
-                    xrayConfig.outbounds.add(0, nextOutbound)
-                    outbound.tag = Constants.TAG_PROXY + "1"
-                    nextOutbound.ensureSockopt().dialerProxy = outbound.tag
-                }
-            }
-        } catch (e: Exception) {
-            Log.e(Constants.TAG, "Failed to configure more outbounds", e)
-            return false
-        }
-
         return true
     }
 
     private fun updateOutboundWithGlobalSettings(outbound: XrayConfig.OutboundBean): Boolean {
         try {
-            var muxEnabled = storage.decodeSettingsBool(Constants.PREF_MUX_ENABLED, false)
             val protocol = outbound.protocol
-            if (protocol.equals(EConfigType.SHADOWSOCKS.name, true)
-                || protocol.equals(EConfigType.SOCKS.name, true)
-                || protocol.equals(EConfigType.HTTP.name, true)
-                || protocol.equals(EConfigType.TROJAN.name, true)
-                || protocol.equals(EConfigType.WIREGUARD.name, true)
-            ) {
-                muxEnabled = false
-            } else if (outbound.streamSettings?.network == NetworkType.XHTTP.type) {
-                muxEnabled = false
-            }
-
-            if (muxEnabled == true) {
-                outbound.mux?.enabled = true
-                outbound.mux?.concurrency =
-                    storage.decodeSettingsString(Constants.PREF_MUX_CONCURRENCY, "8").orEmpty()
-                        .toInt()
-                outbound.mux?.xudpConcurrency =
-                    storage.decodeSettingsString(Constants.PREF_MUX_XUDP_CONCURRENCY, "16")
-                        .orEmpty().toInt()
-                outbound.mux?.xudpProxyUDP443 =
-                    storage.decodeSettingsString(Constants.PREF_MUX_XUDP_QUIC, "reject")
-                if (protocol.equals(
-                        EConfigType.VLESS.name,
-                        true
-                    ) && outbound.settings?.vnext?.first()?.users?.first()?.flow?.isNotEmpty() == true
-                ) {
-                    outbound.mux?.concurrency = -1
-                }
-            } else {
-                outbound.mux?.enabled = false
-                outbound.mux?.concurrency = -1
-            }
+            outbound.mux?.enabled = false
+            outbound.mux?.concurrency = -1
 
             if (protocol.equals(EConfigType.WIREGUARD.name, true)) {
                 var localTunAddr = if (outbound.settings?.address == null) {
@@ -489,9 +237,7 @@ class ConfigManagerImpl @Inject constructor(
                 } else {
                     outbound.settings?.address as List<*>
                 }
-                if (storage.decodeSettingsBool(Constants.PREF_PREFER_IPV6) != true) {
-                    localTunAddr = listOf(localTunAddr.first())
-                }
+                localTunAddr = listOf(localTunAddr.first())
                 outbound.settings?.address = localTunAddr
             }
 
@@ -525,87 +271,21 @@ class ConfigManagerImpl @Inject constructor(
         return true
     }
 
-    private fun updateOutboundFragment(xrayConfig: XrayConfig): Boolean {
-        try {
-            if (storage.decodeSettingsBool(Constants.PREF_FRAGMENT_ENABLED, false) == false) {
-                return true
-            }
-            if (xrayConfig.outbounds[0].streamSettings?.security != Constants.TLS
-                && xrayConfig.outbounds[0].streamSettings?.security != Constants.REALITY
-            ) {
-                return true
-            }
-
-            val fragmentOutbound =
-                XrayConfig.OutboundBean(
-                    protocol = Constants.PROTOCOL_FREEDOM,
-                    tag = Constants.TAG_FRAGMENT,
-                    mux = null
-                )
-
-            var packets =
-                storage.decodeSettingsString(Constants.PREF_FRAGMENT_PACKETS) ?: "tlshello"
-            if (xrayConfig.outbounds[0].streamSettings?.security == Constants.REALITY
-                && packets == "tlshello"
-            ) {
-                packets = "1-3"
-            } else if (xrayConfig.outbounds[0].streamSettings?.security == Constants.TLS
-                && packets != "tlshello"
-            ) {
-                packets = "tlshello"
-            }
-
-            fragmentOutbound.settings = XrayConfig.OutboundBean.OutSettingsBean(
-                fragment = XrayConfig.OutboundBean.OutSettingsBean.FragmentBean(
-                    packets = packets,
-                    length = storage.decodeSettingsString(Constants.PREF_FRAGMENT_LENGTH)
-                        ?: "50-100",
-                    interval = storage.decodeSettingsString(Constants.PREF_FRAGMENT_INTERVAL)
-                        ?: "10-20"
-                ),
-                noises = listOf(
-                    XrayConfig.OutboundBean.OutSettingsBean.NoiseBean(
-                        type = "rand",
-                        packet = "10-20",
-                        delay = "10-16",
-                    )
-                ),
-            )
-            fragmentOutbound.streamSettings = XrayConfig.OutboundBean.StreamSettingsBean(
-                sockopt = XrayConfig.OutboundBean.StreamSettingsBean.SockoptBean(
-                    TcpNoDelay = true,
-                    mark = 255
-                )
-            )
-            xrayConfig.outbounds.add(fragmentOutbound)
-
-            //proxy chain
-            xrayConfig.outbounds[0].streamSettings?.sockopt =
-                XrayConfig.OutboundBean.StreamSettingsBean.SockoptBean(
-                    dialerProxy = Constants.TAG_FRAGMENT
-                )
-        } catch (e: Exception) {
-            Log.e(Constants.TAG, "Failed to update outbound fragment", e)
-            return false
-        }
-        return true
-    }
 
     private fun resolveOutboundDomainsToHosts(xrayConfig: XrayConfig) {
         val proxyOutboundList = xrayConfig.getAllProxyOutbound()
         val dns = xrayConfig.dns ?: return
         val newHosts = dns.hosts?.toMutableMap() ?: mutableMapOf()
-        val preferIpv6 = storage.decodeSettingsBool(Constants.PREF_PREFER_IPV6) == true
 
         for (item in proxyOutboundList) {
             val domain = item.getServerAddress()
             if (domain.isNullOrEmpty()) continue
             if (newHosts.containsKey(domain)) continue
 
-            val resolvedIps = HttpUtil.resolveHostToIP(domain, preferIpv6)
+            val resolvedIps = HttpUtil.resolveHostToIP(domain, false)
             if (resolvedIps.isNullOrEmpty()) continue
 
-            item.ensureSockopt().domainStrategy = if (preferIpv6) "UseIPv6v4" else "UseIPv4v6"
+            item.ensureSockopt().domainStrategy = "UseIPv4v6"
             newHosts[domain] = if (resolvedIps.size == 1) {
                 resolvedIps[0]
             } else {
@@ -630,40 +310,35 @@ class ConfigManagerImpl @Inject constructor(
 
     override fun createInitOutbound(configType: EConfigType): XrayConfig.OutboundBean? {
         return when (configType) {
-            EConfigType.VMESS,
-            EConfigType.VLESS ->
-                return XrayConfig.OutboundBean(
-                    protocol = configType.name.lowercase(),
-                    settings = XrayConfig.OutboundBean.OutSettingsBean(
-                        vnext = listOf(
-                            XrayConfig.OutboundBean.OutSettingsBean.VnextBean(
-                                users = listOf(XrayConfig.OutboundBean.OutSettingsBean.VnextBean.UsersBean())
-                            )
+            EConfigType.VMESS, EConfigType.VLESS -> XrayConfig.OutboundBean(
+                protocol = configType.name.lowercase(),
+                settings = XrayConfig.OutboundBean.OutSettingsBean(
+                    vnext = listOf(
+                        XrayConfig.OutboundBean.OutSettingsBean.VnextBean(
+                            users = listOf(XrayConfig.OutboundBean.OutSettingsBean.VnextBean.UsersBean())
                         )
-                    ),
-                    streamSettings = XrayConfig.OutboundBean.StreamSettingsBean()
-                )
+                    )
+                ), streamSettings = XrayConfig.OutboundBean.StreamSettingsBean()
+            )
 
             EConfigType.SHADOWSOCKS,
             EConfigType.SOCKS,
             EConfigType.HTTP,
-            EConfigType.TROJAN ->
-                return XrayConfig.OutboundBean(
-                    protocol = configType.name.lowercase(),
-                    settings = XrayConfig.OutboundBean.OutSettingsBean(
-                        servers = listOf(XrayConfig.OutboundBean.OutSettingsBean.ServersBean())
-                    ),
-                    streamSettings = XrayConfig.OutboundBean.StreamSettingsBean()
-                )
+            EConfigType.TROJAN -> XrayConfig.OutboundBean(
+                protocol = configType.name.lowercase(),
+                settings = XrayConfig.OutboundBean.OutSettingsBean(
+                    servers = listOf(XrayConfig.OutboundBean.OutSettingsBean.ServersBean())
+                ),
+                streamSettings = XrayConfig.OutboundBean.StreamSettingsBean()
+            )
 
-            EConfigType.WIREGUARD ->
-                return XrayConfig.OutboundBean(
-                    protocol = configType.name.lowercase(),
-                    settings = XrayConfig.OutboundBean.OutSettingsBean(
-                        secretKey = "",
-                        peers = listOf(XrayConfig.OutboundBean.OutSettingsBean.WireGuardBean())
-                    )
+            EConfigType.WIREGUARD -> XrayConfig.OutboundBean(
+                protocol = configType.name.lowercase(),
+                settings = XrayConfig.OutboundBean.OutSettingsBean(
+                    secretKey = "",
+                    peers = listOf(XrayConfig.OutboundBean.OutSettingsBean.WireGuardBean())
                 )
+            )
         }
     }
 

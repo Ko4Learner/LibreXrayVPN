@@ -55,7 +55,7 @@ dependencies {
     implementation(project(":core"))
 
     // XrayCore libs
-    implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.aar", "*.jar"))))
+    implementation(mapOf("name" to "libv2ray", "ext" to "aar"))
 
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)

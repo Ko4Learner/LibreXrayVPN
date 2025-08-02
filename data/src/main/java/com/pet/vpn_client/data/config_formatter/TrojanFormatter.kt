@@ -18,7 +18,7 @@ class TrojanFormatter @Inject constructor(
     val storage: KeyValueStorage
 ) : BaseFormatter() {
     fun parse(str: String): ConfigProfileItem? {
-        var allowInsecure = storage.decodeSettingsBool(Constants.PREF_ALLOW_INSECURE, false)
+        val allowInsecure = false
         val config = ConfigProfileItem.create(EConfigType.TROJAN)
 
         val uri = URI(Utils.fixIllegalUrl(str))
