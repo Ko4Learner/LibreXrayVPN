@@ -4,8 +4,6 @@ import com.pet.vpn_client.core.utils.Constants
 import com.pet.vpn_client.core.utils.Utils
 
 data class ConfigProfileItem(
-//    val configVersion: Int = 4,
-
     val configType: EConfigType,
     var subscriptionId: String = "",
     var addedTime: Long = System.currentTimeMillis(),

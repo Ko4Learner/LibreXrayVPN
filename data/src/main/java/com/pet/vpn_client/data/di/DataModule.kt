@@ -61,7 +61,6 @@ object DataModule {
     fun provideConfigManager(
         storage: KeyValueStorage,
         gson: Gson,
-        settingsManager: SettingsManager,
         httpFormatter: HttpFormatter,
         shadowsocksFormatter: ShadowsocksFormatter,
         socksFormatter: SocksFormatter,
@@ -74,7 +73,6 @@ object DataModule {
         ConfigManagerImpl(
             storage,
             gson,
-            settingsManager,
             httpFormatter,
             shadowsocksFormatter,
             socksFormatter,

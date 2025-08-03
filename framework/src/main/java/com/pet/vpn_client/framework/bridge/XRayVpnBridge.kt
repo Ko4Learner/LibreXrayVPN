@@ -64,14 +64,14 @@ class XRayVpnBridge @Inject constructor(
         var time = -1L
 
         try {
-            time = coreController.measureDelay(settingsManager.getDelayTestUrl())
+            time = coreController.measureDelay(Constants.DELAY_TEST_URL)
         } catch (e: Exception) {
             Log.e(Constants.TAG, "Failed to measure delay with primary URL", e)
         }
 
         if (time == -1L) {
             try {
-                time = coreController.measureDelay(settingsManager.getDelayTestUrl(true))
+                time = coreController.measureDelay(Constants.DELAY_TEST_URL2)
             } catch (e: Exception) {
                 Log.e(Constants.TAG, "Failed to measure delay with alternative URL", e)
             }

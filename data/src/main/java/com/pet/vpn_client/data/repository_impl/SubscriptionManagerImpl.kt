@@ -1,5 +1,6 @@
 package com.pet.vpn_client.data.repository_impl
 
+import android.content.ClipboardManager
 import android.content.Context
 import android.text.TextUtils
 import android.util.Log
@@ -36,10 +37,10 @@ class SubscriptionManagerImpl @Inject constructor(
     val wireguardFormatter: WireguardFormatter,
     val context: Context
 ) : SubscriptionManager {
-
     override suspend fun importClipboard(): Int {
         try {
-            val clipboard = Utils.getClipboard(context)
+            val cmb = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            val clipboard = cmb.primaryClip?.getItemAt(0)?.text.toString()
             val count = importBatchConfig(
                 clipboard
             )
@@ -94,8 +95,8 @@ class SubscriptionManagerImpl @Inject constructor(
             if (servers == null) {
                 return 0
             }
-            //TODO добавить проверку наличия серверов
-            val removedSelectedServer =  null
+            //TODO нужно для добавления или нет в выбранный сервер
+            val removedSelectedServer = null
 
             var count = 0
             servers.lines()
@@ -114,14 +115,13 @@ class SubscriptionManagerImpl @Inject constructor(
         return 0
     }
 
-    //TODO убрать subItem
     private fun parseConfig(
         str: String?,
         removedSelectedServer: ConfigProfileItem?
     ): Int {
         try {
             if (str == null || TextUtils.isEmpty(str)) {
-                return /*R.string.toast_none_data*/ 1
+                return 1
             }
 
             val config = if (str.startsWith(EConfigType.VMESS.protocolScheme)) {
@@ -141,11 +141,12 @@ class SubscriptionManagerImpl @Inject constructor(
             }
 
             if (config == null) {
-                return /*R.string.toast_incorrect_protocol*/ 1
+                return 1
             }
 
             //TODO все сервера имеют один subId
             config.subscriptionId = "1"
+            //TODO при добавлении разобраться когда менять выбранный сервер а когда нет
             val guid = storage.encodeServerConfig("", config)
             if (removedSelectedServer != null &&
                 config.server == removedSelectedServer.server && config.serverPort == removedSelectedServer.serverPort

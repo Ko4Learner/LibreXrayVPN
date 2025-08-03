@@ -15,7 +15,6 @@ import com.pet.vpn_client.data.config_formatter.VmessFormatter
 import com.pet.vpn_client.data.config_formatter.WireguardFormatter
 import com.pet.vpn_client.domain.interfaces.ConfigManager
 import com.pet.vpn_client.domain.interfaces.KeyValueStorage
-import com.pet.vpn_client.domain.interfaces.SettingsManager
 import com.pet.vpn_client.domain.models.ConfigProfileItem
 import com.pet.vpn_client.domain.models.ConfigResult
 import com.pet.vpn_client.domain.models.EConfigType
@@ -28,7 +27,6 @@ import javax.inject.Inject
 class ConfigManagerImpl @Inject constructor(
     val storage: KeyValueStorage,
     val gson: Gson,
-    val settingsManager: SettingsManager,
     val httpFormatter: HttpFormatter,
     val shadowsocksFormatter: ShadowsocksFormatter,
     val socksFormatter: SocksFormatter,
@@ -67,26 +65,25 @@ class ConfigManagerImpl @Inject constructor(
             }
         }
 
-        val v2rayConfig = initV2rayConfig(context) ?: return result
-        v2rayConfig.log.loglevel = "warning"
-        v2rayConfig.remarks = config.remarks
+        val xRayConfig = initV2rayConfig(context) ?: return result
+        xRayConfig.log.loglevel = "warning"
+        xRayConfig.remarks = config.remarks
+        xRayConfig.routing.domainStrategy = "IPIfNonMatch"
+        xRayConfig.stats = null
+        xRayConfig.policy = null
 
-        getInbounds(v2rayConfig)
+        getInbounds(xRayConfig)
 
-        getOutbounds(v2rayConfig, config) ?: return result
+        getOutbounds(xRayConfig, config) ?: return result
 
-        getRouting(v2rayConfig)
-
-        getDns(v2rayConfig)
-
-        v2rayConfig.stats = null
-        v2rayConfig.policy = null
+        getDns(xRayConfig)
 
 
-        resolveOutboundDomainsToHosts(v2rayConfig)
+
+        resolveOutboundDomainsToHosts(xRayConfig)
 
         result.status = true
-        result.content = JsonUtil.toJsonPretty(v2rayConfig) ?: ""
+        result.content = JsonUtil.toJsonPretty(xRayConfig) ?: ""
         result.guid = guid
         return result
     }
@@ -103,12 +100,10 @@ class ConfigManagerImpl @Inject constructor(
 
     private fun getInbounds(xrayConfig: XrayConfig): Boolean {
         try {
-            val socksPort = settingsManager.getSocksPort()
-
             xrayConfig.inbounds.forEach { curInbound ->
                 curInbound.listen = Constants.LOOPBACK
             }
-            xrayConfig.inbounds[0].port = socksPort
+            xrayConfig.inbounds[0].port = 10808
             val fakedns = false
             val sniffAllTlsAndHttp = true
             xrayConfig.inbounds[0].sniffing?.enabled = fakedns || sniffAllTlsAndHttp
@@ -119,26 +114,10 @@ class ConfigManagerImpl @Inject constructor(
             if (fakedns) {
                 xrayConfig.inbounds[0].sniffing?.destOverride?.add("fakedns")
             }
-
-            //if (Utils.isXray()) {
             xrayConfig.inbounds.removeAt(1)
-            //} else {
-            //    val httpPort = settingsManager.getHttpPort()
-            //    xrayConfig.inbounds[1].port = httpPort
-            //}
 
         } catch (e: Exception) {
             Log.e(Constants.TAG, "Failed to configure inbounds", e)
-            return false
-        }
-        return true
-    }
-
-    private fun getRouting(xrayConfig: XrayConfig): Boolean {
-        try {
-            xrayConfig.routing.domainStrategy = "IPIfNonMatch"
-        } catch (e: Exception) {
-            Log.e(Constants.TAG, "Failed to configure routing", e)
             return false
         }
         return true
@@ -150,14 +129,14 @@ class ConfigManagerImpl @Inject constructor(
             val servers = ArrayList<Any>()
 
             //remote Dns
-            val remoteDns = settingsManager.getRemoteDnsServers()
+            val remoteDns = listOf(Constants.DNS_PROXY)
             remoteDns.forEach {
                 servers.add(it)
             }
 
+            // TODO необходимость?
             // domestic DNS
-            val domesticDns = settingsManager.getDomesticDnsServers()
-
+            val domesticDns = listOf(Constants.DNS_DIRECT)
             if (Utils.isPureIpAddress(domesticDns.first())) {
                 xrayConfig.routing.rules.add(
                     0, XrayConfig.RoutingBean.RulesBean(
@@ -180,7 +159,6 @@ class ConfigManagerImpl @Inject constructor(
             hosts[Constants.DNS_GOOGLE_DOMAIN] = Constants.DNS_GOOGLE_ADDRESSES
             hosts[Constants.DNS_QUAD9_DOMAIN] = Constants.DNS_QUAD9_ADDRESSES
             hosts[Constants.DNS_YANDEX_DOMAIN] = Constants.DNS_YANDEX_ADDRESSES
-
 
             // DNS dns
             xrayConfig.dns = XrayConfig.DnsBean(
@@ -205,12 +183,6 @@ class ConfigManagerImpl @Inject constructor(
         }
         return true
     }
-
-
-    //endregion
-
-
-    //region outbound related functions
 
     private fun getOutbounds(xrayConfig: XrayConfig, config: ConfigProfileItem): Boolean? {
         val outbound = convertProfile2Outbound(config) ?: return null
