@@ -42,15 +42,15 @@ class ConfigManagerImpl @Inject constructor(
     override fun getCoreConfig(guid: String): ConfigResult {
         try {
             val config = storage.decodeServerConfig(guid) ?: return ConfigResult(false)
-            return getV2rayNormalConfig(context, guid, config)
+            return getXrayNormalConfig(context, guid, config)
 
         } catch (e: Exception) {
-            Log.e(Constants.TAG, "Failed to get V2ray config", e)
+            Log.e(Constants.TAG, "Failed to get Xray config", e)
             return ConfigResult(false)
         }
     }
 
-    private fun getV2rayNormalConfig(
+    private fun getXrayNormalConfig(
         context: Context,
         guid: String,
         config: ConfigProfileItem
@@ -65,20 +65,16 @@ class ConfigManagerImpl @Inject constructor(
             }
         }
 
-        val xRayConfig = initV2rayConfig(context) ?: return result
-        xRayConfig.log.loglevel = "warning"
+        val xRayConfig = initXrayConfig(context) ?: return result
+        xRayConfig.log.loglevel = LOG_LEVEL
         xRayConfig.remarks = config.remarks
         xRayConfig.routing.domainStrategy = "IPIfNonMatch"
-        xRayConfig.stats = null
-        xRayConfig.policy = null
 
         getInbounds(xRayConfig)
 
         getOutbounds(xRayConfig, config) ?: return result
 
         getDns(xRayConfig)
-
-
 
         resolveOutboundDomainsToHosts(xRayConfig)
 
@@ -88,8 +84,8 @@ class ConfigManagerImpl @Inject constructor(
         return result
     }
 
-    private fun initV2rayConfig(context: Context): XrayConfig? {
-        val assets = initConfigCache ?: Utils.readTextFromAssets(context, "v2ray_config.json")
+    private fun initXrayConfig(context: Context): XrayConfig? {
+        val assets = initConfigCache ?: Utils.readTextFromAssets(context, EMPTY_CONFIG)
         if (TextUtils.isEmpty(assets)) {
             return null
         }
@@ -104,81 +100,11 @@ class ConfigManagerImpl @Inject constructor(
                 curInbound.listen = Constants.LOOPBACK
             }
             xrayConfig.inbounds[0].port = 10808
-            val fakedns = false
-            val sniffAllTlsAndHttp = true
-            xrayConfig.inbounds[0].sniffing?.enabled = fakedns || sniffAllTlsAndHttp
+            xrayConfig.inbounds[0].sniffing?.enabled = true
             xrayConfig.inbounds[0].sniffing?.routeOnly = false
-            if (!sniffAllTlsAndHttp) {
-                xrayConfig.inbounds[0].sniffing?.destOverride?.clear()
-            }
-            if (fakedns) {
-                xrayConfig.inbounds[0].sniffing?.destOverride?.add("fakedns")
-            }
             xrayConfig.inbounds.removeAt(1)
-
         } catch (e: Exception) {
             Log.e(Constants.TAG, "Failed to configure inbounds", e)
-            return false
-        }
-        return true
-    }
-
-    private fun getDns(xrayConfig: XrayConfig): Boolean {
-        try {
-            val hosts = mutableMapOf<String, Any>()
-            val servers = ArrayList<Any>()
-
-            //remote Dns
-            val remoteDns = listOf(Constants.DNS_PROXY)
-            remoteDns.forEach {
-                servers.add(it)
-            }
-
-            // TODO необходимость?
-            // domestic DNS
-            val domesticDns = listOf(Constants.DNS_DIRECT)
-            if (Utils.isPureIpAddress(domesticDns.first())) {
-                xrayConfig.routing.rules.add(
-                    0, XrayConfig.RoutingBean.RulesBean(
-                        outboundTag = Constants.TAG_DIRECT,
-                        port = "53",
-                        ip = arrayListOf(domesticDns.first()),
-                        domain = null
-                    )
-                )
-            }
-
-
-            // hardcode googleapi rule to fix play store problems
-            hosts[Constants.GOOGLEAPIS_CN_DOMAIN] = Constants.GOOGLEAPIS_COM_DOMAIN
-
-            // hardcode popular Android Private DNS rule to fix localhost DNS problem
-            hosts[Constants.DNS_ALIDNS_DOMAIN] = Constants.DNS_ALIDNS_ADDRESSES
-            hosts[Constants.DNS_CLOUDFLARE_DOMAIN] = Constants.DNS_CLOUDFLARE_ADDRESSES
-            hosts[Constants.DNS_DNSPOD_DOMAIN] = Constants.DNS_DNSPOD_ADDRESSES
-            hosts[Constants.DNS_GOOGLE_DOMAIN] = Constants.DNS_GOOGLE_ADDRESSES
-            hosts[Constants.DNS_QUAD9_DOMAIN] = Constants.DNS_QUAD9_ADDRESSES
-            hosts[Constants.DNS_YANDEX_DOMAIN] = Constants.DNS_YANDEX_ADDRESSES
-
-            // DNS dns
-            xrayConfig.dns = XrayConfig.DnsBean(
-                servers = servers,
-                hosts = hosts
-            )
-
-            // DNS routing
-            if (Utils.isPureIpAddress(remoteDns.first())) {
-                xrayConfig.routing.rules.add(
-                    0, XrayConfig.RoutingBean.RulesBean(
-                        outboundTag = Constants.TAG_PROXY,
-                        port = "53",
-                        ip = arrayListOf(remoteDns.first()),
-                        domain = null
-                    )
-                )
-            }
-        } catch (e: Exception) {
-            Log.e(Constants.TAG, "Failed to configure DNS", e)
             return false
         }
         return true
@@ -197,6 +123,30 @@ class ConfigManagerImpl @Inject constructor(
         return true
     }
 
+    private fun getDns(xrayConfig: XrayConfig): Boolean {
+        try {
+            val hosts = mutableMapOf<String, Any>().apply {
+                put(Constants.GOOGLEAPIS_CN_DOMAIN, Constants.GOOGLEAPIS_COM_DOMAIN)
+                put(Constants.DNS_ALIDNS_DOMAIN, Constants.DNS_ALIDNS_ADDRESSES)
+                put(Constants.DNS_CLOUDFLARE_DOMAIN, Constants.DNS_CLOUDFLARE_ADDRESSES)
+                put(Constants.DNS_DNSPOD_DOMAIN, Constants.DNS_DNSPOD_ADDRESSES)
+                put(Constants.DNS_GOOGLE_DOMAIN, Constants.DNS_GOOGLE_ADDRESSES)
+                put(Constants.DNS_QUAD9_DOMAIN, Constants.DNS_QUAD9_ADDRESSES)
+                put(Constants.DNS_YANDEX_DOMAIN, Constants.DNS_YANDEX_ADDRESSES)
+            }
+            val servers = arrayListOf<Any>(Constants.DNS_PROXY)
+
+            xrayConfig.dns = XrayConfig.DnsBean(
+                servers = servers,
+                hosts = hosts
+            )
+        } catch (e: Exception) {
+            Log.e(Constants.TAG, "Failed to configure DNS", e)
+            return false
+        }
+        return true
+    }
+
     private fun updateOutboundWithGlobalSettings(outbound: XrayConfig.OutboundBean): Boolean {
         try {
             val protocol = outbound.protocol
@@ -204,23 +154,23 @@ class ConfigManagerImpl @Inject constructor(
             outbound.mux?.concurrency = -1
 
             if (protocol.equals(EConfigType.WIREGUARD.name, true)) {
-                var localTunAddr = if (outbound.settings?.address == null) {
+                var localTunAdd = if (outbound.settings?.address == null) {
                     listOf(Constants.WIREGUARD_LOCAL_ADDRESS_V4)
                 } else {
                     outbound.settings?.address as List<*>
                 }
-                localTunAddr = listOf(localTunAddr.first())
-                outbound.settings?.address = localTunAddr
+                localTunAdd = listOf(localTunAdd.first())
+                outbound.settings?.address = localTunAdd
             }
 
             if (outbound.streamSettings?.network == Constants.DEFAULT_NETWORK
                 && outbound.streamSettings?.tcpSettings?.header?.type == Constants.HEADER_TYPE_HTTP
             ) {
                 val path = outbound.streamSettings?.tcpSettings?.header?.request?.path
-                val host = outbound.streamSettings?.tcpSettings?.header?.request?.headers?.Host
+                val host = outbound.streamSettings?.tcpSettings?.header?.request?.headers?.host
 
                 val requestString: String by lazy {
-                    """{"version":"1.1","method":"GET","headers":{"User-Agent":["Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.6478.122 Mobile Safari/537.36"],"Accept-Encoding":["gzip, deflate"],"Connection":["keep-alive"],"Pragma":"no-cache"}}"""
+                    STEALTH_HTTP_HEADERS_JSON
                 }
                 outbound.streamSettings?.tcpSettings?.header?.request = gson.fromJson(
                     requestString,
@@ -232,7 +182,7 @@ class ConfigManagerImpl @Inject constructor(
                     } else {
                         path
                     }
-                outbound.streamSettings?.tcpSettings?.header?.request?.headers?.Host = host
+                outbound.streamSettings?.tcpSettings?.header?.request?.headers?.host = host
             }
 
 
@@ -330,7 +280,7 @@ class ConfigManagerImpl @Inject constructor(
         val xhttpExtra = profileItem.xhttpExtra
 
         var sni: String? = null
-        streamSettings.network = if (transport.isEmpty()) NetworkType.TCP.type else transport
+        streamSettings.network = transport.ifEmpty { NetworkType.TCP.type }
         when (streamSettings.network) {
             NetworkType.TCP.type -> {
                 val tcpSetting = XrayConfig.OutboundBean.StreamSettingsBean.TcpSettingsBean()
@@ -339,12 +289,12 @@ class ConfigManagerImpl @Inject constructor(
                     if (!TextUtils.isEmpty(host) || !TextUtils.isEmpty(path)) {
                         val requestObj =
                             XrayConfig.OutboundBean.StreamSettingsBean.TcpSettingsBean.HeaderBean.RequestBean()
-                        requestObj.headers.Host =
+                        requestObj.headers.host =
                             host.orEmpty().split(",").map { it.trim() }.filter { it.isNotEmpty() }
                         requestObj.path =
                             path.orEmpty().split(",").map { it.trim() }.filter { it.isNotEmpty() }
                         tcpSetting.header.request = requestObj
-                        sni = requestObj.headers.Host?.getOrNull(0)
+                        sni = requestObj.headers.host?.getOrNull(0)
                     }
                 } else {
                     tcpSetting.header.type = "none"
@@ -371,7 +321,7 @@ class ConfigManagerImpl @Inject constructor(
 
             NetworkType.WS.type -> {
                 val wssetting = XrayConfig.OutboundBean.StreamSettingsBean.WsSettingsBean()
-                wssetting.headers.Host = host.orEmpty()
+                wssetting.headers.host = host.orEmpty()
                 sni = host
                 wssetting.path = path ?: "/"
                 streamSettings.wsSettings = wssetting
@@ -411,8 +361,8 @@ class ConfigManagerImpl @Inject constructor(
                 grpcSetting.multiMode = mode == "multi"
                 grpcSetting.serviceName = serviceName.orEmpty()
                 grpcSetting.authority = authority.orEmpty()
-                grpcSetting.idle_timeout = 60
-                grpcSetting.health_check_timeout = 20
+                grpcSetting.idleTimeout = 60
+                grpcSetting.healthCheckTimeout = 20
                 sni = authority
                 streamSettings.grpcSettings = grpcSetting
             }
@@ -434,7 +384,7 @@ class ConfigManagerImpl @Inject constructor(
         val shortId = profileItem.shortId
         val spiderX = profileItem.spiderX
 
-        streamSettings.security = if (streamSecurity.isEmpty()) null else streamSecurity
+        streamSettings.security = streamSecurity.ifEmpty { null }
         if (streamSettings.security == null) return
         val tlsSetting = XrayConfig.OutboundBean.StreamSettingsBean.TlsSettingsBean(
             allowInsecure = allowInsecure,
@@ -453,5 +403,12 @@ class ConfigManagerImpl @Inject constructor(
             streamSettings.tlsSettings = null
             streamSettings.realitySettings = tlsSetting
         }
+    }
+
+    companion object {
+        private const val STEALTH_HTTP_HEADERS_JSON =
+            """{"version":"1.1","method":"GET","headers":{"User-Agent":["Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.6478.122 Mobile Safari/537.36"],"Accept":["text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8"],"Accept-Encoding":["gzip, deflate, br"],"Accept-Language":["ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7"],"Connection":["keep-alive"],"Upgrade-Insecure-Requests":["1"],"Sec-Fetch-Site":["none"],"Sec-Fetch-Mode":["navigate"],"Sec-Fetch-User":["?1"],"Sec-Fetch-Dest":["document"],"Pragma":["no-cache"],"Cache-Control":["no-cache"]}}"""
+        private const val LOG_LEVEL = "warning"
+        private const val EMPTY_CONFIG = "xRay_config.json"
     }
 }
