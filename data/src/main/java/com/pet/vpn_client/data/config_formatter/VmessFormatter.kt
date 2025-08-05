@@ -4,32 +4,29 @@ import android.text.TextUtils
 import android.util.Log
 import com.google.gson.Gson
 import com.pet.vpn_client.core.utils.Constants
-import com.pet.vpn_client.domain.interfaces.ConfigManager
+import com.pet.vpn_client.domain.interfaces.repository.ConfigRepository
 import com.pet.vpn_client.domain.models.XrayConfig.OutboundBean
 import com.pet.vpn_client.domain.interfaces.KeyValueStorage
 import com.pet.vpn_client.domain.models.ConfigProfileItem
 import com.pet.vpn_client.domain.models.EConfigType
 import com.pet.vpn_client.domain.models.NetworkType
-import com.pet.vpn_client.domain.models.VmessQRCode
 import com.pet.vpn_client.core.utils.Utils
 import com.pet.vpn_client.core.utils.idnHost
-import com.pet.vpn_client.core.utils.isNotNullEmpty
 import java.net.URI
 import javax.inject.Inject
 import javax.inject.Provider
 
 class VmessFormatter @Inject constructor(
-    val configManager: Provider<ConfigManager>,
+    val configRepository: Provider<ConfigRepository>,
     val storage: KeyValueStorage,
     val gson: Gson
 ) : BaseFormatter() {
-
     fun parse(str: String): ConfigProfileItem? {
         if (str.indexOf('?') > 0 && str.indexOf('&') > 0) {
             return parseVmessStd(str)
         }
 
-        var allowInsecure = storage.decodeSettingsBool(Constants.PREF_ALLOW_INSECURE, false)
+        val allowInsecure = false
         val config = ConfigProfileItem.create(EConfigType.VMESS)
 
         var result = str.replace(EConfigType.VMESS.protocolScheme, "")
@@ -56,7 +53,7 @@ class VmessFormatter @Inject constructor(
         config.method =
             if (TextUtils.isEmpty(vmessQRCode.scy)) Constants.DEFAULT_SECURITY else vmessQRCode.scy
 
-        config.network = vmessQRCode.net ?: NetworkType.TCP.type
+        config.network = vmessQRCode.net.ifEmpty { NetworkType.TCP.type }
         config.headerType = vmessQRCode.type
         config.host = vmessQRCode.host
         config.path = vmessQRCode.path
@@ -84,47 +81,8 @@ class VmessFormatter @Inject constructor(
         return config
     }
 
-    fun toUri(config: ConfigProfileItem): String {
-        val vmessQRCode = VmessQRCode()
-
-        vmessQRCode.v = "2"
-        vmessQRCode.ps = config.remarks
-        vmessQRCode.add = config.server.orEmpty()
-        vmessQRCode.port = config.serverPort.orEmpty()
-        vmessQRCode.id = config.password.orEmpty()
-        vmessQRCode.scy = config.method.orEmpty()
-        vmessQRCode.aid = "0"
-
-        vmessQRCode.net = config.network.orEmpty()
-        vmessQRCode.type = config.headerType.orEmpty()
-        when (NetworkType.fromString(config.network)) {
-            NetworkType.KCP -> {
-                vmessQRCode.path = config.seed.orEmpty()
-            }
-
-            NetworkType.GRPC -> {
-                vmessQRCode.type = config.mode.orEmpty()
-                vmessQRCode.path = config.serviceName.orEmpty()
-                vmessQRCode.host = config.authority.orEmpty()
-            }
-
-            else -> {}
-        }
-
-        config.host.let { if (it.isNotNullEmpty()) vmessQRCode.host = it.orEmpty() }
-        config.path.let { if (it.isNotNullEmpty()) vmessQRCode.path = it.orEmpty() }
-
-        vmessQRCode.tls = config.security.orEmpty()
-        vmessQRCode.sni = config.sni.orEmpty()
-        vmessQRCode.fp = config.fingerPrint.orEmpty()
-        vmessQRCode.alpn = config.alpn.orEmpty()
-
-        val json = gson.toJson(vmessQRCode)
-        return Utils.encode(json)
-    }
-
     fun parseVmessStd(str: String): ConfigProfileItem? {
-        val allowInsecure = storage.decodeSettingsBool(Constants.PREF_ALLOW_INSECURE, false)
+        val allowInsecure = false
         val config = ConfigProfileItem.create(EConfigType.VMESS)
 
         val uri = URI(Utils.fixIllegalUrl(str))
@@ -143,7 +101,7 @@ class VmessFormatter @Inject constructor(
     }
 
     fun toOutbound(profileItem: ConfigProfileItem): OutboundBean? {
-        val outboundBean = configManager.get().createInitOutbound(EConfigType.VMESS)
+        val outboundBean = configRepository.get().createInitOutbound(EConfigType.VMESS)
 
         outboundBean?.settings?.vnext?.first()?.let { vnext ->
             vnext.address = profileItem.server.orEmpty()
@@ -153,13 +111,31 @@ class VmessFormatter @Inject constructor(
         }
 
         val sni = outboundBean?.streamSettings?.let {
-            configManager.get().populateTransportSettings(it, profileItem)
+            configRepository.get().populateTransportSettings(it, profileItem)
         }
 
         outboundBean?.streamSettings?.let {
-            configManager.get().populateTlsSettings(it, profileItem, sni)
+            configRepository.get().populateTlsSettings(it, profileItem, sni)
         }
 
         return outboundBean
     }
 }
+
+data class VmessQRCode(
+    var v: String = "",
+    var ps: String = "",
+    var add: String = "",
+    var port: String = "",
+    var id: String = "",
+    var aid: String = "0",
+    var scy: String = "",
+    var net: String = "",
+    var type: String = "",
+    var host: String = "",
+    var path: String = "",
+    var tls: String = "",
+    var sni: String = "",
+    var alpn: String = "",
+    var fp: String = ""
+)

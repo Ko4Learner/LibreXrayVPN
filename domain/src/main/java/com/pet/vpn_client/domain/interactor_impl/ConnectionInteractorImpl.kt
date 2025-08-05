@@ -7,7 +7,7 @@ import javax.inject.Inject
 class ConnectionInteractorImpl @Inject constructor(val serviceManager: ServiceManager) :
     ConnectionInteractor {
     override suspend fun startConnection(): Boolean {
-        return serviceManager.startServiceFromToggle()
+        return serviceManager.startService()
     }
 
     override suspend fun stopConnection() {

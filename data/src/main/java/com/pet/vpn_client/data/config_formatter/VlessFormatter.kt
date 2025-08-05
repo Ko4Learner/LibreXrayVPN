@@ -1,7 +1,6 @@
 package com.pet.vpn_client.data.config_formatter
 
-import com.pet.vpn_client.core.utils.Constants
-import com.pet.vpn_client.domain.interfaces.ConfigManager
+import com.pet.vpn_client.domain.interfaces.repository.ConfigRepository
 import com.pet.vpn_client.domain.models.XrayConfig.OutboundBean
 import com.pet.vpn_client.domain.interfaces.KeyValueStorage
 import com.pet.vpn_client.domain.models.ConfigProfileItem
@@ -13,12 +12,11 @@ import javax.inject.Inject
 import javax.inject.Provider
 
 class VlessFormatter @Inject constructor(
-    val configManager: Provider<ConfigManager>,
+    val configRepository: Provider<ConfigRepository>,
     val storage: KeyValueStorage
 ) : BaseFormatter() {
-
     fun parse(str: String): ConfigProfileItem? {
-        var allowInsecure = storage.decodeSettingsBool(Constants.PREF_ALLOW_INSECURE, false)
+        val allowInsecure = false
         val config = ConfigProfileItem.create(EConfigType.VLESS)
 
         val uri = URI(Utils.fixIllegalUrl(str))
@@ -36,15 +34,8 @@ class VlessFormatter @Inject constructor(
         return config
     }
 
-    fun toUri(config: ConfigProfileItem): String {
-        val dicQuery = getQueryDic(config)
-        dicQuery["encryption"] = config.method ?: "none"
-
-        return toUri(config, config.password, dicQuery)
-    }
-
     fun toOutbound(profileItem: ConfigProfileItem): OutboundBean? {
-        val outboundBean = configManager.get().createInitOutbound(EConfigType.VLESS)
+        val outboundBean = configRepository.get().createInitOutbound(EConfigType.VLESS)
 
         outboundBean?.settings?.vnext?.first()?.let { vnext ->
             vnext.address = profileItem.server.orEmpty()
@@ -55,11 +46,11 @@ class VlessFormatter @Inject constructor(
         }
 
         val sni = outboundBean?.streamSettings?.let {
-            configManager.get().populateTransportSettings(it, profileItem)
+            configRepository.get().populateTransportSettings(it, profileItem)
         }
 
         outboundBean?.streamSettings?.let {
-            configManager.get().populateTlsSettings(it, profileItem, sni)
+            configRepository.get().populateTlsSettings(it, profileItem, sni)
         }
 
         return outboundBean

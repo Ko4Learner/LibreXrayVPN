@@ -2,11 +2,10 @@ package com.pet.vpn_client.framework.di
 
 import android.content.Context
 import com.pet.vpn_client.domain.interactor_impl.ConnectionInteractorImpl
-import com.pet.vpn_client.domain.interfaces.ConfigManager
+import com.pet.vpn_client.domain.interfaces.repository.ConfigRepository
 import com.pet.vpn_client.domain.interfaces.CoreVpnBridge
 import com.pet.vpn_client.domain.interfaces.KeyValueStorage
 import com.pet.vpn_client.domain.interfaces.ServiceManager
-import com.pet.vpn_client.domain.interfaces.SettingsManager
 import com.pet.vpn_client.domain.interfaces.interactor.ConnectionInteractor
 import com.pet.vpn_client.domain.interfaces.repository.ServiceStateRepository
 import com.pet.vpn_client.framework.ServiceManagerImpl
@@ -23,7 +22,6 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object FrameworkModule {
-
     @Provides
     @Singleton
     fun provideConnectionInteractor(serviceManager: ServiceManager): ConnectionInteractor =
@@ -45,10 +43,9 @@ object FrameworkModule {
         @ApplicationContext context: Context,
         storage: KeyValueStorage,
         serviceManager: ServiceManager,
-        configManager: ConfigManager,
-        settingsManager: SettingsManager
+        configRepository: ConfigRepository
     ): CoreVpnBridge =
-        XRayVpnBridge(context, storage, serviceManager, configManager, settingsManager)
+        XRayVpnBridge(context, storage, serviceManager, configRepository)
 
     @Provides
     @Singleton

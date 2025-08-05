@@ -3,7 +3,7 @@ package com.pet.vpn_client.data.config_formatter
 import android.util.Log
 import com.pet.vpn_client.core.utils.Constants
 import com.pet.vpn_client.domain.models.XrayConfig.OutboundBean
-import com.pet.vpn_client.domain.interfaces.ConfigManager
+import com.pet.vpn_client.domain.interfaces.repository.ConfigRepository
 import com.pet.vpn_client.domain.models.ConfigProfileItem
 import com.pet.vpn_client.domain.models.EConfigType
 import com.pet.vpn_client.domain.models.NetworkType
@@ -13,8 +13,7 @@ import java.net.URI
 import javax.inject.Inject
 import javax.inject.Provider
 
-class ShadowsocksFormatter @Inject constructor(private val configManager: Provider<ConfigManager>) : BaseFormatter() {
-
+class ShadowsocksFormatter @Inject constructor(private val configRepository: Provider<ConfigRepository>) : BaseFormatter() {
     fun parse(str: String): ConfigProfileItem? {
         return parseSip002(str) ?: parseLegacy(str)
     }
@@ -98,14 +97,8 @@ class ShadowsocksFormatter @Inject constructor(private val configManager: Provid
         return config
     }
 
-    fun toUri(config: ConfigProfileItem): String {
-        val pw = "${config.method}:${config.password}"
-
-        return toUri(config, Utils.encode(pw), null)
-    }
-
     fun toOutbound(profileItem: ConfigProfileItem): OutboundBean? {
-        val outboundBean = configManager.get().createInitOutbound(EConfigType.SHADOWSOCKS)
+        val outboundBean = configRepository.get().createInitOutbound(EConfigType.SHADOWSOCKS)
 
         outboundBean?.settings?.servers?.first()?.let { server ->
             server.address = profileItem.server.orEmpty()
@@ -115,11 +108,11 @@ class ShadowsocksFormatter @Inject constructor(private val configManager: Provid
         }
 
         val sni = outboundBean?.streamSettings?.let {
-            configManager.get().populateTransportSettings(it, profileItem)
+            configRepository.get().populateTransportSettings(it, profileItem)
         }
 
         outboundBean?.streamSettings?.let {
-            configManager.get().populateTlsSettings(it, profileItem, sni)
+            configRepository.get().populateTlsSettings(it, profileItem, sni)
         }
 
         return outboundBean
