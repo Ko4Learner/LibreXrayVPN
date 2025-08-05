@@ -1,16 +1,16 @@
 package com.pet.vpn_client.data.config_formatter
 
 import com.pet.vpn_client.domain.models.XrayConfig.OutboundBean
-import com.pet.vpn_client.domain.interfaces.ConfigManager
+import com.pet.vpn_client.domain.interfaces.repository.ConfigRepository
 import com.pet.vpn_client.domain.models.ConfigProfileItem
 import com.pet.vpn_client.domain.models.EConfigType
 import com.pet.vpn_client.core.utils.isNotNullEmpty
 import javax.inject.Inject
 import javax.inject.Provider
 
-class HttpFormatter @Inject constructor(val configManager: Provider<ConfigManager>) : BaseFormatter() {
+class HttpFormatter @Inject constructor(val configRepository: Provider<ConfigRepository>) : BaseFormatter() {
     fun toOutbound(profileItem: ConfigProfileItem): OutboundBean? {
-        val outboundBean = configManager.get().createInitOutbound(EConfigType.HTTP)
+        val outboundBean = configRepository.get().createInitOutbound(EConfigType.HTTP)
 
         outboundBean?.settings?.servers?.first()?.let { server ->
             server.address = profileItem.server.orEmpty()

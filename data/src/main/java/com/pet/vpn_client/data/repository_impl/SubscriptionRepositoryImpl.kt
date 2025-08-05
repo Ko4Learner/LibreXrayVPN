@@ -15,9 +15,9 @@ import com.pet.vpn_client.data.config_formatter.TrojanFormatter
 import com.pet.vpn_client.data.config_formatter.VlessFormatter
 import com.pet.vpn_client.data.config_formatter.VmessFormatter
 import com.pet.vpn_client.data.config_formatter.WireguardFormatter
-import com.pet.vpn_client.domain.interfaces.ConfigManager
+import com.pet.vpn_client.domain.interfaces.repository.ConfigRepository
 import com.pet.vpn_client.domain.interfaces.KeyValueStorage
-import com.pet.vpn_client.domain.interfaces.SubscriptionManager
+import com.pet.vpn_client.domain.interfaces.repository.SubscriptionRepository
 import com.pet.vpn_client.domain.models.ConfigProfileItem
 import com.pet.vpn_client.domain.models.EConfigType
 import com.pet.vpn_client.domain.models.FrameData
@@ -25,10 +25,10 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import javax.inject.Inject
 import kotlin.coroutines.resume
 
-class SubscriptionManagerImpl @Inject constructor(
+class SubscriptionRepositoryImpl @Inject constructor(
     val storage: KeyValueStorage,
     val gson: Gson,
-    val configManager: ConfigManager,
+    val configRepository: ConfigRepository,
     val shadowsocksFormatter: ShadowsocksFormatter,
     val socksFormatter: SocksFormatter,
     val trojanFormatter: TrojanFormatter,
@@ -36,7 +36,7 @@ class SubscriptionManagerImpl @Inject constructor(
     val vmessFormatter: VmessFormatter,
     val wireguardFormatter: WireguardFormatter,
     val context: Context
-) : SubscriptionManager {
+) : SubscriptionRepository {
     override suspend fun importClipboard(): Int {
         try {
             val cmb = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager

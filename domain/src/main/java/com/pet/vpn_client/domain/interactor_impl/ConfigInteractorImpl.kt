@@ -1,22 +1,22 @@
 package com.pet.vpn_client.domain.interactor_impl
 
 import com.pet.vpn_client.domain.interfaces.KeyValueStorage
-import com.pet.vpn_client.domain.interfaces.SubscriptionManager
+import com.pet.vpn_client.domain.interfaces.repository.SubscriptionRepository
 import com.pet.vpn_client.domain.interfaces.interactor.ConfigInteractor
 import com.pet.vpn_client.domain.models.ConfigProfileItem
 import com.pet.vpn_client.domain.models.FrameData
 import javax.inject.Inject
 
 class ConfigInteractorImpl @Inject constructor(
-    val subscriptionManager: SubscriptionManager,
+    val subscriptionRepository: SubscriptionRepository,
     val keyValueStorage: KeyValueStorage
 ) : ConfigInteractor {
     override suspend fun importClipboardConfig(): Int {
-        return subscriptionManager.importClipboard()
+        return subscriptionRepository.importClipboard()
     }
 
     override suspend fun importQrCodeConfig(frameData: FrameData): Int {
-        return subscriptionManager.importQrCode(frameData)
+        return subscriptionRepository.importQrCode(frameData)
     }
 
     override suspend fun getServerList(): List<String> {

@@ -20,7 +20,7 @@ import com.pet.vpn_client.data.config_formatter.TrojanFormatter
 import com.pet.vpn_client.data.config_formatter.VlessFormatter
 import com.pet.vpn_client.data.config_formatter.VmessFormatter
 import com.pet.vpn_client.data.config_formatter.WireguardFormatter
-import com.pet.vpn_client.domain.interfaces.ConfigManager
+import com.pet.vpn_client.domain.interfaces.repository.ConfigRepository
 import com.pet.vpn_client.domain.interfaces.KeyValueStorage
 import com.pet.vpn_client.domain.models.ConfigProfileItem
 import com.pet.vpn_client.domain.models.ConfigResult
@@ -32,7 +32,7 @@ import java.net.Inet6Address
 import java.net.InetAddress
 import javax.inject.Inject
 
-class ConfigManagerImpl @Inject constructor(
+class ConfigRepositoryImpl @Inject constructor(
     val storage: KeyValueStorage,
     val gson: Gson,
     val httpFormatter: HttpFormatter,
@@ -43,8 +43,7 @@ class ConfigManagerImpl @Inject constructor(
     val vmessFormatter: VmessFormatter,
     val wireguardFormatter: WireguardFormatter,
     val context: Context
-) : ConfigManager {
-
+) : ConfigRepository {
     private var initConfigCache: String? = null
 
     override fun getCoreConfig(guid: String): ConfigResult {
@@ -415,24 +414,17 @@ class ConfigManagerImpl @Inject constructor(
 
     private fun resolveHostToIP(host: String): List<String>? {
         try {
-            // If it's already an IP address, return it as a list
             if (Utils.isPureIpAddress(host)) {
                 return null
             }
 
-            // Get all IP addresses
             val addresses = InetAddress.getAllByName(host)
             if (addresses.isEmpty()) {
                 return null
             }
 
-            // Sort addresses based on preference
             val sortedAddresses = addresses.sortedWith(compareBy { it is Inet6Address })
-
             val ipList = sortedAddresses.mapNotNull { it.hostAddress }
-
-            Log.i(Constants.TAG, "Resolved IPs for $host: ${ipList.joinToString()}")
-
             return ipList
         } catch (e: Exception) {
             Log.e(Constants.TAG, "Failed to resolve host to IP", e)

@@ -14,7 +14,7 @@ import android.util.Log
 import com.pet.vpn_client.core.utils.Constants
 import com.pet.vpn_client.domain.interfaces.KeyValueStorage
 import com.pet.vpn_client.domain.interfaces.ServiceManager
-import com.pet.vpn_client.domain.interfaces.SettingsManager
+import com.pet.vpn_client.domain.interfaces.repository.SettingsRepository
 import com.pet.vpn_client.domain.interfaces.repository.ServiceStateRepository
 import com.pet.vpn_client.domain.state.ServiceState
 import com.pet.vpn_client.framework.notification.NotificationFactory
@@ -34,7 +34,7 @@ class VPNService : VpnService() {
     lateinit var serviceManager: ServiceManager
 
     @Inject
-    lateinit var settingsManager: SettingsManager
+    lateinit var settingsRepository: SettingsRepository
 
     @Inject
     lateinit var notificationFactory: NotificationFactory

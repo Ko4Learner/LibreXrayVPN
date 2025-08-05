@@ -3,14 +3,14 @@ package com.pet.vpn_client.data.repository_impl
 import com.google.gson.Gson
 import com.pet.vpn_client.core.utils.Constants
 import com.pet.vpn_client.domain.interfaces.KeyValueStorage
-import com.pet.vpn_client.domain.interfaces.SettingsManager
+import com.pet.vpn_client.domain.interfaces.repository.SettingsRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import java.util.Locale
 import javax.inject.Inject
 
-class SettingsManagerImpl @Inject constructor(val storage: KeyValueStorage, val gson: Gson) :
-    SettingsManager {
+class SettingsRepositoryImpl @Inject constructor(val storage: KeyValueStorage, val gson: Gson) :
+    SettingsRepository {
     private val _localeFlow = MutableStateFlow(getLocale())
     override fun observeLocale(): Flow<Locale> = _localeFlow
 

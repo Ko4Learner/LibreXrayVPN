@@ -10,36 +10,19 @@ import java.net.URLDecoder
 
 object Utils {
     private val IPV4_REGEX =
-        Regex("^([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\\.([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\\.([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\\.([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])$")
-    private val IPV6_REGEX = Regex("^((?:[0-9A-Fa-f]{1,4}))?((?::[0-9A-Fa-f]{1,4}))*::((?:[0-9A-Fa-f]{1,4}))?((?::[0-9A-Fa-f]{1,4}))*|((?:[0-9A-Fa-f]{1,4}))((?::[0-9A-Fa-f]{1,4})){7}$")
+        Regex("^(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])(\\.(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])){3}$")
+    private val IPV6_REGEX = Regex(
+        "^([0-9A-Fa-f]{1,4})?(:[0-9A-Fa-f]{1,4})*::([0-9A-Fa-f]{1,4})?(:[0-9A-Fa-f]{1,4})*|([0-9A-Fa-f]{1,4})(:[0-9A-Fa-f]{1,4}){7}$"
+    )
 
-    /**
-     * Parse a string to an integer with a default value.
-     *
-     * @param str The string to parse.
-     * @param default The default value if parsing fails.
-     * @return The parsed integer, or the default value if parsing fails.
-     */
     fun parseInt(str: String?, default: Int = 0): Int {
         return str?.toIntOrNull() ?: default
     }
 
-    /**
-     * Decode a base64 encoded string.
-     *
-     * @param text The base64 encoded string.
-     * @return The decoded string, or an empty string if decoding fails.
-     */
     fun decode(text: String?): String {
         return tryDecodeBase64(text) ?: text?.trimEnd('=')?.let { tryDecodeBase64(it) }.orEmpty()
     }
 
-    /**
-     * Try to decode a base64 encoded string.
-     *
-     * @param text The base64 encoded string.
-     * @return The decoded string, or null if decoding fails.
-     */
     fun tryDecodeBase64(text: String?): String? {
         if (text.isNullOrEmpty()) return null
 
@@ -56,13 +39,6 @@ object Utils {
         return null
     }
 
-
-    /**
-     * Check if a string is a valid IP address.
-     *
-     * @param value The string to check.
-     * @return True if the string is a valid IP address, false otherwise.
-     */
     fun isIpAddress(value: String?): Boolean {
         if (value.isNullOrEmpty()) return false
 
@@ -100,32 +76,14 @@ object Utils {
         }
     }
 
-    /**
-     * Check if a string is a pure IP address (IPv4 or IPv6).
-     *
-     * @param value The string to check.
-     * @return True if the string is a pure IP address, false otherwise.
-     */
     fun isPureIpAddress(value: String): Boolean {
         return isIpv4Address(value) || isIpv6Address(value)
     }
 
-    /**
-     * Check if a string is a valid IPv4 address.
-     *
-     * @param value The string to check.
-     * @return True if the string is a valid IPv4 address, false otherwise.
-     */
     private fun isIpv4Address(value: String): Boolean {
         return IPV4_REGEX.matches(value)
     }
 
-    /**
-     * Check if a string is a valid IPv6 address.
-     *
-     * @param value The string to check.
-     * @return True if the string is a valid IPv6 address, false otherwise.
-     */
     private fun isIpv6Address(value: String): Boolean {
         var addr = value
         if (addr.startsWith("[") && addr.endsWith("]")) {
@@ -134,12 +92,6 @@ object Utils {
         return IPV6_REGEX.matches(addr)
     }
 
-    /**
-     * Check if a string is a valid URL.
-     *
-     * @param value The string to check.
-     * @return True if the string is a valid URL, false otherwise.
-     */
     fun isValidUrl(value: String?): Boolean {
         if (value.isNullOrEmpty()) return false
 
@@ -153,12 +105,6 @@ object Utils {
         }
     }
 
-    /**
-     * Decode a URL-encoded string.
-     *
-     * @param url The URL-encoded string.
-     * @return The decoded string, or the original string if decoding fails.
-     */
     fun urlDecode(url: String): String {
         return try {
             URLDecoder.decode(url, Charsets.UTF_8.toString())
@@ -168,13 +114,6 @@ object Utils {
         }
     }
 
-    /**
-     * Read text from an asset file.
-     *
-     * @param context The context to use.
-     * @param fileName The name of the asset file.
-     * @return The content of the asset file as a string.
-     */
     fun readTextFromAssets(context: Context?, fileName: String): String {
         if (context == null) return ""
 
@@ -190,12 +129,6 @@ object Utils {
         }
     }
 
-    /**
-     * Get the path to the user asset directory.
-     *
-     * @param context The context to use.
-     * @return The path to the user asset directory.
-     */
     fun userAssetPath(context: Context?): String {
         if (context == null) return ""
 
@@ -208,11 +141,6 @@ object Utils {
         }
     }
 
-    /**
-     * Get the device ID for XUDP base key.
-     *
-     * @return The device ID for XUDP base key.
-     */
     fun getDeviceIdForXUDPBaseKey(): String {
         return try {
             val androidId = Settings.Secure.ANDROID_ID.toByteArray(Charsets.UTF_8)
@@ -223,12 +151,6 @@ object Utils {
         }
     }
 
-    /**
-     * Get the IPv6 address in a formatted string.
-     *
-     * @param address The IPv6 address.
-     * @return The formatted IPv6 address, or the original address if not valid.
-     */
     fun getIpv6Address(address: String?): String {
         if (address.isNullOrEmpty()) return ""
 
@@ -239,12 +161,6 @@ object Utils {
         }
     }
 
-    /**
-     * Fix illegal characters in a URL.
-     *
-     * @param str The URL string.
-     * @return The URL string with illegal characters replaced.
-     */
     fun fixIllegalUrl(str: String): String {
         return str.replace(" ", "%20")
             .replace("|", "%7C")

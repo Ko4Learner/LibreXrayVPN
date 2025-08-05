@@ -10,15 +10,15 @@ import com.pet.vpn_client.data.config_formatter.VlessFormatter
 import com.pet.vpn_client.data.config_formatter.VmessFormatter
 import com.pet.vpn_client.data.config_formatter.WireguardFormatter
 import com.pet.vpn_client.data.mmkv.MMKVStorage
-import com.pet.vpn_client.data.repository_impl.ConfigManagerImpl
-import com.pet.vpn_client.data.repository_impl.SettingsManagerImpl
-import com.pet.vpn_client.data.repository_impl.SubscriptionManagerImpl
+import com.pet.vpn_client.data.repository_impl.ConfigRepositoryImpl
+import com.pet.vpn_client.data.repository_impl.SettingsRepositoryImpl
+import com.pet.vpn_client.data.repository_impl.SubscriptionRepositoryImpl
 import com.pet.vpn_client.domain.interactor_impl.ConfigInteractorImpl
 import com.pet.vpn_client.domain.interactor_impl.SettingsInteractorImpl
-import com.pet.vpn_client.domain.interfaces.ConfigManager
+import com.pet.vpn_client.domain.interfaces.repository.ConfigRepository
 import com.pet.vpn_client.domain.interfaces.KeyValueStorage
-import com.pet.vpn_client.domain.interfaces.SettingsManager
-import com.pet.vpn_client.domain.interfaces.SubscriptionManager
+import com.pet.vpn_client.domain.interfaces.repository.SettingsRepository
+import com.pet.vpn_client.domain.interfaces.repository.SubscriptionRepository
 import com.pet.vpn_client.domain.interfaces.interactor.ConfigInteractor
 import com.pet.vpn_client.domain.interfaces.interactor.SettingsInteractor
 import dagger.Module
@@ -35,17 +35,17 @@ object DataModule {
     @Provides
     @Singleton
     fun provideConfigInteractor(
-        subscriptionManager: SubscriptionManager,
+        subscriptionRepository: SubscriptionRepository,
         keyValueStorage: KeyValueStorage
-    ): ConfigInteractor = ConfigInteractorImpl(subscriptionManager, keyValueStorage)
+    ): ConfigInteractor = ConfigInteractorImpl(subscriptionRepository, keyValueStorage)
 
 
     @Provides
     @Singleton
     fun provideSettingsInteractor(
-        settingsManager: SettingsManager
+        settingsRepository: SettingsRepository
     ): SettingsInteractor =
-        SettingsInteractorImpl(settingsManager)
+        SettingsInteractorImpl(settingsRepository)
 
     @Provides
     @Singleton
@@ -69,8 +69,8 @@ object DataModule {
         vmessFormatter: VmessFormatter,
         wireguardFormatter: WireguardFormatter,
         @ApplicationContext context: Context
-    ): ConfigManager =
-        ConfigManagerImpl(
+    ): ConfigRepository =
+        ConfigRepositoryImpl(
             storage,
             gson,
             httpFormatter,
@@ -88,7 +88,7 @@ object DataModule {
     fun provideSubscriptionManager(
         storage: KeyValueStorage,
         gson: Gson,
-        configManager: ConfigManager,
+        configRepository: ConfigRepository,
         shadowsocksFormatter: ShadowsocksFormatter,
         socksFormatter: SocksFormatter,
         trojanFormatter: TrojanFormatter,
@@ -96,10 +96,10 @@ object DataModule {
         vmessFormatter: VmessFormatter,
         wireguardFormatter: WireguardFormatter,
         @ApplicationContext context: Context
-    ): SubscriptionManager = SubscriptionManagerImpl(
+    ): SubscriptionRepository = SubscriptionRepositoryImpl(
         storage,
         gson,
-        configManager,
+        configRepository,
         shadowsocksFormatter,
         socksFormatter,
         trojanFormatter,
@@ -111,6 +111,6 @@ object DataModule {
 
     @Provides
     @Singleton
-    fun provideSettingsManager(storage: KeyValueStorage, gson: Gson): SettingsManager =
-        SettingsManagerImpl(storage, gson)
+    fun provideSettingsRepository(storage: KeyValueStorage, gson: Gson): SettingsRepository =
+        SettingsRepositoryImpl(storage, gson)
 }

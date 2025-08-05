@@ -10,7 +10,7 @@ import android.content.Intent
 import androidx.core.app.NotificationCompat
 import com.pet.vpn_client.core.R
 import com.pet.vpn_client.core.utils.LocaleHelper
-import com.pet.vpn_client.domain.interfaces.SettingsManager
+import com.pet.vpn_client.domain.interfaces.repository.SettingsRepository
 import com.pet.vpn_client.framework.services.VPNService
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
@@ -18,10 +18,10 @@ import javax.inject.Inject
 class NotificationFactory @Inject constructor(
     @ApplicationContext private val context: Context,
     val pendingIntentProvider: PendingIntentProvider,
-    val settingsManager: SettingsManager
+    val settingsRepository: SettingsRepository
 ) {
     fun createNotification(title: String): Notification {
-        val locale = settingsManager.getLocale()
+        val locale = settingsRepository.getLocale()
         val localizedContext = LocaleHelper.updateLocale(context, locale)
         val channelId = "Vpn_Client"
         val notificationManager =
