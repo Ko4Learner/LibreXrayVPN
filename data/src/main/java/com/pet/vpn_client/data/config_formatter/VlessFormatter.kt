@@ -1,6 +1,5 @@
 package com.pet.vpn_client.data.config_formatter
 
-import com.pet.vpn_client.core.utils.Constants
 import com.pet.vpn_client.domain.interfaces.ConfigManager
 import com.pet.vpn_client.domain.models.XrayConfig.OutboundBean
 import com.pet.vpn_client.domain.interfaces.KeyValueStorage
@@ -34,13 +33,6 @@ class VlessFormatter @Inject constructor(
         getItemFormQuery(config, queryParam, allowInsecure)
 
         return config
-    }
-
-    fun toUri(config: ConfigProfileItem): String {
-        val dicQuery = getQueryDic(config)
-        dicQuery["encryption"] = config.method ?: "none"
-
-        return toUri(config, config.password, dicQuery)
     }
 
     fun toOutbound(profileItem: ConfigProfileItem): OutboundBean? {

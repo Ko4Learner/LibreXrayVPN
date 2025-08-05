@@ -1,6 +1,5 @@
 package com.pet.vpn_client.domain.models
 
-import com.google.gson.annotations.SerializedName
 import com.pet.vpn_client.core.utils.Constants
 
 data class XrayConfig(
@@ -169,13 +168,11 @@ data class XrayConfig(
                         val method: String? = null
                     ) {
                         data class HeadersBean(
-                            var host: List<String>? = ArrayList(),
-                            @SerializedName("User-Agent")
+                            var Host: List<String>? = ArrayList(),
                             val userAgent: List<String>? = null,
-                            @SerializedName("Accept-Encoding")
                             val acceptEncoding: List<String>? = null,
-                            val connection: List<String>? = null,
-                            val pragma: String? = null
+                            val Connection: List<String>? = null,
+                            val Pragma: String? = null
                         )
                     }
                 }
@@ -205,7 +202,7 @@ data class XrayConfig(
                 val useBrowserForwarding: Boolean? = null,
                 val acceptProxyProtocol: Boolean? = null
             ) {
-                data class HeadersBean(var host: String = "")
+                data class HeadersBean(var Host: String = "")
             }
 
             data class HttpupgradeSettingsBean(
@@ -227,7 +224,7 @@ data class XrayConfig(
             )
 
             data class SockoptBean(
-                var tcpNoDelay: Boolean? = null,
+                var TcpNoDelay: Boolean? = null,
                 var tcpKeepAliveIdle: Int? = null,
                 var tcpFastOpen: Boolean? = null,
                 var tproxy: String? = null,
@@ -267,8 +264,8 @@ data class XrayConfig(
                 var serviceName: String = "",
                 var authority: String? = null,
                 var multiMode: Boolean? = null,
-                var idleTimeout: Int? = null,
-                var healthCheckTimeout: Int? = null
+                var idle_timeout: Int? = null,
+                var health_check_timeout: Int? = null
             )
         }
 

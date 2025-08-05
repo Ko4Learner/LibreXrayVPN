@@ -10,8 +10,4 @@ enum class EConfigType(val value: Int, val protocolScheme: String) {
     TROJAN(5, Constants.TROJAN),
     WIREGUARD(6, Constants.WIREGUARD),
     HTTP(7, Constants.HTTP);
-
-    companion object {
-        fun fromInt(value: Int) = entries.firstOrNull { it.value == value }
-    }
 }

@@ -41,12 +41,6 @@ class TrojanFormatter @Inject constructor(
         return config
     }
 
-    fun toUri(config: ConfigProfileItem): String {
-        val dicQuery = getQueryDic(config)
-
-        return toUri(config, config.password, dicQuery)
-    }
-
     fun toOutbound(profileItem: ConfigProfileItem): OutboundBean? {
         val outboundBean = configManager.get().createInitOutbound(EConfigType.TROJAN)
 

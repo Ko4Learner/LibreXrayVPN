@@ -10,10 +10,8 @@ import com.pet.vpn_client.domain.interfaces.KeyValueStorage
 import com.pet.vpn_client.domain.models.ConfigProfileItem
 import com.pet.vpn_client.domain.models.EConfigType
 import com.pet.vpn_client.domain.models.NetworkType
-import com.pet.vpn_client.domain.models.VmessQRCode
 import com.pet.vpn_client.core.utils.Utils
 import com.pet.vpn_client.core.utils.idnHost
-import com.pet.vpn_client.core.utils.isNotNullEmpty
 import java.net.URI
 import javax.inject.Inject
 import javax.inject.Provider
@@ -56,7 +54,7 @@ class VmessFormatter @Inject constructor(
         config.method =
             if (TextUtils.isEmpty(vmessQRCode.scy)) Constants.DEFAULT_SECURITY else vmessQRCode.scy
 
-        config.network = vmessQRCode.net ?: NetworkType.TCP.type
+        config.network = vmessQRCode.net.ifEmpty { NetworkType.TCP.type }
         config.headerType = vmessQRCode.type
         config.host = vmessQRCode.host
         config.path = vmessQRCode.path
@@ -82,45 +80,6 @@ class VmessFormatter @Inject constructor(
         config.alpn = vmessQRCode.alpn
 
         return config
-    }
-
-    fun toUri(config: ConfigProfileItem): String {
-        val vmessQRCode = VmessQRCode()
-
-        vmessQRCode.v = "2"
-        vmessQRCode.ps = config.remarks
-        vmessQRCode.add = config.server.orEmpty()
-        vmessQRCode.port = config.serverPort.orEmpty()
-        vmessQRCode.id = config.password.orEmpty()
-        vmessQRCode.scy = config.method.orEmpty()
-        vmessQRCode.aid = "0"
-
-        vmessQRCode.net = config.network.orEmpty()
-        vmessQRCode.type = config.headerType.orEmpty()
-        when (NetworkType.fromString(config.network)) {
-            NetworkType.KCP -> {
-                vmessQRCode.path = config.seed.orEmpty()
-            }
-
-            NetworkType.GRPC -> {
-                vmessQRCode.type = config.mode.orEmpty()
-                vmessQRCode.path = config.serviceName.orEmpty()
-                vmessQRCode.host = config.authority.orEmpty()
-            }
-
-            else -> {}
-        }
-
-        config.host.let { if (it.isNotNullEmpty()) vmessQRCode.host = it.orEmpty() }
-        config.path.let { if (it.isNotNullEmpty()) vmessQRCode.path = it.orEmpty() }
-
-        vmessQRCode.tls = config.security.orEmpty()
-        vmessQRCode.sni = config.sni.orEmpty()
-        vmessQRCode.fp = config.fingerPrint.orEmpty()
-        vmessQRCode.alpn = config.alpn.orEmpty()
-
-        val json = gson.toJson(vmessQRCode)
-        return Utils.encode(json)
     }
 
     fun parseVmessStd(str: String): ConfigProfileItem? {
@@ -163,3 +122,21 @@ class VmessFormatter @Inject constructor(
         return outboundBean
     }
 }
+
+data class VmessQRCode(
+    var v: String = "",
+    var ps: String = "",
+    var add: String = "",
+    var port: String = "",
+    var id: String = "",
+    var aid: String = "0",
+    var scy: String = "",
+    var net: String = "",
+    var type: String = "",
+    var host: String = "",
+    var path: String = "",
+    var tls: String = "",
+    var sni: String = "",
+    var alpn: String = "",
+    var fp: String = ""
+)

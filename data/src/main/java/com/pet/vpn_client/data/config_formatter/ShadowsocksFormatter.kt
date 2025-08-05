@@ -14,7 +14,6 @@ import javax.inject.Inject
 import javax.inject.Provider
 
 class ShadowsocksFormatter @Inject constructor(private val configManager: Provider<ConfigManager>) : BaseFormatter() {
-
     fun parse(str: String): ConfigProfileItem? {
         return parseSip002(str) ?: parseLegacy(str)
     }
@@ -96,12 +95,6 @@ class ShadowsocksFormatter @Inject constructor(private val configManager: Provid
         config.method = match.groupValues[1].lowercase()
 
         return config
-    }
-
-    fun toUri(config: ConfigProfileItem): String {
-        val pw = "${config.method}:${config.password}"
-
-        return toUri(config, Utils.encode(pw), null)
     }
 
     fun toOutbound(profileItem: ConfigProfileItem): OutboundBean? {

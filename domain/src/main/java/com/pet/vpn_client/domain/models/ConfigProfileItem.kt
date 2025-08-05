@@ -1,8 +1,5 @@
 package com.pet.vpn_client.domain.models
 
-import com.pet.vpn_client.core.utils.Constants
-import com.pet.vpn_client.core.utils.Utils
-
 data class ConfigProfileItem(
     val configType: EConfigType,
     var subscriptionId: String = "",
@@ -54,17 +51,6 @@ data class ConfigProfileItem(
     var bandwidthUp: String? = null,
 ) {
 
-    fun getAllOutboundTags(): MutableList<String> {
-        return mutableListOf(Constants.TAG_PROXY, Constants.TAG_DIRECT, Constants.TAG_BLOCKED)
-    }
-
-    fun getServerAddressAndPort(): String {
-//        if (server.isNullOrEmpty() && configType == EConfigType.CUSTOM) {
-//            return "${Constants.LOOPBACK}:${Constants.PORT_SOCKS}"
-//        }
-        return Utils.getIpv6Address(server) + ":" + serverPort
-    }
-
     override fun equals(other: Any?): Boolean {
         if (other == null) return false
         val obj = other as ConfigProfileItem
@@ -111,5 +97,50 @@ data class ConfigProfileItem(
         fun create(configType: EConfigType): ConfigProfileItem {
             return ConfigProfileItem(configType = configType)
         }
+    }
+
+    override fun hashCode(): Int {
+        var result = addedTime.hashCode()
+        result = 31 * result + (insecure?.hashCode() ?: 0)
+        result = 31 * result + (mtu ?: 0)
+        result = 31 * result + configType.hashCode()
+        result = 31 * result + subscriptionId.hashCode()
+        result = 31 * result + remarks.hashCode()
+        result = 31 * result + (server?.hashCode() ?: 0)
+        result = 31 * result + (serverPort?.hashCode() ?: 0)
+        result = 31 * result + (password?.hashCode() ?: 0)
+        result = 31 * result + (method?.hashCode() ?: 0)
+        result = 31 * result + (flow?.hashCode() ?: 0)
+        result = 31 * result + (username?.hashCode() ?: 0)
+        result = 31 * result + (network?.hashCode() ?: 0)
+        result = 31 * result + (headerType?.hashCode() ?: 0)
+        result = 31 * result + (host?.hashCode() ?: 0)
+        result = 31 * result + (path?.hashCode() ?: 0)
+        result = 31 * result + (seed?.hashCode() ?: 0)
+        result = 31 * result + (quicSecurity?.hashCode() ?: 0)
+        result = 31 * result + (quicKey?.hashCode() ?: 0)
+        result = 31 * result + (mode?.hashCode() ?: 0)
+        result = 31 * result + (serviceName?.hashCode() ?: 0)
+        result = 31 * result + (authority?.hashCode() ?: 0)
+        result = 31 * result + (xhttpMode?.hashCode() ?: 0)
+        result = 31 * result + (xhttpExtra?.hashCode() ?: 0)
+        result = 31 * result + (security?.hashCode() ?: 0)
+        result = 31 * result + (sni?.hashCode() ?: 0)
+        result = 31 * result + (alpn?.hashCode() ?: 0)
+        result = 31 * result + (fingerPrint?.hashCode() ?: 0)
+        result = 31 * result + (publicKey?.hashCode() ?: 0)
+        result = 31 * result + (shortId?.hashCode() ?: 0)
+        result = 31 * result + (spiderX?.hashCode() ?: 0)
+        result = 31 * result + (secretKey?.hashCode() ?: 0)
+        result = 31 * result + (preSharedKey?.hashCode() ?: 0)
+        result = 31 * result + (localAddress?.hashCode() ?: 0)
+        result = 31 * result + (reserved?.hashCode() ?: 0)
+        result = 31 * result + (obfsPassword?.hashCode() ?: 0)
+        result = 31 * result + (portHopping?.hashCode() ?: 0)
+        result = 31 * result + (portHoppingInterval?.hashCode() ?: 0)
+        result = 31 * result + (pinSHA256?.hashCode() ?: 0)
+        result = 31 * result + (bandwidthDown?.hashCode() ?: 0)
+        result = 31 * result + (bandwidthUp?.hashCode() ?: 0)
+        return result
     }
 }

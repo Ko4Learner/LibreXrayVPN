@@ -9,7 +9,6 @@ import javax.inject.Inject
 import javax.inject.Provider
 
 class HttpFormatter @Inject constructor(val configManager: Provider<ConfigManager>) : BaseFormatter() {
-
     fun toOutbound(profileItem: ConfigProfileItem): OutboundBean? {
         val outboundBean = configManager.get().createInitOutbound(EConfigType.HTTP)
 
@@ -23,7 +22,6 @@ class HttpFormatter @Inject constructor(val configManager: Provider<ConfigManage
                 server.users = listOf(socksUsersBean)
             }
         }
-
         return outboundBean
     }
 }

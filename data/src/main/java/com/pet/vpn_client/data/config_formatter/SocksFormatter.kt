@@ -35,16 +35,6 @@ class SocksFormatter @Inject constructor(val configManager: Provider<ConfigManag
         return config
     }
 
-    fun toUri(config: ConfigProfileItem): String {
-        val pw =
-            if (config.username.isNotNullEmpty())
-                "${config.username}:${config.password}"
-            else
-                ":"
-
-        return toUri(config, Utils.encode(pw), null)
-    }
-
     fun toOutbound(profileItem: ConfigProfileItem): OutboundBean? {
         val outboundBean = configManager.get().createInitOutbound(EConfigType.SOCKS)
 

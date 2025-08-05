@@ -4,6 +4,13 @@ import android.content.Context
 import android.text.TextUtils
 import android.util.Log
 import com.google.gson.Gson
+import com.google.gson.GsonBuilder
+import com.google.gson.JsonObject
+import com.google.gson.JsonParser
+import com.google.gson.JsonPrimitive
+import com.google.gson.JsonSerializationContext
+import com.google.gson.JsonSerializer
+import com.google.gson.reflect.TypeToken
 import com.pet.vpn_client.core.utils.Constants
 import com.pet.vpn_client.domain.models.XrayConfig
 import com.pet.vpn_client.data.config_formatter.HttpFormatter
@@ -19,9 +26,10 @@ import com.pet.vpn_client.domain.models.ConfigProfileItem
 import com.pet.vpn_client.domain.models.ConfigResult
 import com.pet.vpn_client.domain.models.EConfigType
 import com.pet.vpn_client.domain.models.NetworkType
-import com.pet.vpn_client.core.utils.HttpUtil
-import com.pet.vpn_client.core.utils.JsonUtil
 import com.pet.vpn_client.core.utils.Utils
+import java.lang.reflect.Type
+import java.net.Inet6Address
+import java.net.InetAddress
 import javax.inject.Inject
 
 class ConfigManagerImpl @Inject constructor(
@@ -79,7 +87,7 @@ class ConfigManagerImpl @Inject constructor(
         resolveOutboundDomainsToHosts(xRayConfig)
 
         result.status = true
-        result.content = JsonUtil.toJsonPretty(xRayConfig) ?: ""
+        result.content = toJsonPretty(xRayConfig) ?: ""
         result.guid = guid
         return result
     }
@@ -167,7 +175,7 @@ class ConfigManagerImpl @Inject constructor(
                 && outbound.streamSettings?.tcpSettings?.header?.type == Constants.HEADER_TYPE_HTTP
             ) {
                 val path = outbound.streamSettings?.tcpSettings?.header?.request?.path
-                val host = outbound.streamSettings?.tcpSettings?.header?.request?.headers?.host
+                val host = outbound.streamSettings?.tcpSettings?.header?.request?.headers?.Host
 
                 val requestString: String by lazy {
                     STEALTH_HTTP_HEADERS_JSON
@@ -182,7 +190,7 @@ class ConfigManagerImpl @Inject constructor(
                     } else {
                         path
                     }
-                outbound.streamSettings?.tcpSettings?.header?.request?.headers?.host = host
+                outbound.streamSettings?.tcpSettings?.header?.request?.headers?.Host = host
             }
 
 
@@ -204,7 +212,7 @@ class ConfigManagerImpl @Inject constructor(
             if (domain.isNullOrEmpty()) continue
             if (newHosts.containsKey(domain)) continue
 
-            val resolvedIps = HttpUtil.resolveHostToIP(domain, false)
+            val resolvedIps = resolveHostToIP(domain)
             if (resolvedIps.isNullOrEmpty()) continue
 
             item.ensureSockopt().domainStrategy = "UseIPv4v6"
@@ -289,12 +297,12 @@ class ConfigManagerImpl @Inject constructor(
                     if (!TextUtils.isEmpty(host) || !TextUtils.isEmpty(path)) {
                         val requestObj =
                             XrayConfig.OutboundBean.StreamSettingsBean.TcpSettingsBean.HeaderBean.RequestBean()
-                        requestObj.headers.host =
+                        requestObj.headers.Host =
                             host.orEmpty().split(",").map { it.trim() }.filter { it.isNotEmpty() }
                         requestObj.path =
                             path.orEmpty().split(",").map { it.trim() }.filter { it.isNotEmpty() }
                         tcpSetting.header.request = requestObj
-                        sni = requestObj.headers.host?.getOrNull(0)
+                        sni = requestObj.headers.Host?.getOrNull(0)
                     }
                 } else {
                     tcpSetting.header.type = "none"
@@ -321,7 +329,7 @@ class ConfigManagerImpl @Inject constructor(
 
             NetworkType.WS.type -> {
                 val wssetting = XrayConfig.OutboundBean.StreamSettingsBean.WsSettingsBean()
-                wssetting.headers.host = host.orEmpty()
+                wssetting.headers.Host = host.orEmpty()
                 sni = host
                 wssetting.path = path ?: "/"
                 streamSettings.wsSettings = wssetting
@@ -342,7 +350,7 @@ class ConfigManagerImpl @Inject constructor(
                 sni = host
                 xhttpSetting.path = path ?: "/"
                 xhttpSetting.mode = xhttpMode
-                xhttpSetting.extra = JsonUtil.parseString(xhttpExtra)
+                xhttpSetting.extra = parseString(xhttpExtra)
                 streamSettings.xhttpSettings = xhttpSetting
             }
 
@@ -361,8 +369,8 @@ class ConfigManagerImpl @Inject constructor(
                 grpcSetting.multiMode = mode == "multi"
                 grpcSetting.serviceName = serviceName.orEmpty()
                 grpcSetting.authority = authority.orEmpty()
-                grpcSetting.idleTimeout = 60
-                grpcSetting.healthCheckTimeout = 20
+                grpcSetting.idle_timeout = 60
+                grpcSetting.health_check_timeout = 20
                 sni = authority
                 streamSettings.grpcSettings = grpcSetting
             }
@@ -405,9 +413,65 @@ class ConfigManagerImpl @Inject constructor(
         }
     }
 
+    private fun resolveHostToIP(host: String): List<String>? {
+        try {
+            // If it's already an IP address, return it as a list
+            if (Utils.isPureIpAddress(host)) {
+                return null
+            }
+
+            // Get all IP addresses
+            val addresses = InetAddress.getAllByName(host)
+            if (addresses.isEmpty()) {
+                return null
+            }
+
+            // Sort addresses based on preference
+            val sortedAddresses = addresses.sortedWith(compareBy { it is Inet6Address })
+
+            val ipList = sortedAddresses.mapNotNull { it.hostAddress }
+
+            Log.i(Constants.TAG, "Resolved IPs for $host: ${ipList.joinToString()}")
+
+            return ipList
+        } catch (e: Exception) {
+            Log.e(Constants.TAG, "Failed to resolve host to IP", e)
+            return null
+        }
+    }
+
+    private fun toJsonPretty(src: Any?): String? {
+        if (src == null)
+            return null
+        val gsonPre = GsonBuilder()
+            .setPrettyPrinting()
+            .disableHtmlEscaping()
+            .registerTypeAdapter( // custom serializer is needed here since JSON by default parse number as Double, core will fail to start
+                object : TypeToken<Double>() {}.type,
+                JsonSerializer { src: Double?, _: Type?, _: JsonSerializationContext? ->
+                    JsonPrimitive(
+                        src?.toInt()
+                    )
+                }
+            )
+            .create()
+        return gsonPre.toJson(src)
+    }
+
+    private fun parseString(src: String?): JsonObject? {
+        if (src == null)
+            return null
+        try {
+            return JsonParser.parseString(src).getAsJsonObject()
+        } catch (e: Exception) {
+            Log.e(Constants.TAG, "Failed to parse JSON string", e)
+            return null
+        }
+    }
+
     companion object {
         private const val STEALTH_HTTP_HEADERS_JSON =
-            """{"version":"1.1","method":"GET","headers":{"User-Agent":["Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.6478.122 Mobile Safari/537.36"],"Accept":["text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8"],"Accept-Encoding":["gzip, deflate, br"],"Accept-Language":["ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7"],"Connection":["keep-alive"],"Upgrade-Insecure-Requests":["1"],"Sec-Fetch-Site":["none"],"Sec-Fetch-Mode":["navigate"],"Sec-Fetch-User":["?1"],"Sec-Fetch-Dest":["document"],"Pragma":["no-cache"],"Cache-Control":["no-cache"]}}"""
+            """{"version":"1.1","method":"GET","headers":{"userAgent":["Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.6478.122 Mobile Safari/537.36"],"Accept":["text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8"],"acceptEncoding":["gzip, deflate, br"],"Accept-Language":["ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7"],"Connection":["keep-alive"],"Upgrade-Insecure-Requests":["1"],"Sec-Fetch-Site":["none"],"Sec-Fetch-Mode":["navigate"],"Sec-Fetch-User":["?1"],"Sec-Fetch-Dest":["document"],"Pragma":["no-cache"],"Cache-Control":["no-cache"]}}"""
         private const val LOG_LEVEL = "warning"
         private const val EMPTY_CONFIG = "xRay_config.json"
     }

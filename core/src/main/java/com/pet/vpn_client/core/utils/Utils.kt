@@ -7,8 +7,6 @@ import android.util.Log
 import android.util.Patterns
 import android.webkit.URLUtil
 import java.net.URLDecoder
-import java.net.URLEncoder
-
 
 object Utils {
     private val IPV4_REGEX =
@@ -58,20 +56,6 @@ object Utils {
         return null
     }
 
-    /**
-     * Encode a string to base64.
-     *
-     * @param text The string to encode.
-     * @return The base64 encoded string, or an empty string if encoding fails.
-     */
-    fun encode(text: String): String {
-        return try {
-            Base64.encodeToString(text.toByteArray(Charsets.UTF_8), Base64.NO_WRAP)
-        } catch (e: Exception) {
-            Log.e(Constants.TAG, "Failed to encode text to base64", e)
-            ""
-        }
-    }
 
     /**
      * Check if a string is a valid IP address.
@@ -180,21 +164,6 @@ object Utils {
             URLDecoder.decode(url, Charsets.UTF_8.toString())
         } catch (e: Exception) {
             Log.e(Constants.TAG, "Failed to decode URL", e)
-            url
-        }
-    }
-
-    /**
-     * Encode a string to URL-encoded format.
-     *
-     * @param url The string to encode.
-     * @return The URL-encoded string, or the original string if encoding fails.
-     */
-    fun urlEncode(url: String): String {
-        return try {
-            URLEncoder.encode(url, Charsets.UTF_8.toString()).replace("+", "%20")
-        } catch (e: Exception) {
-            Log.e(Constants.TAG, "Failed to encode URL", e)
             url
         }
     }
