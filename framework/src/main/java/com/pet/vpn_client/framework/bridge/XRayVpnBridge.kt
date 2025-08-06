@@ -60,14 +60,14 @@ class XRayVpnBridge @Inject constructor(
         var time = -1L
 
         try {
-            time = coreController.measureDelay(Constants.DELAY_TEST_URL)
+            time = coreController.measureDelay(DELAY_TEST_URL)
         } catch (e: Exception) {
             Log.e(Constants.TAG, "Failed to measure delay with primary URL", e)
         }
 
         if (time == -1L) {
             try {
-                time = coreController.measureDelay(Constants.DELAY_TEST_URL2)
+                time = coreController.measureDelay(DELAY_TEST_URL2)
             } catch (e: Exception) {
                 Log.e(Constants.TAG, "Failed to measure delay with alternative URL", e)
             }
@@ -92,5 +92,10 @@ class XRayVpnBridge @Inject constructor(
         override fun onEmitStatus(l: Long, s: String?): Long {
             return 0
         }
+    }
+
+    companion object{
+        private const val DELAY_TEST_URL = "https://www.gstatic.com/generate_204"
+        private const val DELAY_TEST_URL2 = "https://www.google.com/generate_204"
     }
 }

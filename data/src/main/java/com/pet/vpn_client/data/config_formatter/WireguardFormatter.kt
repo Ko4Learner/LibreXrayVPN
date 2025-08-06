@@ -32,7 +32,7 @@ class WireguardFormatter @Inject constructor(
         config.localAddress = queryParam["address"] ?: Constants.WIREGUARD_LOCAL_ADDRESS_V4
         config.publicKey = queryParam["publickey"].orEmpty()
         config.preSharedKey = queryParam["presharedkey"]?.takeIf { it.isNotEmpty() }
-        config.mtu = Utils.parseInt(queryParam["mtu"] ?: Constants.WIREGUARD_LOCAL_MTU)
+        config.mtu = (queryParam["mtu"] ?: Constants.WIREGUARD_LOCAL_MTU).toIntOrNull() ?: 0
         config.reserved = queryParam["reserved"] ?: "0,0,0"
 
         return config

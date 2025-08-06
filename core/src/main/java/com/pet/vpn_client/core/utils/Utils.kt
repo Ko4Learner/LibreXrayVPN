@@ -1,7 +1,5 @@
 package com.pet.vpn_client.core.utils
 
-import android.content.Context
-import android.provider.Settings
 import android.util.Base64
 import android.util.Log
 import android.util.Patterns
@@ -14,10 +12,6 @@ object Utils {
     private val IPV6_REGEX = Regex(
         "^([0-9A-Fa-f]{1,4})?(:[0-9A-Fa-f]{1,4})*::([0-9A-Fa-f]{1,4})?(:[0-9A-Fa-f]{1,4})*|([0-9A-Fa-f]{1,4})(:[0-9A-Fa-f]{1,4}){7}$"
     )
-
-    fun parseInt(str: String?, default: Int = 0): Int {
-        return str?.toIntOrNull() ?: default
-    }
 
     fun decode(text: String?): String {
         return tryDecodeBase64(text) ?: text?.trimEnd('=')?.let { tryDecodeBase64(it) }.orEmpty()
@@ -41,12 +35,10 @@ object Utils {
 
     fun isIpAddress(value: String?): Boolean {
         if (value.isNullOrEmpty()) return false
-
         try {
             var addr = value.trim()
             if (addr.isEmpty()) return false
 
-            //CIDR
             if (addr.contains("/")) {
                 val arr = addr.split("/")
                 if (arr.size == 2 && arr[1].toIntOrNull() != null && arr[1].toInt() > -1) {
@@ -54,7 +46,6 @@ object Utils {
                 }
             }
 
-            // Handle IPv4-mapped IPv6 addresses
             if (addr.startsWith("::ffff:") && '.' in addr) {
                 addr = addr.drop(7)
             } else if (addr.startsWith("[::ffff:") && '.' in addr) {
@@ -80,18 +71,6 @@ object Utils {
         return isIpv4Address(value) || isIpv6Address(value)
     }
 
-    private fun isIpv4Address(value: String): Boolean {
-        return IPV4_REGEX.matches(value)
-    }
-
-    private fun isIpv6Address(value: String): Boolean {
-        var addr = value
-        if (addr.startsWith("[") && addr.endsWith("]")) {
-            addr = addr.drop(1).dropLast(1)
-        }
-        return IPV6_REGEX.matches(addr)
-    }
-
     fun isValidUrl(value: String?): Boolean {
         if (value.isNullOrEmpty()) return false
 
@@ -114,43 +93,6 @@ object Utils {
         }
     }
 
-    fun readTextFromAssets(context: Context?, fileName: String): String {
-        if (context == null) return ""
-
-        return try {
-            context.assets.open(fileName).use { inputStream ->
-                inputStream.bufferedReader().use { reader ->
-                    reader.readText()
-                }
-            }
-        } catch (e: Exception) {
-            Log.e(Constants.TAG, "Failed to read asset file: $fileName", e)
-            ""
-        }
-    }
-
-    fun userAssetPath(context: Context?): String {
-        if (context == null) return ""
-
-        return try {
-            context.getExternalFilesDir(Constants.DIR_ASSETS)?.absolutePath
-                ?: context.getDir(Constants.DIR_ASSETS, 0).absolutePath
-        } catch (e: Exception) {
-            Log.e(Constants.TAG, "Failed to get user asset path", e)
-            ""
-        }
-    }
-
-    fun getDeviceIdForXUDPBaseKey(): String {
-        return try {
-            val androidId = Settings.Secure.ANDROID_ID.toByteArray(Charsets.UTF_8)
-            Base64.encodeToString(androidId.copyOf(32), Base64.NO_PADDING.or(Base64.URL_SAFE))
-        } catch (e: Exception) {
-            Log.e(Constants.TAG, "Failed to generate device ID", e)
-            ""
-        }
-    }
-
     fun getIpv6Address(address: String?): String {
         if (address.isNullOrEmpty()) return ""
 
@@ -164,5 +106,17 @@ object Utils {
     fun fixIllegalUrl(str: String): String {
         return str.replace(" ", "%20")
             .replace("|", "%7C")
+    }
+
+    private fun isIpv4Address(value: String): Boolean {
+        return IPV4_REGEX.matches(value)
+    }
+
+    private fun isIpv6Address(value: String): Boolean {
+        var addr = value
+        if (addr.startsWith("[") && addr.endsWith("]")) {
+            addr = addr.drop(1).dropLast(1)
+        }
+        return IPV6_REGEX.matches(addr)
     }
 }

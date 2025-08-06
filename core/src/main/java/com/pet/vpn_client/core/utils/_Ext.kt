@@ -6,5 +6,3 @@ fun CharSequence?.isNotNullEmpty(): Boolean = this != null && this.isNotEmpty()
 
 val URI.idnHost: String
     get() = host?.replace("[", "")?.replace("]", "").orEmpty()
-
-fun String?.removeWhiteSpace(): String? = this?.replace(" ", "")

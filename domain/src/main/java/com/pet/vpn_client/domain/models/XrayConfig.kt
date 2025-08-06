@@ -19,7 +19,6 @@ data class XrayConfig(
     var observatory: Any? = null,
     var burstObservatory: Any? = null
 ) {
-
     data class LogBean(
         val access: String? = null,
         val error: String? = null,

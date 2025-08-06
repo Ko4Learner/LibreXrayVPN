@@ -93,7 +93,7 @@ class ConfigRepositoryImpl @Inject constructor(
     }
 
     private fun initXrayConfig(context: Context): XrayConfig? {
-        val assets = initConfigCache ?: Utils.readTextFromAssets(context, EMPTY_CONFIG)
+        val assets = initConfigCache ?: readTextFromAssets(context)
         if (TextUtils.isEmpty(assets)) {
             return null
         }
@@ -105,7 +105,7 @@ class ConfigRepositoryImpl @Inject constructor(
     private fun getInbounds(xrayConfig: XrayConfig): Boolean {
         try {
             xrayConfig.inbounds.forEach { curInbound ->
-                curInbound.listen = Constants.LOOPBACK
+                curInbound.listen = LOOPBACK
             }
             xrayConfig.inbounds[0].port = 10808
             xrayConfig.inbounds[0].sniffing?.enabled = true
@@ -133,16 +133,16 @@ class ConfigRepositoryImpl @Inject constructor(
 
     private fun getDns(xrayConfig: XrayConfig): Boolean {
         try {
-            val hosts = mutableMapOf<String, Any>().apply {
-                put(Constants.GOOGLEAPIS_CN_DOMAIN, Constants.GOOGLEAPIS_COM_DOMAIN)
-                put(Constants.DNS_ALIDNS_DOMAIN, Constants.DNS_ALIDNS_ADDRESSES)
-                put(Constants.DNS_CLOUDFLARE_DOMAIN, Constants.DNS_CLOUDFLARE_ADDRESSES)
-                put(Constants.DNS_DNSPOD_DOMAIN, Constants.DNS_DNSPOD_ADDRESSES)
-                put(Constants.DNS_GOOGLE_DOMAIN, Constants.DNS_GOOGLE_ADDRESSES)
-                put(Constants.DNS_QUAD9_DOMAIN, Constants.DNS_QUAD9_ADDRESSES)
-                put(Constants.DNS_YANDEX_DOMAIN, Constants.DNS_YANDEX_ADDRESSES)
-            }
-            val servers = arrayListOf<Any>(Constants.DNS_PROXY)
+            val hosts = mapOf(
+                GOOGLEAPIS_CN_DOMAIN to GOOGLEAPIS_COM_DOMAIN,
+                DNS_ALIDNS_DOMAIN to DNS_ALIDNS_ADDRESSES,
+                DNS_CLOUDFLARE_DOMAIN to DNS_CLOUDFLARE_ADDRESSES,
+                DNS_DNSPOD_DOMAIN to DNS_DNSPOD_ADDRESSES,
+                DNS_GOOGLE_DOMAIN to DNS_GOOGLE_ADDRESSES,
+                DNS_QUAD9_DOMAIN to DNS_QUAD9_ADDRESSES,
+                DNS_YANDEX_DOMAIN to DNS_YANDEX_ADDRESSES
+            )
+            val servers = arrayListOf<Any>(DNS_PROXY)
 
             xrayConfig.dns = XrayConfig.DnsBean(
                 servers = servers,
@@ -172,7 +172,7 @@ class ConfigRepositoryImpl @Inject constructor(
             }
 
             if (outbound.streamSettings?.network == Constants.DEFAULT_NETWORK
-                && outbound.streamSettings?.tcpSettings?.header?.type == Constants.HEADER_TYPE_HTTP
+                && outbound.streamSettings?.tcpSettings?.header?.type == HEADER_TYPE_HTTP
             ) {
                 val path = outbound.streamSettings?.tcpSettings?.header?.request?.path
                 val host = outbound.streamSettings?.tcpSettings?.header?.request?.headers?.Host
@@ -292,8 +292,8 @@ class ConfigRepositoryImpl @Inject constructor(
         when (streamSettings.network) {
             NetworkType.TCP.type -> {
                 val tcpSetting = XrayConfig.OutboundBean.StreamSettingsBean.TcpSettingsBean()
-                if (headerType == Constants.HEADER_TYPE_HTTP) {
-                    tcpSetting.header.type = Constants.HEADER_TYPE_HTTP
+                if (headerType == HEADER_TYPE_HTTP) {
+                    tcpSetting.header.type = HEADER_TYPE_HTTP
                     if (!TextUtils.isEmpty(host) || !TextUtils.isEmpty(path)) {
                         val requestObj =
                             XrayConfig.OutboundBean.StreamSettingsBean.TcpSettingsBean.HeaderBean.RequestBean()
@@ -462,10 +462,62 @@ class ConfigRepositoryImpl @Inject constructor(
         }
     }
 
+    private fun readTextFromAssets(context: Context?): String {
+        if (context == null) return ""
+
+        return try {
+            context.assets.open(EMPTY_CONFIG).use { inputStream ->
+                inputStream.bufferedReader().use { reader ->
+                    reader.readText()
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(Constants.TAG, "Failed to read asset file: $EMPTY_CONFIG", e)
+            ""
+        }
+    }
+
     companion object {
         private const val STEALTH_HTTP_HEADERS_JSON =
             """{"version":"1.1","method":"GET","headers":{"userAgent":["Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.6478.122 Mobile Safari/537.36"],"Accept":["text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8"],"acceptEncoding":["gzip, deflate, br"],"Accept-Language":["ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7"],"Connection":["keep-alive"],"Upgrade-Insecure-Requests":["1"],"Sec-Fetch-Site":["none"],"Sec-Fetch-Mode":["navigate"],"Sec-Fetch-User":["?1"],"Sec-Fetch-Dest":["document"],"Pragma":["no-cache"],"Cache-Control":["no-cache"]}}"""
         private const val LOG_LEVEL = "warning"
         private const val EMPTY_CONFIG = "xRay_config.json"
+        private const val LOOPBACK = "127.0.0.1"
+        private const val DNS_PROXY = "1.1.1.1"
+        private const val HEADER_TYPE_HTTP = "http"
+
+        /**
+         * DNS service domains for popular public DNS providers and specialized endpoints.
+         *
+         * These constants represent DNS-over-HTTPS (DoH), DNS-over-TLS (DoT), or other DNS service domains
+         * required by the application to configure upstream DNS servers or remap domains.
+         */
+        private const val GOOGLEAPIS_CN_DOMAIN = "domain:googleapis.cn"
+        private const val GOOGLEAPIS_COM_DOMAIN = "googleapis.com"
+        private const val DNS_DNSPOD_DOMAIN = "dot.pub"
+        private const val DNS_ALIDNS_DOMAIN = "dns.alidns.com"
+        private const val DNS_CLOUDFLARE_DOMAIN = "one.one.one.one"
+        private const val DNS_GOOGLE_DOMAIN = "dns.google"
+        private const val DNS_QUAD9_DOMAIN = "dns.quad9.net"
+        private const val DNS_YANDEX_DOMAIN = "common.dot.dns.yandex.net"
+
+        /**
+         * Lists of public DNS resolver IP addresses (IPv4/IPv6) for each provider.
+         *
+         * These address lists are used to configure upstream DNS resolvers within the application
+         * and provide direct IP options for various providers (AliDNS, Cloudflare, Google, DNSPod, Quad9, Yandex).
+         * IPv6 addresses are included when available.
+         */
+        private val DNS_ALIDNS_ADDRESSES =
+            listOf("223.5.5.5", "223.6.6.6", "2400:3200::1", "2400:3200:baba::1")
+        private val DNS_CLOUDFLARE_ADDRESSES =
+            listOf("1.1.1.1", "1.0.0.1", "2606:4700:4700::1111", "2606:4700:4700::1001")
+        private val DNS_DNSPOD_ADDRESSES = listOf("1.12.12.12", "120.53.53.53")
+        private val DNS_GOOGLE_ADDRESSES =
+            listOf("8.8.8.8", "8.8.4.4", "2001:4860:4860::8888", "2001:4860:4860::8844")
+        private val DNS_QUAD9_ADDRESSES =
+            listOf("9.9.9.9", "149.112.112.112", "2620:fe::fe", "2620:fe::9")
+        private val DNS_YANDEX_ADDRESSES =
+            listOf("77.88.8.8", "77.88.8.1", "2a02:6b8::feed:0ff", "2a02:6b8:0:1::feed:0ff")
     }
 }

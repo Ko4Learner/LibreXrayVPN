@@ -110,7 +110,7 @@ class VPNService : VpnService() {
             .addRoute(DEFAULT_ROUTE, 0)
             .addDnsServer("1.1.1.1")
             .setSession(serviceManager.getRunningServerName())
-            .addDisallowedApplication("com.pet.vpn_client")
+            .addDisallowedApplication(Constants.ANG_PACKAGE)
         try {
             if (::mInterface.isInitialized) mInterface.close()
         } catch (e: Exception) {

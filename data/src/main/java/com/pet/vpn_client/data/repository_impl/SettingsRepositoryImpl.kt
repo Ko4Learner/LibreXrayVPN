@@ -15,15 +15,18 @@ class SettingsRepositoryImpl @Inject constructor(val storage: KeyValueStorage, v
     override fun observeLocale(): Flow<Locale> = _localeFlow
 
     override suspend fun setLocale(localeTag: String) {
-        storage.encodeSettings(Constants.PREF_LANGUAGE, localeTag)
+        storage.encodeSettings(PREF_LANGUAGE, localeTag)
         _localeFlow.value = getLocale()
     }
 
     override fun getLocale(): Locale {
-        val tag = storage.decodeSettingsString(Constants.PREF_LANGUAGE)
+        val tag = storage.decodeSettingsString(PREF_LANGUAGE)
         return when {
             tag.isNullOrEmpty() || tag == Constants.AUTO_LOCALE_TAG -> Locale.getDefault()
             else -> Locale.forLanguageTag(tag)
         }
+    }
+    companion object{
+        private const val PREF_LANGUAGE = "pref_language"
     }
 }

@@ -51,7 +51,7 @@ class VmessFormatter @Inject constructor(
         config.serverPort = vmessQRCode.port
         config.password = vmessQRCode.id
         config.method =
-            if (TextUtils.isEmpty(vmessQRCode.scy)) Constants.DEFAULT_SECURITY else vmessQRCode.scy
+            if (TextUtils.isEmpty(vmessQRCode.scy)) DEFAULT_SECURITY else vmessQRCode.scy
 
         config.network = vmessQRCode.net.ifEmpty { NetworkType.TCP.type }
         config.headerType = vmessQRCode.type
@@ -93,7 +93,7 @@ class VmessFormatter @Inject constructor(
         config.server = uri.idnHost
         config.serverPort = uri.port.toString()
         config.password = uri.userInfo
-        config.method = Constants.DEFAULT_SECURITY
+        config.method = DEFAULT_SECURITY
 
         getItemFormQuery(config, queryParam, allowInsecure)
 
@@ -119,6 +119,9 @@ class VmessFormatter @Inject constructor(
         }
 
         return outboundBean
+    }
+    companion object{
+        private const val DEFAULT_SECURITY = "auto"
     }
 }
 
