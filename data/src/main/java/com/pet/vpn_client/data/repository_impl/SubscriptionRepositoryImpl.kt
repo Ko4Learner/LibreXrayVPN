@@ -21,6 +21,7 @@ import com.pet.vpn_client.domain.interfaces.repository.SubscriptionRepository
 import com.pet.vpn_client.domain.models.ConfigProfileItem
 import com.pet.vpn_client.domain.models.EConfigType
 import com.pet.vpn_client.domain.models.FrameData
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.suspendCancellableCoroutine
 import javax.inject.Inject
 import kotlin.coroutines.resume
@@ -35,7 +36,7 @@ class SubscriptionRepositoryImpl @Inject constructor(
     val vlessFormatter: VlessFormatter,
     val vmessFormatter: VmessFormatter,
     val wireguardFormatter: WireguardFormatter,
-    val context: Context
+    @ApplicationContext val context: Context
 ) : SubscriptionRepository {
     override suspend fun importClipboard(): Int {
         try {

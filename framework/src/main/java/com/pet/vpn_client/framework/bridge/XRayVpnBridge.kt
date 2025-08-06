@@ -1,13 +1,11 @@
 package com.pet.vpn_client.framework.bridge
 
-import android.content.Context
 import android.util.Log
 import com.pet.vpn_client.core.utils.Constants
-import com.pet.vpn_client.domain.interfaces.repository.ConfigRepository
 import com.pet.vpn_client.domain.interfaces.CoreVpnBridge
 import com.pet.vpn_client.domain.interfaces.KeyValueStorage
 import com.pet.vpn_client.domain.interfaces.ServiceManager
-
+import com.pet.vpn_client.domain.interfaces.repository.ConfigRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -17,10 +15,9 @@ import libv2ray.Libv2ray
 import javax.inject.Inject
 
 class XRayVpnBridge @Inject constructor(
-    val context: Context,
-    val storage: KeyValueStorage,
-    val serviceManager: ServiceManager,
-    val configRepository: ConfigRepository
+    private val storage: KeyValueStorage,
+    private val serviceManager: ServiceManager,
+    private val configRepository: ConfigRepository
 ) : CoreVpnBridge {
     private val coreController: CoreController = Libv2ray.newCoreController(CoreCallback())
     override fun isRunning(): Boolean = coreController.isRunning
@@ -47,13 +44,13 @@ class XRayVpnBridge @Inject constructor(
                 try {
                     coreController.stopLoop()
                 } catch (e: Exception) {
-                    Log.e(Constants.TAG, "Failed to stop V2Ray loop", e)
+                    Log.e(Constants.TAG, "Failed to stop XRay loop", e)
                 }
             }
         }
     }
 
-    //TODO необходимость?
+    //TODO получение статистики по тегу, использовать в будущем на главном экране
     override fun queryStats(tag: String, link: String): Long {
         return coreController.queryStats(tag, link)
     }

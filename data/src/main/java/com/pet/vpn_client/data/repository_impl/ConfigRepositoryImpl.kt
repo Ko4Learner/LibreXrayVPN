@@ -27,6 +27,7 @@ import com.pet.vpn_client.domain.models.ConfigResult
 import com.pet.vpn_client.domain.models.EConfigType
 import com.pet.vpn_client.domain.models.NetworkType
 import com.pet.vpn_client.core.utils.Utils
+import dagger.hilt.android.qualifiers.ApplicationContext
 import java.lang.reflect.Type
 import java.net.Inet6Address
 import java.net.InetAddress
@@ -42,7 +43,7 @@ class ConfigRepositoryImpl @Inject constructor(
     val vlessFormatter: VlessFormatter,
     val vmessFormatter: VmessFormatter,
     val wireguardFormatter: WireguardFormatter,
-    val context: Context
+    @ApplicationContext val context: Context
 ) : ConfigRepository {
     private var initConfigCache: String? = null
 

@@ -10,6 +10,7 @@ import com.pet.vpn_client.domain.models.ConfigProfileItem
 import com.pet.vpn_client.domain.state.ServiceState
 import com.pet.vpn_client.framework.services.VPNService
 import com.pet.vpn_client.core.utils.Utils
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filter
@@ -22,7 +23,7 @@ class ServiceManagerImpl @Inject constructor(
     private val storage: KeyValueStorage,
     private val coreVpnBridgeProvider: Provider<CoreVpnBridge>,
     private val stateRepository: ServiceStateRepository,
-    private val context: Context
+    @ApplicationContext private val context: Context
 ) : ServiceManager {
 
     private val coreVpnBridge: CoreVpnBridge by lazy { coreVpnBridgeProvider.get() }
