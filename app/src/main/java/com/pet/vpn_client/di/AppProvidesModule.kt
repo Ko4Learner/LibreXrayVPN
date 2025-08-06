@@ -13,7 +13,7 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object AppModule {
+object AppProvidesModule {
     @Provides
     @Singleton
     fun providePendingIntentProvider(): PendingIntentProvider = object : PendingIntentProvider {
