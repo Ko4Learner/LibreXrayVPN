@@ -17,8 +17,8 @@ import javax.inject.Inject
 
 class NotificationFactory @Inject constructor(
     @ApplicationContext private val context: Context,
-    val pendingIntentProvider: PendingIntentProvider,
-    val settingsRepository: SettingsRepository
+    private val pendingIntentProvider: PendingIntentProvider,
+    private val settingsRepository: SettingsRepository
 ) {
     fun createNotification(title: String): Notification {
         val locale = settingsRepository.getLocale()

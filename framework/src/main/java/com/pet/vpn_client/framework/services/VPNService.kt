@@ -12,9 +12,7 @@ import android.os.ParcelFileDescriptor
 import android.os.StrictMode
 import android.util.Log
 import com.pet.vpn_client.core.utils.Constants
-import com.pet.vpn_client.domain.interfaces.KeyValueStorage
 import com.pet.vpn_client.domain.interfaces.ServiceManager
-import com.pet.vpn_client.domain.interfaces.repository.SettingsRepository
 import com.pet.vpn_client.domain.interfaces.repository.ServiceStateRepository
 import com.pet.vpn_client.domain.state.ServiceState
 import com.pet.vpn_client.framework.notification.NotificationFactory
@@ -28,13 +26,7 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class VPNService : VpnService() {
     @Inject
-    lateinit var storage: KeyValueStorage
-
-    @Inject
     lateinit var serviceManager: ServiceManager
-
-    @Inject
-    lateinit var settingsRepository: SettingsRepository
 
     @Inject
     lateinit var notificationFactory: NotificationFactory
