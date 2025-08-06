@@ -2,6 +2,7 @@ package com.pet.vpn_client.framework
 
 import android.content.Context
 import android.content.Intent
+import com.pet.vpn_client.core.utils.Constants
 import com.pet.vpn_client.domain.interfaces.CoreVpnBridge
 import com.pet.vpn_client.domain.interfaces.KeyValueStorage
 import com.pet.vpn_client.domain.interfaces.ServiceManager
@@ -57,14 +58,14 @@ class ServiceManagerImpl @Inject constructor(
         ) return
 
         val intent = Intent(context, VPNService::class.java).apply {
-            putExtra("COMMAND", "START_SERVICE")
+            putExtra(Constants.EXTRA_COMMAND, Constants.COMMAND_START_SERVICE)
         }
         context.startForegroundService(intent)
     }
 
     override fun stopService() {
         val intent = Intent(context, VPNService::class.java).apply {
-            putExtra("COMMAND", "STOP_SERVICE")
+            putExtra(Constants.EXTRA_COMMAND, Constants.COMMAND_STOP_SERVICE)
         }
         context.startForegroundService(intent)
     }

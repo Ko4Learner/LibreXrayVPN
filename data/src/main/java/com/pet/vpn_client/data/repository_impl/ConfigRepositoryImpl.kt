@@ -76,7 +76,7 @@ class ConfigRepositoryImpl @Inject constructor(
         val xRayConfig = initXrayConfig(context) ?: return result
         xRayConfig.log.loglevel = LOG_LEVEL
         xRayConfig.remarks = config.remarks
-        xRayConfig.routing.domainStrategy = "IPIfNonMatch"
+        xRayConfig.routing.domainStrategy = IP_IF_NON_MATCH
 
         getInbounds(xRayConfig)
 
@@ -215,7 +215,7 @@ class ConfigRepositoryImpl @Inject constructor(
             val resolvedIps = resolveHostToIP(domain)
             if (resolvedIps.isNullOrEmpty()) continue
 
-            item.ensureSockopt().domainStrategy = "UseIPv4v6"
+            item.ensureSockopt().domainStrategy = USE_IPV4V6
             newHosts[domain] = if (resolvedIps.size == 1) {
                 resolvedIps[0]
             } else {
@@ -305,7 +305,7 @@ class ConfigRepositoryImpl @Inject constructor(
                         sni = requestObj.headers.Host?.getOrNull(0)
                     }
                 } else {
-                    tcpSetting.header.type = "none"
+                    tcpSetting.header.type = NONE
                     sni = host
                 }
                 streamSettings.tcpSettings = tcpSetting
@@ -313,7 +313,7 @@ class ConfigRepositoryImpl @Inject constructor(
 
             NetworkType.KCP.type -> {
                 val kcpsetting = XrayConfig.OutboundBean.StreamSettingsBean.KcpSettingsBean()
-                kcpsetting.header.type = headerType ?: "none"
+                kcpsetting.header.type = headerType ?: NONE
                 if (seed.isNullOrEmpty()) {
                     kcpsetting.seed = null
                 } else {
@@ -366,7 +366,7 @@ class ConfigRepositoryImpl @Inject constructor(
 
             NetworkType.GRPC.type -> {
                 val grpcSetting = XrayConfig.OutboundBean.StreamSettingsBean.GrpcSettingsBean()
-                grpcSetting.multiMode = mode == "multi"
+                grpcSetting.multiMode = mode == MULTI
                 grpcSetting.serviceName = serviceName.orEmpty()
                 grpcSetting.authority = authority.orEmpty()
                 grpcSetting.idle_timeout = 60
@@ -439,7 +439,7 @@ class ConfigRepositoryImpl @Inject constructor(
         val gsonPre = GsonBuilder()
             .setPrettyPrinting()
             .disableHtmlEscaping()
-            .registerTypeAdapter( // custom serializer is needed here since JSON by default parse number as Double, core will fail to start
+            .registerTypeAdapter(
                 object : TypeToken<Double>() {}.type,
                 JsonSerializer { src: Double?, _: Type?, _: JsonSerializationContext? ->
                     JsonPrimitive(
@@ -485,6 +485,10 @@ class ConfigRepositoryImpl @Inject constructor(
         private const val LOOPBACK = "127.0.0.1"
         private const val DNS_PROXY = "1.1.1.1"
         private const val HEADER_TYPE_HTTP = "http"
+        private const val IP_IF_NON_MATCH = "IPIfNonMatch"
+        private const val USE_IPV4V6 = "UseIPv4v6"
+        private const val NONE = "none"
+        private const val MULTI = "multi"
 
         /**
          * DNS service domains for popular public DNS providers and specialized endpoints.

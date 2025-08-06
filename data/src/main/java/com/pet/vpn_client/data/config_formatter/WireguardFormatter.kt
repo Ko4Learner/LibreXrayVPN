@@ -29,11 +29,11 @@ class WireguardFormatter @Inject constructor(
         config.serverPort = uri.port.toString()
 
         config.secretKey = uri.userInfo.orEmpty()
-        config.localAddress = queryParam["address"] ?: Constants.WIREGUARD_LOCAL_ADDRESS_V4
-        config.publicKey = queryParam["publickey"].orEmpty()
-        config.preSharedKey = queryParam["presharedkey"]?.takeIf { it.isNotEmpty() }
-        config.mtu = (queryParam["mtu"] ?: Constants.WIREGUARD_LOCAL_MTU).toIntOrNull() ?: 0
-        config.reserved = queryParam["reserved"] ?: "0,0,0"
+        config.localAddress = queryParam[QUERY_ADDRESS] ?: Constants.WIREGUARD_LOCAL_ADDRESS_V4
+        config.publicKey = queryParam[QUERY_PUBLIC_KEY].orEmpty()
+        config.preSharedKey = queryParam[QUERY_PRESHARED_KEY]?.takeIf { it.isNotEmpty() }
+        config.mtu = (queryParam[QUERY_MTU] ?: Constants.WIREGUARD_LOCAL_MTU).toIntOrNull() ?: 0
+        config.reserved = queryParam[QUERY_RESERVED] ?: DEFAULT_RESERVED
 
         return config
     }
@@ -57,5 +57,15 @@ class WireguardFormatter @Inject constructor(
         }
 
         return outboundBean
+    }
+
+    companion object {
+        private const val QUERY_ADDRESS = "address"
+        private const val QUERY_PUBLIC_KEY = "publickey"
+        private const val QUERY_PRESHARED_KEY = "presharedkey"
+        private const val QUERY_MTU = "mtu"
+        private const val QUERY_RESERVED = "reserved"
+
+        private const val DEFAULT_RESERVED = "0,0,0"
     }
 }

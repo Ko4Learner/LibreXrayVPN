@@ -80,18 +80,18 @@ class VPNService : VpnService() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        when (intent?.getStringExtra("COMMAND")) {
-            "START_SERVICE" -> {
+        when (intent?.getStringExtra(Constants.EXTRA_COMMAND)) {
+            Constants.COMMAND_START_SERVICE -> {
                 if (serviceManager.startCoreLoop()) setup()
             }
 
-            "STOP_SERVICE" -> {
+            Constants.COMMAND_STOP_SERVICE -> {
                 stopVpn(true)
                 serviceStateRepository.updateState(ServiceState.Stopped)
                 return START_NOT_STICKY
             }
 
-            "RESTART_SERVICE" -> {
+            Constants.COMMAND_RESTART_SERVICE -> {
                 serviceManager.restartService()
             }
         }
@@ -108,7 +108,7 @@ class VPNService : VpnService() {
         builder.setMtu(VPN_MTU)
             .addAddress(PRIVATE_VLAN4_CLIENT, 30)
             .addRoute(DEFAULT_ROUTE, 0)
-            .addDnsServer("1.1.1.1")
+            .addDnsServer(DEFAULT_DNS_SERVER)
             .setSession(serviceManager.getRunningServerName())
             .addDisallowedApplication(Constants.ANG_PACKAGE)
         try {
@@ -135,19 +135,18 @@ class VPNService : VpnService() {
     }
 
     private fun runTun2socks() {
-        val socksPort = PORT_SOCKS
         val cmd = arrayListOf(
             File(
                 applicationContext.applicationInfo.nativeLibraryDir,
                 TUN2SOCKS
             ).absolutePath,
-            "--netif-ipaddr", PRIVATE_VLAN4_ROUTER,
-            "--netif-netmask", "255.255.255.252",
-            "--socks-server-addr", "127.0.0.1:${socksPort}",
-            "--tunmtu", VPN_MTU.toString(),
-            "--sock-path", "sock_path",
-            "--enable-udprelay",
-            "--loglevel", "notice"
+            ARG_NETIF_IPADDR, PRIVATE_VLAN4_ROUTER,
+            ARG_NETIF_NETMASK, NETMASK_30,
+            ARG_SOCKS_SERVER_ADDR, "$LOCALHOST:$PORT_SOCKS",
+            ARG_TUN_MTU, VPN_MTU.toString(),
+            ARG_SOCK_PATH, SOCK_PATH,
+            ARG_ENABLE_UDP_RELAY,
+            ARG_LOG_LEVEL, LOG_LEVEL_NOTICE
         )
         try {
             val processBuilder = ProcessBuilder(cmd)
@@ -170,7 +169,7 @@ class VPNService : VpnService() {
 
     private fun sendFd() {
         val fd = mInterface.fileDescriptor
-        val path = File(applicationContext.filesDir, "sock_path").absolutePath
+        val path = File(applicationContext.filesDir, SOCK_PATH).absolutePath
 
         CoroutineScope(Dispatchers.IO).launch {
             var failsCount = 0
@@ -225,5 +224,17 @@ class VPNService : VpnService() {
         private const val PORT_SOCKS = 10808
         private const val PRIVATE_VLAN4_ROUTER = "10.10.14.2"
         private const val TUN2SOCKS = "libtun2socks.so"
+        private const val DEFAULT_DNS_SERVER = "1.1.1.1"
+        private const val ARG_NETIF_IPADDR = "--netif-ipaddr"
+        private const val ARG_NETIF_NETMASK = "--netif-netmask"
+        private const val NETMASK_30 = "255.255.255.252"
+        private const val LOCALHOST = "127.0.0.1"
+        private const val ARG_SOCKS_SERVER_ADDR = "--socks-server-addr"
+        private const val ARG_TUN_MTU = "--tunmtu"
+        private const val ARG_SOCK_PATH = "--sock-path"
+        private const val SOCK_PATH = "sock_path"
+        private const val ARG_ENABLE_UDP_RELAY = "--enable-udprelay"
+        private const val ARG_LOG_LEVEL = "--loglevel"
+        private const val LOG_LEVEL_NOTICE = "notice"
     }
 }

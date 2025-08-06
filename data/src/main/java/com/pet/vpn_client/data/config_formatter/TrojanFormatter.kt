@@ -35,7 +35,7 @@ class TrojanFormatter @Inject constructor(
             val queryParam = getQueryParam(uri)
 
             getItemFormQuery(config, queryParam, allowInsecure)
-            config.security = queryParam["security"] ?: Constants.TLS
+            config.security = queryParam[SECURITY] ?: Constants.TLS
         }
 
         return config
@@ -60,5 +60,9 @@ class TrojanFormatter @Inject constructor(
         }
 
         return outboundBean
+    }
+
+    companion object{
+        private const val SECURITY = "security"
     }
 }

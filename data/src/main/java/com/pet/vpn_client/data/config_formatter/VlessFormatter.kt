@@ -27,7 +27,7 @@ class VlessFormatter @Inject constructor(
         config.server = uri.idnHost
         config.serverPort = uri.port.toString()
         config.password = uri.userInfo
-        config.method = queryParam["encryption"] ?: "none"
+        config.method = queryParam[ENCRYPTION] ?: NONE
 
         getItemFormQuery(config, queryParam, allowInsecure)
 
@@ -54,5 +54,10 @@ class VlessFormatter @Inject constructor(
         }
 
         return outboundBean
+    }
+
+    companion object {
+        private const val ENCRYPTION = "encryption"
+        private const val NONE = "none"
     }
 }

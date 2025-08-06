@@ -9,6 +9,7 @@ import android.content.Context.NOTIFICATION_SERVICE
 import android.content.Intent
 import androidx.core.app.NotificationCompat
 import com.pet.vpn_client.core.R
+import com.pet.vpn_client.core.utils.Constants
 import com.pet.vpn_client.core.utils.LocaleHelper
 import com.pet.vpn_client.domain.interfaces.repository.SettingsRepository
 import com.pet.vpn_client.framework.services.VPNService
@@ -58,7 +59,7 @@ class NotificationFactory @Inject constructor(
 
     private fun createStopServicePendingIntent(context: Context): PendingIntent {
         val intent = Intent(context, VPNService::class.java).apply {
-            putExtra("COMMAND", "STOP_SERVICE")
+            putExtra(Constants.EXTRA_COMMAND, Constants.COMMAND_STOP_SERVICE)
         }
         return PendingIntent.getService(
             context,
@@ -70,7 +71,7 @@ class NotificationFactory @Inject constructor(
 
     private fun createRestartServicePendingIntent(context: Context): PendingIntent {
         val intent = Intent(context, VPNService::class.java).apply {
-            putExtra("COMMAND", "RESTART_SERVICE")
+            putExtra(Constants.EXTRA_COMMAND, Constants.COMMAND_RESTART_SERVICE)
         }
         return PendingIntent.getService(
             context,

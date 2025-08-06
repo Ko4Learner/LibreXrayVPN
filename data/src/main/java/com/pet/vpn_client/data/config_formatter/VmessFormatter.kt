@@ -36,7 +36,6 @@ class VmessFormatter @Inject constructor(
             return null
         }
         val vmessQRCode = gson.fromJson(result, VmessQRCode::class.java)
-        // Although VmessQRCode fields are non null, looks like Gson may still create null fields
         if (TextUtils.isEmpty(vmessQRCode.add)
             || TextUtils.isEmpty(vmessQRCode.port)
             || TextUtils.isEmpty(vmessQRCode.id)

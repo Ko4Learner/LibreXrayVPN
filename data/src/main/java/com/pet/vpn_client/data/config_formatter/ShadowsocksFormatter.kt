@@ -13,7 +13,8 @@ import java.net.URI
 import javax.inject.Inject
 import javax.inject.Provider
 
-class ShadowsocksFormatter @Inject constructor(private val configRepository: Provider<ConfigRepository>) : BaseFormatter() {
+class ShadowsocksFormatter @Inject constructor(private val configRepository: Provider<ConfigRepository>) :
+    BaseFormatter() {
     fun parse(str: String): ConfigProfileItem? {
         return parseSip002(str) ?: parseLegacy(str)
     }
@@ -42,18 +43,18 @@ class ShadowsocksFormatter @Inject constructor(private val configRepository: Pro
 
         if (!uri.rawQuery.isNullOrEmpty()) {
             val queryParam = getQueryParam(uri)
-            if (queryParam["plugin"]?.contains("obfs=http") == true) {
+            if (queryParam[QUERY_PLUGIN]?.contains(OBFS_HTTP) == true) {
                 val queryPairs = HashMap<String, String>()
-                for (pair in queryParam["plugin"]?.split(";") ?: listOf()) {
+                for (pair in queryParam[QUERY_PLUGIN]?.split(";") ?: listOf()) {
                     val idx = pair.split("=")
                     if (idx.count() == 2) {
-                        queryPairs.put(idx.first(), idx.last())
+                        queryPairs[idx.first()] = idx.last()
                     }
                 }
                 config.network = NetworkType.TCP.type
-                config.headerType = "http"
-                config.host = queryPairs["obfs-host"]
-                config.path = queryPairs["path"]
+                config.headerType = HEADER_TYPE_HTTP
+                config.host = queryPairs[OBFS_HOST]
+                config.path = queryPairs[PATH]
             }
         }
 
@@ -116,5 +117,13 @@ class ShadowsocksFormatter @Inject constructor(private val configRepository: Pro
         }
 
         return outboundBean
+    }
+
+    companion object {
+        private const val QUERY_PLUGIN = "plugin"
+        private const val OBFS_HTTP = "obfs=http"
+        private const val OBFS_HOST = "obfs-host"
+        private const val PATH = "path"
+        private const val HEADER_TYPE_HTTP = "http"
     }
 }

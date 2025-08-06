@@ -45,7 +45,7 @@ data class XrayConfig(
     }
 
     data class OutboundBean(
-        var tag: String = "proxy",
+        var tag: String = PROXY,
         var protocol: String,
         var settings: OutSettingsBean? = null,
         var streamSettings: StreamSettingsBean? = null,
@@ -156,7 +156,7 @@ data class XrayConfig(
                 val acceptProxyProtocol: Boolean? = null
             ) {
                 data class HeaderBean(
-                    var type: String = "none",
+                    var type: String = NONE,
                     var request: RequestBean? = null,
                     var response: Any? = null
                 ) {
@@ -189,7 +189,7 @@ data class XrayConfig(
                 var seed: String? = null
             ) {
                 data class HeaderBean(
-                    var type: String = "none",
+                    var type: String = NONE,
                     var domain: String? = null
                 )
             }
@@ -252,11 +252,11 @@ data class XrayConfig(
             )
 
             data class QuicSettingBean(
-                var security: String = "none",
+                var security: String = NONE,
                 var key: String = "",
                 var header: HeaderBean = HeaderBean()
             ) {
-                data class HeaderBean(var type: String = "none")
+                data class HeaderBean(var type: String = NONE)
             }
 
             data class GrpcSettingsBean(
@@ -313,6 +313,7 @@ data class XrayConfig(
         val queryStrategy: String? = null,
         val tag: String? = null
     )
+
     data class RoutingBean(
         var domainStrategy: String,
         var domainMatcher: String? = null,
@@ -321,7 +322,7 @@ data class XrayConfig(
     ) {
 
         data class RulesBean(
-            var type: String = "field",
+            var type: String = FIELD,
             var ip: ArrayList<String>? = null,
             var domain: ArrayList<String>? = null,
             var outboundTag: String = "",
@@ -357,5 +358,11 @@ data class XrayConfig(
         return outbounds.filter { outbound ->
             EConfigType.entries.any { it.name.equals(outbound.protocol, ignoreCase = true) }
         }
+    }
+
+    companion object {
+        private const val PROXY = "proxy"
+        private const val NONE = "none"
+        private const val FIELD = "field"
     }
 }

@@ -24,4 +24,9 @@ object Constants {
     const val DEFAULT_NETWORK = "tcp"
     const val TLS = "tls"
     const val REALITY = "reality"
+
+    const val EXTRA_COMMAND = "COMMAND"
+    const val COMMAND_START_SERVICE = "START_SERVICE"
+    const val COMMAND_STOP_SERVICE = "STOP_SERVICE"
+    const val COMMAND_RESTART_SERVICE = "RESTART_SERVICE"
 }
