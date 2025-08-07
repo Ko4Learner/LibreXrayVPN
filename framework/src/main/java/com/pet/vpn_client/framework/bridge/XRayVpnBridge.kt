@@ -14,6 +14,11 @@ import libv2ray.CoreController
 import libv2ray.Libv2ray
 import javax.inject.Inject
 
+/**
+ * Bridge for interacting with the Xray VPN core.
+ * Manages the lifecycle of the Xray engine, providing methods to start, stop, and query the core.
+ * Handles configuration and communication with lower-level VPN engine logic.
+ */
 class XRayVpnBridge @Inject constructor(
     private val storage: KeyValueStorage,
     private val serviceManager: ServiceManager,
@@ -22,6 +27,11 @@ class XRayVpnBridge @Inject constructor(
     private val coreController: CoreController = Libv2ray.newCoreController(CoreCallback())
     override fun isRunning(): Boolean = coreController.isRunning
 
+    /**
+     * Starts the Xray core loop if not already running.
+     *
+     * @return true if started successfully, false if already running or on failure.
+     */
     override fun startCoreLoop(): Boolean {
         if (coreController.isRunning) return false
         val guid = storage.getSelectServer() ?: return false
@@ -38,6 +48,11 @@ class XRayVpnBridge @Inject constructor(
         return true
     }
 
+    //TODO разобраться с корутиной
+    /**
+     * Stops the Xray core loop asynchronously if running.
+     * Launches coroutine for IO operations.
+     */
     override fun stopCoreLoop() {
         if (coreController.isRunning) {
             CoroutineScope(Dispatchers.IO).launch {
@@ -51,10 +66,23 @@ class XRayVpnBridge @Inject constructor(
     }
 
     //TODO получение статистики по тегу, использовать в будущем на главном экране
+    /**
+     * Queries traffic statistics by tag and link.
+     *
+     * @param tag The statistics tag.
+     * @param link The link identifier.
+     * @return The queried statistics value.
+     */
     override fun queryStats(tag: String, link: String): Long {
         return coreController.queryStats(tag, link)
     }
 
+    /**
+     * Measures network delay using the Xray core.
+     * Attempts primary and fallback test URLs.
+     *
+     * @return Measured delay in milliseconds, or null if core is not running.
+     */
     override suspend fun measureDelay(): Long? {
         if (!coreController.isRunning) return null
         var time = -1L
@@ -75,6 +103,9 @@ class XRayVpnBridge @Inject constructor(
         return time
     }
 
+    /**
+     * Callback handler for core lifecycle events.
+     */
     private inner class CoreCallback : CoreCallbackHandler {
         override fun startup(): Long {
             return 0

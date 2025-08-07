@@ -19,10 +19,19 @@ import com.pet.vpn_client.framework.notification.NotificationFactory
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import java.io.File
 import javax.inject.Inject
 
+/**
+ * Android service for managing the VPN tunnel using Xray and tun2socks.
+ *
+ * Handles the VPN lifecycle: setup, management, teardown, and system integration.
+ * Starts and monitors the native tun2socks process, configures the VPN interface,
+ * and manages notifications and network callbacks.
+ */
 @AndroidEntryPoint
 class VPNService : VpnService() {
     @Inject
@@ -37,17 +46,18 @@ class VPNService : VpnService() {
     private lateinit var mInterface: ParcelFileDescriptor
     private var isRunning = false
     private lateinit var process: Process
+    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     //TODO необходимость connectivityManager, networkRequest, networkCallback
-    private val connectivityManager by lazy { getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager }
 
+    // Manages network connectivity callbacks for routing updates
+    private val connectivityManager by lazy { getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager }
     private val networkRequest by lazy {
         NetworkRequest.Builder()
             .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
             .addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED)
             .build()
     }
-
     private val networkCallback by lazy {
         object : ConnectivityManager.NetworkCallback() {
             override fun onAvailable(network: Network) {
@@ -67,6 +77,11 @@ class VPNService : VpnService() {
         }
     }
 
+    /**
+     * Called when the service is created.
+     * - Sets relaxed thread policy (for native process).
+     * - Starts the service in the foreground with a persistent notification.
+     */
     override fun onCreate() {
         super.onCreate()
         val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
@@ -74,11 +89,17 @@ class VPNService : VpnService() {
         startForeground(1, notificationFactory.createNotification("Vpn"))
     }
 
-    //вызывается при ручном отзыве разрешения пользователем
+    /**
+     * Called if user revokes VPN permission.
+     * Stops VPN and cleans up resources.
+     */
     override fun onRevoke() {
         stopVpn()
     }
 
+    /**
+     * Handles incoming commands for starting, stopping, and restarting the VPN service.
+     */
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.getStringExtra(Constants.EXTRA_COMMAND)) {
             Constants.COMMAND_START_SERVICE -> {
@@ -98,11 +119,21 @@ class VPNService : VpnService() {
         return START_STICKY
     }
 
+    /**
+     * Prepares and establishes the VPN interface, then launches tun2socks.
+     */
     private fun setup() {
         if (prepare(this) != null || !setupVpnService()) return
         runTun2socks()
     }
 
+    /**
+     * Configures and establishes the VPN interface.
+     * Sets MTU, address, route, DNS, and session parameters.
+     * Requests system network updates.
+     *
+     * @return true if interface was established successfully, false otherwise.
+     */
     private fun setupVpnService(): Boolean {
         val builder = Builder()
         builder.setMtu(VPN_MTU)
@@ -134,6 +165,10 @@ class VPNService : VpnService() {
         return false
     }
 
+    /**
+     * Launches the native tun2socks process to bridge traffic.
+     * Monitors process state and handles automatic restarts.
+     */
     private fun runTun2socks() {
         val cmd = arrayListOf(
             File(
@@ -167,11 +202,15 @@ class VPNService : VpnService() {
         }
     }
 
+    /**
+     * Sends the VPN file descriptor to the tun2socks process using a local socket.
+     * Retries up to 5 times with increasing delay if necessary.
+     */
     private fun sendFd() {
         val fd = mInterface.fileDescriptor
         val path = File(applicationContext.filesDir, SOCK_PATH).absolutePath
 
-        CoroutineScope(Dispatchers.IO).launch {
+        serviceScope.launch {
             var failsCount = 0
             while (true) try {
                 Thread.sleep(50L shl failsCount)
@@ -193,6 +232,12 @@ class VPNService : VpnService() {
         }
     }
 
+    /**
+     * Stops the VPN: closes interface, stops native process, updates state,
+     * and unregisters network callbacks.
+     *
+     * @param isForcedStop Whether to stop the Android service and close the interface.
+     */
     private fun stopVpn(isForcedStop: Boolean = false) {
         isRunning = false
         try {
@@ -215,6 +260,14 @@ class VPNService : VpnService() {
             }
         }
         serviceStateRepository.updateState(ServiceState.Stopped)
+    }
+
+    /**
+     * Cleans up and cancels all background tasks when the service is destroyed.
+     */
+    override fun onDestroy() {
+        super.onDestroy()
+        serviceScope.cancel()
     }
 
     companion object {

@@ -14,6 +14,8 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object AppProvidesModule {
+    private const val REQUEST_CODE_OPEN_APP = 0
+
     @Provides
     @Singleton
     fun providePendingIntentProvider(): PendingIntentProvider = object : PendingIntentProvider {
@@ -23,7 +25,7 @@ object AppProvidesModule {
             }
             return PendingIntent.getActivity(
                 context,
-                0,
+                REQUEST_CODE_OPEN_APP,
                 intent,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
