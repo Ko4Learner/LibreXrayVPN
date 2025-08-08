@@ -40,14 +40,12 @@ class ServiceManagerImpl @Inject constructor(
 
     /**
      * Starts the VPN service if a server is selected.
-     * @return true if started successfully, false otherwise.
      */
-    override fun startService(): Boolean {
+    override fun startService() {
         if (storage.getSelectServer().isNullOrEmpty()) {
-            return false
+            return
         }
         startContextService()
-        return true
     }
 
     /**

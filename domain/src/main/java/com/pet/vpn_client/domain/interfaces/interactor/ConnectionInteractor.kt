@@ -1,7 +1,16 @@
 package com.pet.vpn_client.domain.interfaces.interactor
 
+/**
+ * Controls VPN lifecycle at the domain level.
+ *
+ * Contracts:
+ * - startConnection()
+ * - stopConnection()
+ * - testConnection(): returns round-trip latency in **ms**, or null if failed.
+ * - restartConnection()
+ */
 interface ConnectionInteractor {
-    suspend fun startConnection(): Boolean
+    suspend fun startConnection()
     suspend fun stopConnection()
     suspend fun testConnection(): Long?
     fun restartConnection()

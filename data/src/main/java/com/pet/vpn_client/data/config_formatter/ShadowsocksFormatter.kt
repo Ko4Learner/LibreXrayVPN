@@ -76,7 +76,6 @@ class ShadowsocksFormatter @Inject constructor(private val configRepository: Pro
             result = result.substring(0, indexSplit)
         }
 
-        //part decode
         val indexS = result.indexOf("@")
         result = if (indexS > 0) {
             Utils.decode(result.substring(0, indexS)) + result.substring(

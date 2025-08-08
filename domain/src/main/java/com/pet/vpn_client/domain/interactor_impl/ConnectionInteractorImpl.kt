@@ -4,10 +4,10 @@ import com.pet.vpn_client.domain.interfaces.ServiceManager
 import com.pet.vpn_client.domain.interfaces.interactor.ConnectionInteractor
 import javax.inject.Inject
 
-class ConnectionInteractorImpl @Inject constructor(val serviceManager: ServiceManager) :
+class ConnectionInteractorImpl @Inject constructor(private val serviceManager: ServiceManager) :
     ConnectionInteractor {
-    override suspend fun startConnection(): Boolean {
-        return serviceManager.startService()
+    override suspend fun startConnection() {
+        serviceManager.startService()
     }
 
     override suspend fun stopConnection() {

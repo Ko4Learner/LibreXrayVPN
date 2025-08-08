@@ -1,7 +1,7 @@
 package com.pet.vpn_client.domain.interfaces
 
 interface ServiceManager {
-    fun startService(): Boolean
+    fun startService()
     fun stopService()
     fun getRunningServerName(): String
     fun startCoreLoop(): Boolean

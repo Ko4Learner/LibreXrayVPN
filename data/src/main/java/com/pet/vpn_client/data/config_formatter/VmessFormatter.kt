@@ -80,7 +80,7 @@ class VmessFormatter @Inject constructor(
         return config
     }
 
-    fun parseVmessStd(str: String): ConfigProfileItem? {
+    private fun parseVmessStd(str: String): ConfigProfileItem? {
         val allowInsecure = false
         val config = ConfigProfileItem.create(EConfigType.VMESS)
 

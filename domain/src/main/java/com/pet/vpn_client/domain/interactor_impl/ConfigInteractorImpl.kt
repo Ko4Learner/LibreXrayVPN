@@ -8,6 +8,7 @@ import com.pet.vpn_client.domain.models.FrameData
 import com.pet.vpn_client.domain.models.ImportResult
 import javax.inject.Inject
 
+
 class ConfigInteractorImpl @Inject constructor(
     private val subscriptionRepository: SubscriptionRepository,
     private val keyValueStorage: KeyValueStorage

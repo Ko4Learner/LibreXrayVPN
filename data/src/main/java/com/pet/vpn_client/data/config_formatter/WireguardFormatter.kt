@@ -65,7 +65,6 @@ class WireguardFormatter @Inject constructor(
         private const val QUERY_PRESHARED_KEY = "presharedkey"
         private const val QUERY_MTU = "mtu"
         private const val QUERY_RESERVED = "reserved"
-
         private const val DEFAULT_RESERVED = "0,0,0"
     }
 }
