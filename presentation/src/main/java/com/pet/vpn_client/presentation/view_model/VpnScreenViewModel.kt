@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.pet.vpn_client.domain.interfaces.interactor.ConfigInteractor
 import com.pet.vpn_client.domain.interfaces.interactor.ConnectionInteractor
 import com.pet.vpn_client.domain.interfaces.repository.ServiceStateRepository
+import com.pet.vpn_client.domain.models.ImportResult
 import com.pet.vpn_client.domain.state.ServiceState
 import com.pet.vpn_client.presentation.intent.VpnScreenIntent
 import com.pet.vpn_client.presentation.models.ServerItemModel
@@ -98,15 +99,18 @@ class VpnScreenViewModel @Inject constructor(
 
     private fun importConfigFromClipboard() {
         viewModelScope.launch(Dispatchers.IO) {
-            if (configInteractor.importClipboardConfig() >= 0) {
-                updateServerList(configInteractor.getServerList())
-            } else {
-                _state.update {
+            when (configInteractor.importClipboardConfig()) {
+                ImportResult.Empty -> _state.update {
                     it.copy(
-                        serverItemList = listOf(),
+                        error = "Empty config"
+                    )
+                }
+                ImportResult.Error -> _state.update {
+                    it.copy(
                         error = "Config imported error"
                     )
                 }
+                ImportResult.Success -> updateServerList(configInteractor.getServerList())
             }
         }
     }

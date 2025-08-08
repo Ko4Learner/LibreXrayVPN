@@ -21,10 +21,13 @@ import com.pet.vpn_client.domain.interfaces.repository.SubscriptionRepository
 import com.pet.vpn_client.domain.models.ConfigProfileItem
 import com.pet.vpn_client.domain.models.EConfigType
 import com.pet.vpn_client.domain.models.FrameData
+import com.pet.vpn_client.domain.models.ImportResult
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
-import kotlin.coroutines.resume
+import kotlin.coroutines.cancellation.CancellationException
 
 class SubscriptionRepositoryImpl @Inject constructor(
     val storage: KeyValueStorage,
@@ -38,50 +41,56 @@ class SubscriptionRepositoryImpl @Inject constructor(
     val wireguardFormatter: WireguardFormatter,
     @ApplicationContext val context: Context
 ) : SubscriptionRepository {
-    override suspend fun importClipboard(): Int {
-        try {
-            val cmb = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-            val clipboard = cmb.primaryClip?.getItemAt(0)?.text.toString()
-            val count = importBatchConfig(
-                clipboard
-            )
-            return count
-        } catch (e: Exception) {
-            Log.e(Constants.TAG, "Failed to import config from clipboard", e)
-            return -1
+    //TODO уйти от цифр в результатах
+    override suspend fun importClipboard(): ImportResult = try {
+        val cmb = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        val text = cmb.primaryClip
+            ?.getItemAt(0)
+            ?.coerceToText(context)
+            ?.toString()
+            ?.trim()
+            .orEmpty()
+
+        when {
+            text.isEmpty() -> ImportResult.Empty
+            importBatchConfig(text) > 0 -> ImportResult.Success
+            else -> ImportResult.Empty
         }
+    } catch (e: Exception) {
+        Log.e(Constants.TAG, "Failed to import config from clipboard", e)
+        ImportResult.Error
     }
 
-    override suspend fun importQrCode(frameData: FrameData): Int =
-        suspendCancellableCoroutine { cont ->
-            val inputImage = InputImage.fromByteArray(
-                frameData.bytes,
-                frameData.width,
-                frameData.height,
-                frameData.rotationDegrees,
-                frameData.imageFormat
-            )
-
-            val scanner = BarcodeScanning.getClient()
-
-            scanner.process(inputImage)
-                .addOnSuccessListener { barcodes ->
-                    val result = barcodes.firstOrNull()?.rawValue
-                    if (result != null) {
-                        try {
-                            val count = importBatchConfig(result)
-                            cont.resume(count)
-                        } catch (_: Exception) {
-                            cont.resume(-1)
-                        }
-                    } else {
-                        cont.resume(-1)
-                    }
-                }
-                .addOnFailureListener {
-                    cont.resume(-1)
-                }
+    override suspend fun importQrCode(frameData: FrameData): ImportResult {
+        val image = InputImage.fromByteArray(
+            frameData.bytes,
+            frameData.width,
+            frameData.height,
+            frameData.rotationDegrees,  // ensure 0/90/180/270 upstream
+            frameData.imageFormat
+        )
+        val scanner = BarcodeScanning.getClient()
+        return try {
+            val barcodes = scanner.process(image).await()
+            val raw = barcodes.firstOrNull()?.rawValue?.trim().orEmpty()
+            if (raw.isEmpty()) {
+                ImportResult.Empty
+            } else {
+                val imported = withContext(Dispatchers.IO) { importBatchConfig(raw) }
+                if (imported > 0) ImportResult.Success else ImportResult.Empty
+            }
+        } catch (c: CancellationException) {
+            throw c
+        } catch (e: Exception) {
+            Log.e(Constants.TAG, "Failed to import config from QR", e)
+            ImportResult.Error
+        } finally {
+            try {
+                scanner.close()
+            } catch (_: Exception) { /* ignore */
+            }
         }
+    }
 
     private fun importBatchConfig(server: String?): Int {
         var count = parseBatchConfig(Utils.decode(server))

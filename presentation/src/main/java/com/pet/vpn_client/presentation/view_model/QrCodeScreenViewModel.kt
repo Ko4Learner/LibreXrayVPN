@@ -4,6 +4,7 @@ import androidx.camera.core.ImageProxy
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pet.vpn_client.domain.interfaces.interactor.ConfigInteractor
+import com.pet.vpn_client.domain.models.ImportResult
 import com.pet.vpn_client.presentation.formatter.toFrameData
 import com.pet.vpn_client.presentation.intent.QrCodeScreenIntent
 import com.pet.vpn_client.presentation.state.QrCodeScreenState
@@ -44,14 +45,14 @@ class QrCodeScreenViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 when (configInteractor.importQrCodeConfig(imageProxy.toFrameData())) {
-                    -1 -> _state.update {
+                    ImportResult.Error -> _state.update {
                         it.copy(
                             configFound = false,
                             error = null
                         )
                     }
 
-                    0 ->
+                    ImportResult.Empty ->
                         _state.update {
                             it.copy(
                                 configFound = false,

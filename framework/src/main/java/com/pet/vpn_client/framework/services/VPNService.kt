@@ -21,6 +21,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.File
 import javax.inject.Inject
@@ -49,8 +50,6 @@ class VPNService : VpnService() {
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     //TODO необходимость connectivityManager, networkRequest, networkCallback
-
-    // Manages network connectivity callbacks for routing updates
     private val connectivityManager by lazy { getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager }
     private val networkRequest by lazy {
         NetworkRequest.Builder()
@@ -120,7 +119,7 @@ class VPNService : VpnService() {
     }
 
     /**
-     * Prepares and establishes the VPN interface, then launches tun2socks.
+     * Prepares the VPN, then launches tun2socks.
      */
     private fun setup() {
         if (prepare(this) != null || !setupVpnService()) return
@@ -166,8 +165,12 @@ class VPNService : VpnService() {
     }
 
     /**
-     * Launches the native tun2socks process to bridge traffic.
-     * Monitors process state and handles automatic restarts.
+     * Launches the native tun2socks process to bridge traffic from the TUN interface to a local SOCKS proxy.
+     *
+     * - Builds and executes the tun2socks command with network parameters and logging options.
+     * - Spawns a watcher thread that waits for process termination and restarts it if the VPN is still active.
+     * - Sends the TUN file descriptor to the process via a Unix domain socket.
+     * - Updates the service state to Connected once the data path is ready.
      */
     private fun runTun2socks() {
         val cmd = arrayListOf(
@@ -203,8 +206,7 @@ class VPNService : VpnService() {
     }
 
     /**
-     * Sends the VPN file descriptor to the tun2socks process using a local socket.
-     * Retries up to 5 times with increasing delay if necessary.
+     * Sends the VPN TUN file descriptor to the native tun2socks process over a Unix domain socket.
      */
     private fun sendFd() {
         val fd = mInterface.fileDescriptor
@@ -213,7 +215,7 @@ class VPNService : VpnService() {
         serviceScope.launch {
             var failsCount = 0
             while (true) try {
-                Thread.sleep(50L shl failsCount)
+                delay(50L shl failsCount)
                 LocalSocket().use { localSocket ->
                     localSocket.connect(
                         LocalSocketAddress(
