@@ -9,13 +9,13 @@ import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.common.InputImage
 import com.pet.vpn_client.core.utils.Constants
 import com.pet.vpn_client.core.utils.Utils
-import com.pet.vpn_client.data.config_formatter.ShadowsocksFormatter
-import com.pet.vpn_client.data.config_formatter.SocksFormatter
-import com.pet.vpn_client.data.config_formatter.TrojanFormatter
-import com.pet.vpn_client.data.config_formatter.VlessFormatter
-import com.pet.vpn_client.data.config_formatter.VmessFormatter
-import com.pet.vpn_client.data.config_formatter.WireguardFormatter
-import com.pet.vpn_client.domain.interfaces.repository.ConfigRepository
+import com.pet.vpn_client.data.protocol_parsers.ShadowsocksParser
+import com.pet.vpn_client.data.protocol_parsers.SocksParser
+import com.pet.vpn_client.data.protocol_parsers.TrojanParser
+import com.pet.vpn_client.data.protocol_parsers.VlessParser
+import com.pet.vpn_client.data.protocol_parsers.VmessParser
+import com.pet.vpn_client.data.protocol_parsers.WireguardParser
+import com.pet.vpn_client.domain.interfaces.CoreConfigProvider
 import com.pet.vpn_client.domain.interfaces.KeyValueStorage
 import com.pet.vpn_client.domain.interfaces.repository.SubscriptionRepository
 import com.pet.vpn_client.domain.models.ConfigProfileItem
@@ -32,13 +32,13 @@ import kotlin.coroutines.cancellation.CancellationException
 class SubscriptionRepositoryImpl @Inject constructor(
     val storage: KeyValueStorage,
     val gson: Gson,
-    val configRepository: ConfigRepository,
-    val shadowsocksFormatter: ShadowsocksFormatter,
-    val socksFormatter: SocksFormatter,
-    val trojanFormatter: TrojanFormatter,
-    val vlessFormatter: VlessFormatter,
-    val vmessFormatter: VmessFormatter,
-    val wireguardFormatter: WireguardFormatter,
+    val coreConfigProvider: CoreConfigProvider,
+    val shadowsocksFormatter: ShadowsocksParser,
+    val socksFormatter: SocksParser,
+    val trojanFormatter: TrojanParser,
+    val vlessFormatter: VlessParser,
+    val vmessFormatter: VmessParser,
+    val wireguardFormatter: WireguardParser,
     @ApplicationContext val context: Context
 ) : SubscriptionRepository {
     //TODO уйти от цифр в результатах

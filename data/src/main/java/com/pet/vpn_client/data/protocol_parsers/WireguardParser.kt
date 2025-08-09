@@ -1,22 +1,14 @@
-package com.pet.vpn_client.data.config_formatter
+package com.pet.vpn_client.data.protocol_parsers
 
 import com.pet.vpn_client.core.utils.Constants
-import com.pet.vpn_client.domain.interfaces.repository.ConfigRepository
-import com.pet.vpn_client.domain.models.XrayConfig.OutboundBean
-import com.pet.vpn_client.domain.interfaces.KeyValueStorage
 import com.pet.vpn_client.domain.models.ConfigProfileItem
 import com.pet.vpn_client.domain.models.EConfigType
 import com.pet.vpn_client.core.utils.Utils
 import com.pet.vpn_client.core.utils.idnHost
 import java.net.URI
 import javax.inject.Inject
-import javax.inject.Provider
 
-
-class WireguardFormatter @Inject constructor(
-    val configRepository: Provider<ConfigRepository>,
-    val storage: KeyValueStorage
-) : BaseFormatter() {
+class WireguardParser @Inject constructor() : BaseParser() {
     fun parse(str: String): ConfigProfileItem? {
         val config = ConfigProfileItem.create(EConfigType.WIREGUARD)
 
@@ -36,27 +28,6 @@ class WireguardFormatter @Inject constructor(
         config.reserved = queryParam[QUERY_RESERVED] ?: DEFAULT_RESERVED
 
         return config
-    }
-
-    fun toOutbound(profileItem: ConfigProfileItem): OutboundBean? {
-        val outboundBean = configRepository.get().createInitOutbound(EConfigType.WIREGUARD)
-
-        outboundBean?.settings?.let { wireguard ->
-            wireguard.secretKey = profileItem.secretKey
-            wireguard.address =
-                (profileItem.localAddress ?: Constants.WIREGUARD_LOCAL_ADDRESS_V4).split(",")
-            wireguard.peers?.firstOrNull()?.let { peer ->
-                peer.publicKey = profileItem.publicKey.orEmpty()
-                peer.preSharedKey = profileItem.preSharedKey?.takeIf { it.isNotEmpty() }
-                peer.endpoint =
-                    Utils.getIpv6Address(profileItem.server) + ":${profileItem.serverPort}"
-            }
-            wireguard.mtu = profileItem.mtu
-            wireguard.reserved = profileItem.reserved?.takeIf { it.isNotBlank() }?.split(",")
-                ?.filter { it.isNotBlank() }?.map { it.trim().toInt() }
-        }
-
-        return outboundBean
     }
 
     companion object {

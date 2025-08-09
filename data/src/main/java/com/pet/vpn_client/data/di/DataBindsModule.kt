@@ -1,7 +1,6 @@
 package com.pet.vpn_client.data.di
 
 import com.pet.vpn_client.data.mmkv.MMKVStorage
-import com.pet.vpn_client.data.repository_impl.ConfigRepositoryImpl
 import com.pet.vpn_client.data.repository_impl.SettingsRepositoryImpl
 import com.pet.vpn_client.data.repository_impl.SubscriptionRepositoryImpl
 import com.pet.vpn_client.domain.interactor_impl.ConfigInteractorImpl
@@ -9,7 +8,6 @@ import com.pet.vpn_client.domain.interactor_impl.SettingsInteractorImpl
 import com.pet.vpn_client.domain.interfaces.KeyValueStorage
 import com.pet.vpn_client.domain.interfaces.interactor.ConfigInteractor
 import com.pet.vpn_client.domain.interfaces.interactor.SettingsInteractor
-import com.pet.vpn_client.domain.interfaces.repository.ConfigRepository
 import com.pet.vpn_client.domain.interfaces.repository.SettingsRepository
 import com.pet.vpn_client.domain.interfaces.repository.SubscriptionRepository
 import dagger.Binds
@@ -33,10 +31,6 @@ abstract class DataBindsModule {
     @Binds
     @Singleton
     abstract fun bindMMKVConfig(impl: MMKVStorage): KeyValueStorage
-
-    @Binds
-    @Singleton
-    abstract fun bindConfigManager(impl: ConfigRepositoryImpl): ConfigRepository
 
     @Binds
     @Singleton

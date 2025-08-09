@@ -1,4 +1,4 @@
-package com.pet.vpn_client.data.config_formatter
+package com.pet.vpn_client.data.protocol_parsers
 
 import com.pet.vpn_client.core.utils.Constants
 import com.pet.vpn_client.domain.models.ConfigProfileItem
@@ -7,7 +7,7 @@ import com.pet.vpn_client.core.utils.Utils
 import java.net.URI
 import kotlin.text.orEmpty
 
-open class BaseFormatter {
+open class BaseParser {
     fun getQueryParam(uri: URI): Map<String, String> {
         return uri.rawQuery.split("&")
             .associate { it.split("=").let { (k, v) -> k to Utils.urlDecode(v) } }

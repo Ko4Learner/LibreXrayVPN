@@ -1,11 +1,11 @@
-package com.pet.vpn_client.domain.interfaces.repository
+package com.pet.vpn_client.domain.interfaces
 
 import com.pet.vpn_client.domain.models.ConfigProfileItem
 import com.pet.vpn_client.domain.models.ConfigResult
 import com.pet.vpn_client.domain.models.EConfigType
 import com.pet.vpn_client.domain.models.XrayConfig
 
-interface ConfigRepository {
+interface CoreConfigProvider {
     fun getCoreConfig(guid: String): ConfigResult
     fun createInitOutbound(configType: EConfigType): XrayConfig.OutboundBean?
     fun populateTransportSettings(

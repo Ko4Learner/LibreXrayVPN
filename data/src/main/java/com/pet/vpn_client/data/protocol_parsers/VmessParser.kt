@@ -1,12 +1,9 @@
-package com.pet.vpn_client.data.config_formatter
+package com.pet.vpn_client.data.protocol_parsers
 
 import android.text.TextUtils
 import android.util.Log
 import com.google.gson.Gson
 import com.pet.vpn_client.core.utils.Constants
-import com.pet.vpn_client.domain.interfaces.repository.ConfigRepository
-import com.pet.vpn_client.domain.models.XrayConfig.OutboundBean
-import com.pet.vpn_client.domain.interfaces.KeyValueStorage
 import com.pet.vpn_client.domain.models.ConfigProfileItem
 import com.pet.vpn_client.domain.models.EConfigType
 import com.pet.vpn_client.domain.models.NetworkType
@@ -14,13 +11,8 @@ import com.pet.vpn_client.core.utils.Utils
 import com.pet.vpn_client.core.utils.idnHost
 import java.net.URI
 import javax.inject.Inject
-import javax.inject.Provider
 
-class VmessFormatter @Inject constructor(
-    val configRepository: Provider<ConfigRepository>,
-    val storage: KeyValueStorage,
-    val gson: Gson
-) : BaseFormatter() {
+class VmessParser @Inject constructor(val gson: Gson) : BaseParser() {
     fun parse(str: String): ConfigProfileItem? {
         if (str.indexOf('?') > 0 && str.indexOf('&') > 0) {
             return parseVmessStd(str)
@@ -99,27 +91,7 @@ class VmessFormatter @Inject constructor(
         return config
     }
 
-    fun toOutbound(profileItem: ConfigProfileItem): OutboundBean? {
-        val outboundBean = configRepository.get().createInitOutbound(EConfigType.VMESS)
-
-        outboundBean?.settings?.vnext?.first()?.let { vnext ->
-            vnext.address = profileItem.server.orEmpty()
-            vnext.port = profileItem.serverPort.orEmpty().toInt()
-            vnext.users[0].id = profileItem.password.orEmpty()
-            vnext.users[0].security = profileItem.method
-        }
-
-        val sni = outboundBean?.streamSettings?.let {
-            configRepository.get().populateTransportSettings(it, profileItem)
-        }
-
-        outboundBean?.streamSettings?.let {
-            configRepository.get().populateTlsSettings(it, profileItem, sni)
-        }
-
-        return outboundBean
-    }
-    companion object{
+    companion object {
         private const val DEFAULT_SECURITY = "auto"
     }
 }

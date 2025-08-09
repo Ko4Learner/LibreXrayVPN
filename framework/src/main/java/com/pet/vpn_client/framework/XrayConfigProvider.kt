@@ -1,4 +1,4 @@
-package com.pet.vpn_client.data.repository_impl
+package com.pet.vpn_client.framework
 
 import android.content.Context
 import android.text.TextUtils
@@ -12,39 +12,39 @@ import com.google.gson.JsonSerializationContext
 import com.google.gson.JsonSerializer
 import com.google.gson.reflect.TypeToken
 import com.pet.vpn_client.core.utils.Constants
-import com.pet.vpn_client.domain.models.XrayConfig
-import com.pet.vpn_client.data.config_formatter.HttpFormatter
-import com.pet.vpn_client.data.config_formatter.ShadowsocksFormatter
-import com.pet.vpn_client.data.config_formatter.SocksFormatter
-import com.pet.vpn_client.data.config_formatter.TrojanFormatter
-import com.pet.vpn_client.data.config_formatter.VlessFormatter
-import com.pet.vpn_client.data.config_formatter.VmessFormatter
-import com.pet.vpn_client.data.config_formatter.WireguardFormatter
-import com.pet.vpn_client.domain.interfaces.repository.ConfigRepository
+import com.pet.vpn_client.core.utils.Utils
+import com.pet.vpn_client.domain.interfaces.CoreConfigProvider
 import com.pet.vpn_client.domain.interfaces.KeyValueStorage
 import com.pet.vpn_client.domain.models.ConfigProfileItem
 import com.pet.vpn_client.domain.models.ConfigResult
 import com.pet.vpn_client.domain.models.EConfigType
 import com.pet.vpn_client.domain.models.NetworkType
-import com.pet.vpn_client.core.utils.Utils
+import com.pet.vpn_client.domain.models.XrayConfig
+import com.pet.vpn_client.framework.outbound_converter.HttpConverter
+import com.pet.vpn_client.framework.outbound_converter.ShadowsocksConverter
+import com.pet.vpn_client.framework.outbound_converter.SocksConverter
+import com.pet.vpn_client.framework.outbound_converter.TrojanConverter
+import com.pet.vpn_client.framework.outbound_converter.VlessConverter
+import com.pet.vpn_client.framework.outbound_converter.VmessConverter
+import com.pet.vpn_client.framework.outbound_converter.WireguardConverter
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.lang.reflect.Type
 import java.net.Inet6Address
 import java.net.InetAddress
 import javax.inject.Inject
 
-class ConfigRepositoryImpl @Inject constructor(
+class XrayConfigProvider @Inject constructor(
     val storage: KeyValueStorage,
     val gson: Gson,
-    val httpFormatter: HttpFormatter,
-    val shadowsocksFormatter: ShadowsocksFormatter,
-    val socksFormatter: SocksFormatter,
-    val trojanFormatter: TrojanFormatter,
-    val vlessFormatter: VlessFormatter,
-    val vmessFormatter: VmessFormatter,
-    val wireguardFormatter: WireguardFormatter,
+    val httpConverter: HttpConverter,
+    val shadowsocksConverter: ShadowsocksConverter,
+    val socksConverter: SocksConverter,
+    val trojanConverter: TrojanConverter,
+    val vlessConverter: VlessConverter,
+    val vmessConverter: VmessConverter,
+    val wireguardConverter: WireguardConverter,
     @ApplicationContext val context: Context
-) : ConfigRepository {
+) : CoreConfigProvider {
     private var initConfigCache: String? = null
 
     override fun getCoreConfig(guid: String): ConfigResult {
@@ -228,13 +228,13 @@ class ConfigRepositoryImpl @Inject constructor(
 
     private fun convertProfile2Outbound(profileItem: ConfigProfileItem): XrayConfig.OutboundBean? {
         return when (profileItem.configType) {
-            EConfigType.VMESS -> vmessFormatter.toOutbound(profileItem)
-            EConfigType.SHADOWSOCKS -> shadowsocksFormatter.toOutbound(profileItem)
-            EConfigType.SOCKS -> socksFormatter.toOutbound(profileItem)
-            EConfigType.VLESS -> vlessFormatter.toOutbound(profileItem)
-            EConfigType.TROJAN -> trojanFormatter.toOutbound(profileItem)
-            EConfigType.WIREGUARD -> wireguardFormatter.toOutbound(profileItem)
-            EConfigType.HTTP -> httpFormatter.toOutbound(profileItem)
+            EConfigType.VMESS -> vmessConverter.toOutbound(profileItem)
+            EConfigType.SHADOWSOCKS -> shadowsocksConverter.toOutbound(profileItem)
+            EConfigType.SOCKS -> socksConverter.toOutbound(profileItem)
+            EConfigType.VLESS -> vlessConverter.toOutbound(profileItem)
+            EConfigType.TROJAN -> trojanConverter.toOutbound(profileItem)
+            EConfigType.WIREGUARD -> wireguardConverter.toOutbound(profileItem)
+            EConfigType.HTTP -> httpConverter.toOutbound(profileItem)
         }
     }
 

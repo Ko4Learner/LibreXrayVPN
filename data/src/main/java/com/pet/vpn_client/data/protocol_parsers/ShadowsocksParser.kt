@@ -1,9 +1,7 @@
-package com.pet.vpn_client.data.config_formatter
+package com.pet.vpn_client.data.protocol_parsers
 
 import android.util.Log
 import com.pet.vpn_client.core.utils.Constants
-import com.pet.vpn_client.domain.models.XrayConfig.OutboundBean
-import com.pet.vpn_client.domain.interfaces.repository.ConfigRepository
 import com.pet.vpn_client.domain.models.ConfigProfileItem
 import com.pet.vpn_client.domain.models.EConfigType
 import com.pet.vpn_client.domain.models.NetworkType
@@ -11,10 +9,8 @@ import com.pet.vpn_client.core.utils.Utils
 import com.pet.vpn_client.core.utils.idnHost
 import java.net.URI
 import javax.inject.Inject
-import javax.inject.Provider
 
-class ShadowsocksFormatter @Inject constructor(private val configRepository: Provider<ConfigRepository>) :
-    BaseFormatter() {
+class ShadowsocksParser @Inject constructor() : BaseParser() {
     fun parse(str: String): ConfigProfileItem? {
         return parseSip002(str) ?: parseLegacy(str)
     }
@@ -95,27 +91,6 @@ class ShadowsocksFormatter @Inject constructor(private val configRepository: Pro
         config.method = match.groupValues[1].lowercase()
 
         return config
-    }
-
-    fun toOutbound(profileItem: ConfigProfileItem): OutboundBean? {
-        val outboundBean = configRepository.get().createInitOutbound(EConfigType.SHADOWSOCKS)
-
-        outboundBean?.settings?.servers?.first()?.let { server ->
-            server.address = profileItem.server.orEmpty()
-            server.port = profileItem.serverPort.orEmpty().toInt()
-            server.password = profileItem.password
-            server.method = profileItem.method
-        }
-
-        val sni = outboundBean?.streamSettings?.let {
-            configRepository.get().populateTransportSettings(it, profileItem)
-        }
-
-        outboundBean?.streamSettings?.let {
-            configRepository.get().populateTlsSettings(it, profileItem, sni)
-        }
-
-        return outboundBean
     }
 
     companion object {
