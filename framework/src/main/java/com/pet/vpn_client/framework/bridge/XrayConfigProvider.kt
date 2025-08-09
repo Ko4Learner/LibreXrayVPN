@@ -1,4 +1,4 @@
-package com.pet.vpn_client.framework
+package com.pet.vpn_client.framework.bridge
 
 import android.content.Context
 import android.text.TextUtils
@@ -13,13 +13,12 @@ import com.google.gson.JsonSerializer
 import com.google.gson.reflect.TypeToken
 import com.pet.vpn_client.core.utils.Constants
 import com.pet.vpn_client.core.utils.Utils
-import com.pet.vpn_client.domain.interfaces.CoreConfigProvider
 import com.pet.vpn_client.domain.interfaces.KeyValueStorage
 import com.pet.vpn_client.domain.models.ConfigProfileItem
 import com.pet.vpn_client.domain.models.ConfigResult
 import com.pet.vpn_client.domain.models.EConfigType
 import com.pet.vpn_client.domain.models.NetworkType
-import com.pet.vpn_client.domain.models.XrayConfig
+import com.pet.vpn_client.framework.models.XrayConfig
 import com.pet.vpn_client.framework.outbound_converter.HttpConverter
 import com.pet.vpn_client.framework.outbound_converter.ShadowsocksConverter
 import com.pet.vpn_client.framework.outbound_converter.SocksConverter
@@ -44,10 +43,10 @@ class XrayConfigProvider @Inject constructor(
     val vmessConverter: VmessConverter,
     val wireguardConverter: WireguardConverter,
     @ApplicationContext val context: Context
-) : CoreConfigProvider {
+) {
     private var initConfigCache: String? = null
 
-    override fun getCoreConfig(guid: String): ConfigResult {
+    fun getCoreConfig(guid: String): ConfigResult {
         try {
             val config = storage.decodeServerConfig(guid) ?: return ConfigResult(false)
             return getXrayNormalConfig(context, guid, config)
@@ -238,7 +237,7 @@ class XrayConfigProvider @Inject constructor(
         }
     }
 
-    override fun createInitOutbound(configType: EConfigType): XrayConfig.OutboundBean? {
+    fun createInitOutbound(configType: EConfigType): XrayConfig.OutboundBean? {
         return when (configType) {
             EConfigType.VMESS, EConfigType.VLESS -> XrayConfig.OutboundBean(
                 protocol = configType.name.lowercase(),
@@ -272,7 +271,7 @@ class XrayConfigProvider @Inject constructor(
         }
     }
 
-    override fun populateTransportSettings(
+    fun populateTransportSettings(
         streamSettings: XrayConfig.OutboundBean.StreamSettingsBean,
         profileItem: ConfigProfileItem
     ): String? {
@@ -378,7 +377,7 @@ class XrayConfigProvider @Inject constructor(
         return sni
     }
 
-    override fun populateTlsSettings(
+    fun populateTlsSettings(
         streamSettings: XrayConfig.OutboundBean.StreamSettingsBean,
         profileItem: ConfigProfileItem,
         sniExt: String?

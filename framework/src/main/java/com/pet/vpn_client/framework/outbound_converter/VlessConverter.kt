@@ -1,15 +1,16 @@
 package com.pet.vpn_client.framework.outbound_converter
 
-import com.pet.vpn_client.domain.interfaces.CoreConfigProvider
 import com.pet.vpn_client.domain.models.ConfigProfileItem
 import com.pet.vpn_client.domain.models.EConfigType
-import com.pet.vpn_client.domain.models.XrayConfig.OutboundBean
+import com.pet.vpn_client.framework.models.XrayConfig.OutboundBean
+import com.pet.vpn_client.framework.bridge.XrayConfigProvider
+import dagger.Lazy
 import javax.inject.Inject
-import javax.inject.Provider
 
-class VlessConverter @Inject constructor(val coreConfigProvider: Provider<CoreConfigProvider>) {
+class VlessConverter @Inject constructor(private val xrayConfigProviderLazy: Lazy<XrayConfigProvider>) {
     fun toOutbound(profileItem: ConfigProfileItem): OutboundBean? {
-        val outboundBean = coreConfigProvider.get().createInitOutbound(EConfigType.VLESS)
+        val xrayConfigProvider = xrayConfigProviderLazy.get()
+        val outboundBean = xrayConfigProvider.createInitOutbound(EConfigType.VLESS)
 
         outboundBean?.settings?.vnext?.first()?.let { vnext ->
             vnext.address = profileItem.server.orEmpty()
@@ -20,11 +21,11 @@ class VlessConverter @Inject constructor(val coreConfigProvider: Provider<CoreCo
         }
 
         val sni = outboundBean?.streamSettings?.let {
-            coreConfigProvider.get().populateTransportSettings(it, profileItem)
+            xrayConfigProvider.populateTransportSettings(it, profileItem)
         }
 
         outboundBean?.streamSettings?.let {
-            coreConfigProvider.get().populateTlsSettings(it, profileItem, sni)
+            xrayConfigProvider.populateTlsSettings(it, profileItem, sni)
         }
         return outboundBean
     }

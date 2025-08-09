@@ -4,7 +4,6 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.text.TextUtils
 import android.util.Log
-import com.google.gson.Gson
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.common.InputImage
 import com.pet.vpn_client.core.utils.Constants
@@ -15,7 +14,6 @@ import com.pet.vpn_client.data.protocol_parsers.TrojanParser
 import com.pet.vpn_client.data.protocol_parsers.VlessParser
 import com.pet.vpn_client.data.protocol_parsers.VmessParser
 import com.pet.vpn_client.data.protocol_parsers.WireguardParser
-import com.pet.vpn_client.domain.interfaces.CoreConfigProvider
 import com.pet.vpn_client.domain.interfaces.KeyValueStorage
 import com.pet.vpn_client.domain.interfaces.repository.SubscriptionRepository
 import com.pet.vpn_client.domain.models.ConfigProfileItem
@@ -31,14 +29,12 @@ import kotlin.coroutines.cancellation.CancellationException
 
 class SubscriptionRepositoryImpl @Inject constructor(
     val storage: KeyValueStorage,
-    val gson: Gson,
-    val coreConfigProvider: CoreConfigProvider,
-    val shadowsocksFormatter: ShadowsocksParser,
-    val socksFormatter: SocksParser,
-    val trojanFormatter: TrojanParser,
-    val vlessFormatter: VlessParser,
-    val vmessFormatter: VmessParser,
-    val wireguardFormatter: WireguardParser,
+    val shadowsocksParser: ShadowsocksParser,
+    val socksParser: SocksParser,
+    val trojanParser: TrojanParser,
+    val vlessParser: VlessParser,
+    val vmessParser: VmessParser,
+    val wireguardParser: WireguardParser,
     @ApplicationContext val context: Context
 ) : SubscriptionRepository {
     //TODO уйти от цифр в результатах
@@ -135,17 +131,17 @@ class SubscriptionRepositoryImpl @Inject constructor(
             }
 
             val config = if (str.startsWith(EConfigType.VMESS.protocolScheme)) {
-                vmessFormatter.parse(str)
+                vmessParser.parse(str)
             } else if (str.startsWith(EConfigType.SHADOWSOCKS.protocolScheme)) {
-                shadowsocksFormatter.parse(str)
+                shadowsocksParser.parse(str)
             } else if (str.startsWith(EConfigType.SOCKS.protocolScheme)) {
-                socksFormatter.parse(str)
+                socksParser.parse(str)
             } else if (str.startsWith(EConfigType.TROJAN.protocolScheme)) {
-                trojanFormatter.parse(str)
+                trojanParser.parse(str)
             } else if (str.startsWith(EConfigType.VLESS.protocolScheme)) {
-                vlessFormatter.parse(str)
+                vlessParser.parse(str)
             } else if (str.startsWith(EConfigType.WIREGUARD.protocolScheme)) {
-                wireguardFormatter.parse(str)
+                wireguardParser.parse(str)
             } else {
                 null
             }

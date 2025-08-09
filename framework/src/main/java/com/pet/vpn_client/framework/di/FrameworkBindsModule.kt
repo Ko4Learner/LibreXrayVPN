@@ -1,14 +1,12 @@
 package com.pet.vpn_client.framework.di
 
 import com.pet.vpn_client.domain.interactor_impl.ConnectionInteractorImpl
-import com.pet.vpn_client.domain.interfaces.CoreConfigProvider
 import com.pet.vpn_client.domain.interfaces.CoreVpnBridge
 import com.pet.vpn_client.domain.interfaces.ServiceManager
 import com.pet.vpn_client.domain.interfaces.interactor.ConnectionInteractor
 import com.pet.vpn_client.domain.interfaces.repository.ServiceStateRepository
 import com.pet.vpn_client.framework.ServiceManagerImpl
 import com.pet.vpn_client.framework.ServiceStateRepositoryImpl
-import com.pet.vpn_client.framework.XrayConfigProvider
 import com.pet.vpn_client.framework.bridge.XRayVpnBridge
 import dagger.Binds
 import dagger.Module
@@ -34,8 +32,4 @@ abstract class FrameworkBindsModule {
     @Binds
     @Singleton
     abstract fun bindServiceStateRepository(impl: ServiceStateRepositoryImpl): ServiceStateRepository
-
-    @Binds
-    @Singleton
-    abstract fun bindCoreConfigProvider(impl: XrayConfigProvider): CoreConfigProvider
 }

@@ -11,6 +11,7 @@ import com.pet.vpn_client.domain.models.ConfigProfileItem
 import com.pet.vpn_client.domain.state.ServiceState
 import com.pet.vpn_client.framework.services.VPNService
 import com.pet.vpn_client.core.utils.Utils
+import dagger.Lazy
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -19,7 +20,6 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import javax.inject.Provider
 
 /**
  * Implements management logic for VPN service operations.
@@ -30,11 +30,11 @@ import javax.inject.Provider
  */
 class ServiceManagerImpl @Inject constructor(
     private val storage: KeyValueStorage,
-    private val coreVpnBridgeProvider: Provider<CoreVpnBridge>,
+    private val coreVpnBridgeLazy: Lazy<CoreVpnBridge>,
     private val stateRepository: ServiceStateRepository,
     @ApplicationContext private val context: Context
 ) : ServiceManager {
-    private val coreVpnBridge: CoreVpnBridge by lazy { coreVpnBridgeProvider.get() }
+    private val coreVpnBridge: CoreVpnBridge get() = coreVpnBridgeLazy.get()
     private var currentConfig: ConfigProfileItem? = null
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 

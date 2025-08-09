@@ -96,7 +96,7 @@ class VmessParser @Inject constructor(val gson: Gson) : BaseParser() {
     }
 }
 
-data class VmessQRCode(
+private data class VmessQRCode(
     var v: String = "",
     var ps: String = "",
     var add: String = "",

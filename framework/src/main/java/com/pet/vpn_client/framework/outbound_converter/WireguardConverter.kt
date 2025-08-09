@@ -2,16 +2,18 @@ package com.pet.vpn_client.framework.outbound_converter
 
 import com.pet.vpn_client.core.utils.Constants
 import com.pet.vpn_client.core.utils.Utils
-import com.pet.vpn_client.domain.interfaces.CoreConfigProvider
 import com.pet.vpn_client.domain.models.ConfigProfileItem
 import com.pet.vpn_client.domain.models.EConfigType
-import com.pet.vpn_client.domain.models.XrayConfig.OutboundBean
+import com.pet.vpn_client.framework.models.XrayConfig.OutboundBean
+import com.pet.vpn_client.framework.bridge.XrayConfigProvider
+import dagger.Lazy
 import javax.inject.Inject
 import javax.inject.Provider
 
-class WireguardConverter @Inject constructor(val coreConfigProvider: Provider<CoreConfigProvider>) {
+class WireguardConverter @Inject constructor(private val xrayConfigProviderLazy: Lazy<XrayConfigProvider>) {
     fun toOutbound(profileItem: ConfigProfileItem): OutboundBean? {
-        val outboundBean = coreConfigProvider.get().createInitOutbound(EConfigType.WIREGUARD)
+        val xrayConfigProvider = xrayConfigProviderLazy.get()
+        val outboundBean = xrayConfigProvider.createInitOutbound(EConfigType.WIREGUARD)
 
         outboundBean?.settings?.let { wireguard ->
             wireguard.secretKey = profileItem.secretKey

@@ -1,6 +1,7 @@
-package com.pet.vpn_client.domain.models
+package com.pet.vpn_client.framework.models
 
 import com.pet.vpn_client.core.utils.Constants
+import com.pet.vpn_client.domain.models.EConfigType
 
 data class XrayConfig(
     var remarks: String? = null,

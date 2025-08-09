@@ -1,15 +1,16 @@
 package com.pet.vpn_client.framework.outbound_converter
 
-import com.pet.vpn_client.domain.interfaces.CoreConfigProvider
 import com.pet.vpn_client.domain.models.ConfigProfileItem
 import com.pet.vpn_client.domain.models.EConfigType
-import com.pet.vpn_client.domain.models.XrayConfig.OutboundBean
+import com.pet.vpn_client.framework.models.XrayConfig.OutboundBean
+import com.pet.vpn_client.framework.bridge.XrayConfigProvider
+import dagger.Lazy
 import javax.inject.Inject
-import javax.inject.Provider
 
-class SocksConverter @Inject constructor(val coreConfigProvider: Provider<CoreConfigProvider>) {
+class SocksConverter @Inject constructor(private val xrayConfigProviderLazy: Lazy<XrayConfigProvider>) {
     fun toOutbound(profileItem: ConfigProfileItem): OutboundBean? {
-        val outboundBean = coreConfigProvider.get().createInitOutbound(EConfigType.SOCKS)
+        val xrayConfigProvider = xrayConfigProviderLazy.get()
+        val outboundBean = xrayConfigProvider.createInitOutbound(EConfigType.SOCKS)
 
         outboundBean?.settings?.servers?.first()?.let { server ->
             server.address = profileItem.server.orEmpty()
