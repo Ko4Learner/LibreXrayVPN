@@ -7,7 +7,18 @@ import com.pet.vpn_client.framework.bridge.XrayConfigProvider
 import dagger.Lazy
 import javax.inject.Inject
 
+/**
+ * Converts a profile into an Xray Trojan outbound.
+ *
+ * Responsibilities:
+ * - Maps server address/port, password and optional flow.
+ * - Applies transport settings and then TLS/REALITY options when applicable.
+ */
 class TrojanConverter @Inject constructor(private val xrayConfigProviderLazy: Lazy<XrayConfigProvider>) {
+
+    /**
+     * Builds a Trojan [OutboundBean] from the given profile.
+     */
     fun toOutbound(profileItem: ConfigProfileItem): OutboundBean? {
         val xrayConfigProvider = xrayConfigProviderLazy.get()
         val outboundBean = xrayConfigProvider.createInitOutbound(EConfigType.TROJAN)

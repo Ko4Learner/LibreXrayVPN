@@ -3,6 +3,9 @@ package com.pet.vpn_client.framework.models
 import com.pet.vpn_client.core.utils.Constants
 import com.pet.vpn_client.domain.models.EConfigType
 
+/**
+ * Data model that mirrors the Xray core JSON configuration.
+ */
 data class XrayConfig(
     var remarks: String? = null,
     var stats: Any? = null,
@@ -20,6 +23,9 @@ data class XrayConfig(
     var observatory: Any? = null,
     var burstObservatory: Any? = null
 ) {
+    /**
+     * Logging options for the Xray core.
+     */
     data class LogBean(
         val access: String? = null,
         val error: String? = null,
@@ -27,6 +33,9 @@ data class XrayConfig(
         val dnsLog: Boolean? = null
     )
 
+    /**
+     * Inbound listener definition (local entry points).
+     */
     data class InboundBean(
         var tag: String,
         var port: Int,
@@ -37,6 +46,9 @@ data class XrayConfig(
         val streamSettings: Any? = null,
         val allocate: Any? = null
     ) {
+        /**
+         * Controls protocol sniffing on inbound traffic, e.g., to detect HTTP/HTTPS and domains.
+         */
         data class SniffingBean(
             var enabled: Boolean,
             val destOverride: ArrayList<String>,
@@ -45,6 +57,14 @@ data class XrayConfig(
         )
     }
 
+    /**
+     * Outbound (proxy) definition. This is where the remote server/protocol is configured.
+     *
+     * - `protocol` must match one of the supported types (see `EConfigType`).
+     * - `settings` shape depends on the protocol (vmess/vless/shadowsocks/etc).
+     * - `streamSettings` configures transport (TCP/WS/gRPC/…) and security (TLS/REALITY).
+     * - `mux` toggles multiplexing and related options.
+     */
     data class OutboundBean(
         var tag: String = PROXY,
         var protocol: String,
@@ -54,6 +74,9 @@ data class XrayConfig(
         val sendThrough: String? = null,
         var mux: MuxBean? = MuxBean(false)
     ) {
+        /**
+         * Protocol-specific settings container (shape differs per protocol).
+         */
         data class OutSettingsBean(
             var vnext: List<VnextBean>? = null,
             var fragment: FragmentBean? = null,
@@ -135,6 +158,14 @@ data class XrayConfig(
             )
         }
 
+        /**
+         * Per-connection transport and security settings.
+         *
+         * - `network`: transport type (e.g., "tcp", "ws", "grpc", "h2" …).
+         * - `security`: null, "tls" or "reality".
+         *   If "tls" → use `tlsSettings`; if "reality" → use `realitySettings`; do not set both.
+         * - `sockopt`: low-level socket options and `domainStrategy` overrides when needed.
+         */
         data class StreamSettingsBean(
             var network: String = Constants.DEFAULT_NETWORK,
             var security: String? = null,
@@ -276,6 +307,10 @@ data class XrayConfig(
             var xudpProxyUDP443: String? = null,
         )
 
+        /**
+         * Accessor to read the server address from protocol-specific settings.
+         * Returns null if not applicable or missing.
+         */
         fun getServerAddress(): String? {
             if (protocol.equals(EConfigType.VMESS.name, true)
                 || protocol.equals(EConfigType.VLESS.name, true)
@@ -293,6 +328,9 @@ data class XrayConfig(
             return null
         }
 
+        /**
+         * Ensures a non-null `sockopt` object and returns it, creating defaults if needed.
+         */
         fun ensureSockopt(): StreamSettingsBean.SockoptBean {
             val stream = streamSettings ?: StreamSettingsBean().also {
                 streamSettings = it
@@ -306,6 +344,12 @@ data class XrayConfig(
         }
     }
 
+    /**
+     * DNS configuration for the core.
+     *
+     * - `servers`: resolver endpoints (IPs/strings/objects per Xray schema).
+     * - `hosts`: domain remapping (domain → IP or list of IPs).
+     */
     data class DnsBean(
         var servers: ArrayList<Any>? = null,
         var hosts: Map<String, Any>? = null,
@@ -315,6 +359,12 @@ data class XrayConfig(
         val tag: String? = null
     )
 
+    /**
+     * Routing configuration and rules.
+     *
+     * - `domainStrategy` (e.g., "IPIfNonMatch", "AsIs") determines how domains resolve for rules.
+     * - `rules` select traffic by domain/ip/network/inboundTag and route it to the desired outbound tag.
+     */
     data class RoutingBean(
         var domainStrategy: String,
         var domainMatcher: String? = null,
@@ -355,6 +405,9 @@ data class XrayConfig(
         )
     }
 
+    /**
+     * Returns only the outbounds whose `protocol` matches known proxy types (see `EConfigType`).
+     */
     fun getAllProxyOutbound(): List<OutboundBean> {
         return outbounds.filter { outbound ->
             EConfigType.entries.any { it.name.equals(outbound.protocol, ignoreCase = true) }

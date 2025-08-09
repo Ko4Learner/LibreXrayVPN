@@ -8,9 +8,20 @@ import com.pet.vpn_client.framework.models.XrayConfig.OutboundBean
 import com.pet.vpn_client.framework.bridge.XrayConfigProvider
 import dagger.Lazy
 import javax.inject.Inject
-import javax.inject.Provider
 
+/**
+ * Converts a profile into an Xray WireGuard outbound.
+ *
+ * Responsibilities:
+ * - Maps keys, local addresses, peer parameters (publicKey/preSharedKey/endpoint),
+ *   and optional MTU/reserved values.
+ * - Leaves transport/TLS settings unused (not applicable to WireGuard).
+ */
 class WireguardConverter @Inject constructor(private val xrayConfigProviderLazy: Lazy<XrayConfigProvider>) {
+
+    /**
+     * Builds a WireGuard [OutboundBean] from the given profile.
+     */
     fun toOutbound(profileItem: ConfigProfileItem): OutboundBean? {
         val xrayConfigProvider = xrayConfigProviderLazy.get()
         val outboundBean = xrayConfigProvider.createInitOutbound(EConfigType.WIREGUARD)

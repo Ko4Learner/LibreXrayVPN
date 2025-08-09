@@ -7,8 +7,18 @@ import com.pet.vpn_client.framework.bridge.XrayConfigProvider
 import dagger.Lazy
 import javax.inject.Inject
 
-
+/**
+ * Converts a profile into an Xray Shadowsocks outbound.
+ *
+ * Responsibilities:
+ * - Maps server address/port, method and password.
+ * - Applies transport settings and then TLS/REALITY options when applicable.
+ */
 class ShadowsocksConverter @Inject constructor(private val xrayConfigProviderLazy: Lazy<XrayConfigProvider>) {
+
+    /**
+     * Builds a Shadowsocks [OutboundBean] from the given profile.
+     */
     fun toOutbound(profileItem: ConfigProfileItem): OutboundBean? {
         val xrayConfigProvider = xrayConfigProviderLazy.get()
         val outboundBean = xrayConfigProvider.createInitOutbound(EConfigType.SHADOWSOCKS)

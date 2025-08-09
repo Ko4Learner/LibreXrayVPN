@@ -32,20 +32,29 @@ import java.net.Inet6Address
 import java.net.InetAddress
 import javax.inject.Inject
 
+/**
+ * Builds Xray core configuration from a base template and a protocol profile.
+ */
 class XrayConfigProvider @Inject constructor(
-    val storage: KeyValueStorage,
-    val gson: Gson,
-    val httpConverter: HttpConverter,
-    val shadowsocksConverter: ShadowsocksConverter,
-    val socksConverter: SocksConverter,
-    val trojanConverter: TrojanConverter,
-    val vlessConverter: VlessConverter,
-    val vmessConverter: VmessConverter,
-    val wireguardConverter: WireguardConverter,
-    @ApplicationContext val context: Context
+    private val storage: KeyValueStorage,
+    private val gson: Gson,
+    private val httpConverter: HttpConverter,
+    private val shadowsocksConverter: ShadowsocksConverter,
+    private val socksConverter: SocksConverter,
+    private val trojanConverter: TrojanConverter,
+    private val vlessConverter: VlessConverter,
+    private val vmessConverter: VmessConverter,
+    private val wireguardConverter: WireguardConverter,
+    @ApplicationContext private val context: Context
 ) {
     private var initConfigCache: String? = null
 
+    /**
+     * Returns a composed Xray configuration for the given profile GUID.
+     *
+     * @return [ConfigResult] where `status=true` and `content` is a JSON string on success.
+     *         If the profile is missing or invalid, returns `status=false`.
+     */
     fun getCoreConfig(guid: String): ConfigResult {
         try {
             val config = storage.decodeServerConfig(guid) ?: return ConfigResult(false)
@@ -57,6 +66,10 @@ class XrayConfigProvider @Inject constructor(
         }
     }
 
+    /**
+     * Composes a full config by validating the profile, updating base template and
+     * wiring inbounds/outbounds, DNS and routing.
+     */
     private fun getXrayNormalConfig(
         context: Context,
         guid: String,
@@ -79,7 +92,7 @@ class XrayConfigProvider @Inject constructor(
 
         getInbounds(xRayConfig)
 
-        getOutbounds(xRayConfig, config) ?: return result
+        if (!getOutbounds(xRayConfig, config)) return result
 
         getDns(xRayConfig)
 
@@ -91,6 +104,9 @@ class XrayConfigProvider @Inject constructor(
         return result
     }
 
+    /**
+     * Loads the base Xray JSON template from assets (cached after first read).
+     */
     private fun initXrayConfig(context: Context): XrayConfig? {
         val assets = initConfigCache ?: readTextFromAssets(context)
         if (TextUtils.isEmpty(assets)) {
@@ -101,12 +117,15 @@ class XrayConfigProvider @Inject constructor(
         return config
     }
 
+    /**
+     * Configures inbound listeners (loopback, ports, sniffing) on the template.
+     */
     private fun getInbounds(xrayConfig: XrayConfig): Boolean {
         try {
             xrayConfig.inbounds.forEach { curInbound ->
                 curInbound.listen = LOOPBACK
             }
-            xrayConfig.inbounds[0].port = 10808
+            xrayConfig.inbounds[0].port = LOCAL_SOCKS_PORT
             xrayConfig.inbounds[0].sniffing?.enabled = true
             xrayConfig.inbounds[0].sniffing?.routeOnly = false
             xrayConfig.inbounds.removeAt(1)
@@ -117,10 +136,13 @@ class XrayConfigProvider @Inject constructor(
         return true
     }
 
-    private fun getOutbounds(xrayConfig: XrayConfig, config: ConfigProfileItem): Boolean? {
-        val outbound = convertProfile2Outbound(config) ?: return null
+    /**
+     * Builds an outbound from a profile and injects it into the template.
+     */
+    private fun getOutbounds(xrayConfig: XrayConfig, config: ConfigProfileItem): Boolean {
+        val outbound = convertProfiletoOutbound(config) ?: return false
         val ret = updateOutboundWithGlobalSettings(outbound)
-        if (!ret) return null
+        if (!ret) return false
 
         if (xrayConfig.outbounds.isNotEmpty()) {
             xrayConfig.outbounds[0] = outbound
@@ -130,6 +152,9 @@ class XrayConfigProvider @Inject constructor(
         return true
     }
 
+    /**
+     * Applies DNS servers and host remappings to the template.
+     */
     private fun getDns(xrayConfig: XrayConfig): Boolean {
         try {
             val hosts = mapOf(
@@ -154,6 +179,9 @@ class XrayConfigProvider @Inject constructor(
         return true
     }
 
+    /**
+     * Applies global adjustments to the outbound (e.g., mux, HTTP header stealth, WireGuard address).
+     */
     private fun updateOutboundWithGlobalSettings(outbound: XrayConfig.OutboundBean): Boolean {
         try {
             val protocol = outbound.protocol
@@ -200,7 +228,10 @@ class XrayConfigProvider @Inject constructor(
         return true
     }
 
-
+    /**
+     * Resolves outbound target domains to IP addresses and writes them into DNS hosts.
+     * Also sets domain strategy to prefer both IPv4 and IPv6 where applicable.
+     */
     private fun resolveOutboundDomainsToHosts(xrayConfig: XrayConfig) {
         val proxyOutboundList = xrayConfig.getAllProxyOutbound()
         val dns = xrayConfig.dns ?: return
@@ -225,7 +256,10 @@ class XrayConfigProvider @Inject constructor(
         dns.hosts = newHosts
     }
 
-    private fun convertProfile2Outbound(profileItem: ConfigProfileItem): XrayConfig.OutboundBean? {
+    /**
+     * Converts a profile into an outbound according to its protocol type.
+     */
+    private fun convertProfiletoOutbound(profileItem: ConfigProfileItem): XrayConfig.OutboundBean? {
         return when (profileItem.configType) {
             EConfigType.VMESS -> vmessConverter.toOutbound(profileItem)
             EConfigType.SHADOWSOCKS -> shadowsocksConverter.toOutbound(profileItem)
@@ -237,6 +271,9 @@ class XrayConfigProvider @Inject constructor(
         }
     }
 
+    /**
+     * Creates a minimal outbound skeleton for the given protocol type, used for initial drafts.
+     */
     fun createInitOutbound(configType: EConfigType): XrayConfig.OutboundBean? {
         return when (configType) {
             EConfigType.VMESS, EConfigType.VLESS -> XrayConfig.OutboundBean(
@@ -271,6 +308,11 @@ class XrayConfigProvider @Inject constructor(
         }
     }
 
+    /**
+     * Fills transport-specific stream settings (TCP/WS/GRPC/etc) from a profile.
+     *
+     * @return The inferred SNI (if any) to be used later in TLS/REALITY settings.
+     */
     fun populateTransportSettings(
         streamSettings: XrayConfig.OutboundBean.StreamSettingsBean,
         profileItem: ConfigProfileItem
@@ -377,6 +419,11 @@ class XrayConfigProvider @Inject constructor(
         return sni
     }
 
+    /**
+     * Applies TLS or REALITY settings onto the stream based on profile values.
+     *
+     * @param sniExt SNI suggested by transport (e.g., first Host), used if profile SNI is empty.
+     */
     fun populateTlsSettings(
         streamSettings: XrayConfig.OutboundBean.StreamSettingsBean,
         profileItem: ConfigProfileItem,
@@ -412,6 +459,10 @@ class XrayConfigProvider @Inject constructor(
         }
     }
 
+    /**
+     * Resolves a domain to a list of IP addresses (IPv4 first, then IPv6).
+     * Returns null if input is already an IP or resolution fails.
+     */
     private fun resolveHostToIP(host: String): List<String>? {
         try {
             if (Utils.isPureIpAddress(host)) {
@@ -432,6 +483,9 @@ class XrayConfigProvider @Inject constructor(
         }
     }
 
+    /**
+     * Serializes an object to JSON. Doubles are coerced to Ints where required.
+     */
     private fun toJsonPretty(src: Any?): String? {
         if (src == null)
             return null
@@ -450,6 +504,9 @@ class XrayConfigProvider @Inject constructor(
         return gsonPre.toJson(src)
     }
 
+    /**
+     * Safely parses a JSON string into [JsonObject], returning null on failure.
+     */
     private fun parseString(src: String?): JsonObject? {
         if (src == null)
             return null
@@ -461,6 +518,9 @@ class XrayConfigProvider @Inject constructor(
         }
     }
 
+    /**
+     * Reads the base config template from the app assets folder.
+     */
     private fun readTextFromAssets(context: Context?): String {
         if (context == null) return ""
 
@@ -482,6 +542,7 @@ class XrayConfigProvider @Inject constructor(
         private const val LOG_LEVEL = "warning"
         private const val EMPTY_CONFIG = "xRay_config.json"
         private const val LOOPBACK = "127.0.0.1"
+        private const val LOCAL_SOCKS_PORT = 10808
         private const val DNS_PROXY = "1.1.1.1"
         private const val HEADER_TYPE_HTTP = "http"
         private const val IP_IF_NON_MATCH = "IPIfNonMatch"

@@ -7,7 +7,18 @@ import com.pet.vpn_client.framework.bridge.XrayConfigProvider
 import dagger.Lazy
 import javax.inject.Inject
 
+/**
+ * Converts a profile into an Xray HTTP outbound.
+ *
+ * Responsibilities:
+ * - Maps server address/port and optional basic auth (username/password).
+ * - Does not modify transport/TLS settings (HTTP outbound is plain).
+ */
 class HttpConverter @Inject constructor(private val xrayConfigProviderLazy: Lazy<XrayConfigProvider>) {
+
+    /**
+     * Builds an HTTP [OutboundBean] from the given profile.
+     */
     fun toOutbound(profileItem: ConfigProfileItem): OutboundBean? {
         val xrayConfigProvider = xrayConfigProviderLazy.get()
         val outboundBean = xrayConfigProvider.createInitOutbound(EConfigType.HTTP)
