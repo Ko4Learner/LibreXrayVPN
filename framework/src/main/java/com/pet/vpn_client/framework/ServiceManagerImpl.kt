@@ -42,7 +42,7 @@ class ServiceManagerImpl @Inject constructor(
      * Starts the VPN service if a server is selected.
      */
     override fun startService() {
-        if (storage.getSelectServer().isNullOrEmpty()) {
+        if (storage.getSelectedServer().isNullOrEmpty()) {
             return
         }
         startContextService()
@@ -67,7 +67,7 @@ class ServiceManagerImpl @Inject constructor(
      */
     private fun startContextService() {
         if (coreVpnBridge.isRunning()) return
-        val guid = storage.getSelectServer() ?: return
+        val guid = storage.getSelectedServer() ?: return
         val config = storage.decodeServerConfig(guid) ?: return
         if (!Utils.isValidUrl(config.server)
             && !Utils.isIpAddress(config.server)

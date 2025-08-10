@@ -1,6 +1,7 @@
 package com.pet.vpn_client.data.mmkv
 
 import com.google.gson.Gson
+import com.pet.vpn_client.core.utils.Utils.fromJsonReified
 import com.pet.vpn_client.domain.models.ConfigProfileItem
 import com.pet.vpn_client.domain.interfaces.KeyValueStorage
 import com.tencent.mmkv.MMKV
@@ -12,25 +13,22 @@ class MMKVStorage @Inject constructor(private val gson: Gson) : KeyValueStorage 
     private val profileFullStorage by lazy { MMKV.mmkvWithID(ID_PROFILE_FULL_CONFIG, MMKV.MULTI_PROCESS_MODE) }
     private val settingsStorage by lazy { MMKV.mmkvWithID(ID_SETTING, MMKV.MULTI_PROCESS_MODE) }
 
-    override fun getSelectServer(): String? {
+    override fun getSelectedServer(): String? {
         return mainStorage.decodeString(KEY_SELECTED_SERVER)
     }
 
-    override fun setSelectServer(guid: String) {
+    override fun setSelectedServer(guid: String) {
         mainStorage.encode(KEY_SELECTED_SERVER, guid)
     }
 
-    override fun encodeServerList(serverList: MutableList<String>) {
+    override fun encodeServerList(serverList: List<String>) {
         mainStorage.encode(KEY_ANG_CONFIGS, gson.toJson(serverList))
     }
 
-    override fun decodeServerList(): MutableList<String> {
-        val json = mainStorage.decodeString(KEY_ANG_CONFIGS)
-        return if (json.isNullOrBlank()) {
-            mutableListOf()
-        } else {
-            gson.fromJson(json, mutableListOf<String>()::class.java)
-        }
+    override fun decodeServerList(): List<String> {
+        val json = mainStorage.decodeString(KEY_ANG_CONFIGS) ?: return emptyList()
+        return runCatching { gson.fromJsonReified<List<String>>(json) }
+            .getOrElse { emptyList() }
     }
 
     override fun decodeServerConfig(guid: String): ConfigProfileItem? {
@@ -48,11 +46,11 @@ class MMKVStorage @Inject constructor(private val gson: Gson) : KeyValueStorage 
     override fun encodeServerConfig(guid: String, config: ConfigProfileItem): String {
         val key = guid.ifBlank { UUID.randomUUID().toString().replace("-", "") }
         profileFullStorage.encode(key, gson.toJson(config))
-        val serverList = decodeServerList()
+        val serverList = decodeServerList().toMutableList()
         if (!serverList.contains(key)) {
             serverList.add(0, key)
             encodeServerList(serverList)
-            if (getSelectServer().isNullOrBlank()) {
+            if (getSelectedServer().isNullOrBlank()) {
                 mainStorage.encode(KEY_SELECTED_SERVER, key)
             }
         }
@@ -63,10 +61,10 @@ class MMKVStorage @Inject constructor(private val gson: Gson) : KeyValueStorage 
         if (guid.isBlank()) {
             return
         }
-        if (getSelectServer() == guid) {
+        if (getSelectedServer() == guid) {
             mainStorage.remove(KEY_SELECTED_SERVER)
         }
-        val serverList = decodeServerList()
+        val serverList = decodeServerList().toMutableList()
         serverList.remove(guid)
         encodeServerList(serverList)
         profileFullStorage.remove(guid)

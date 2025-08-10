@@ -157,7 +157,7 @@ class SubscriptionRepositoryImpl @Inject constructor(
             if (removedSelectedServer != null &&
                 config.server == removedSelectedServer.server && config.serverPort == removedSelectedServer.serverPort
             ) {
-                storage.setSelectServer(guid)
+                storage.setSelectedServer(guid)
             }
         } catch (e: Exception) {
             Log.e(Constants.TAG, "Failed to parse config", e)

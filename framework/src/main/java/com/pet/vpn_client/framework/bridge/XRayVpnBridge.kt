@@ -33,7 +33,7 @@ class XRayVpnBridge @Inject constructor(
      */
     override fun startCoreLoop(): Boolean {
         if (coreController.isRunning) return false
-        val guid = storage.getSelectServer() ?: return false
+        val guid = storage.getSelectedServer() ?: return false
         val result = xrayConfigProvider.getCoreConfig(guid)
         if (!result.status) return false
 

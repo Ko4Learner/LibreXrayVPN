@@ -4,6 +4,8 @@ import android.util.Base64
 import android.util.Log
 import android.util.Patterns
 import android.webkit.URLUtil
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import java.net.URLDecoder
 
 object Utils {
@@ -107,6 +109,9 @@ object Utils {
         return str.replace(" ", "%20")
             .replace("|", "%7C")
     }
+
+    inline fun <reified T> Gson.fromJsonReified(json: String): T =
+        fromJson(json, object : TypeToken<T>() {}.type)
 
     private fun isIpv4Address(value: String): Boolean {
         return IPV4_REGEX.matches(value)
