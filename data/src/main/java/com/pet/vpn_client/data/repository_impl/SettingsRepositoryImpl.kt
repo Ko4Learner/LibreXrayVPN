@@ -8,16 +8,31 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import java.util.Locale
 import javax.inject.Inject
 
-class SettingsRepositoryImpl @Inject constructor(val storage: KeyValueStorage) :
+/**
+ * Default implementation of [SettingsRepository].
+ */
+class SettingsRepositoryImpl @Inject constructor(private val storage: KeyValueStorage) :
     SettingsRepository {
+    /**
+     * Hot stream emitting the current [Locale].
+     */
     private val _localeFlow = MutableStateFlow(getLocale())
+    /**
+     * Observes the user's preferred locale.
+     */
     override fun observeLocale(): Flow<Locale> = _localeFlow
 
+    /**
+     * Persists the preferred locale tag and updates observers.
+     */
     override suspend fun setLocale(localeTag: String) {
-        storage.encodeSettings(PREF_LANGUAGE, localeTag)
+        storage.encodeSettingsString(PREF_LANGUAGE, localeTag)
         _localeFlow.value = getLocale()
     }
 
+    /**
+     * Returns the current effective [Locale].
+     */
     override fun getLocale(): Locale {
         val tag = storage.decodeSettingsString(PREF_LANGUAGE)
         return when {

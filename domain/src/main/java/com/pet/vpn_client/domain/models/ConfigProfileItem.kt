@@ -1,5 +1,12 @@
 package com.pet.vpn_client.domain.models
 
+/**
+ * Domain-level VPN profile used by parsers (data) and converters (framework).
+ *
+ * Notes:
+ * - Fields are protocol-specific; unused fields may remain null/blank.
+ *
+ */
 data class ConfigProfileItem(
     val configType: EConfigType,
     var subscriptionId: String = "",

@@ -7,13 +7,27 @@ import com.pet.vpn_client.core.utils.Utils
 import java.net.URI
 import kotlin.text.orEmpty
 
+/**
+ * Base class for protocol parsers.
+ *
+ * Purpose:
+ * - Provides common helpers to extract and apply transport/TLS parameters
+ *   from a URI query string to a [ConfigProfileItem].
+ */
 open class BaseParser {
+    /**
+     * Parses the URI query into a key/value map.
+     * @return Map of decoded query parameters.
+     */
     fun getQueryParam(uri: URI): Map<String, String> {
         return uri.rawQuery.split("&")
             .associate { it.split("=").let { (k, v) -> k to Utils.urlDecode(v) } }
     }
 
-    fun getItemFormQuery(
+    /**
+     * Applies shared transport/TLS parameters from [queryParam] to [config].
+     */
+    fun getItemFromQuery(
         config: ConfigProfileItem,
         queryParam: Map<String, String>,
         allowInsecure: Boolean

@@ -27,6 +27,6 @@ interface KeyValueStorage {
     fun encodeServerConfig(guid: String, config: ConfigProfileItem): String
     fun decodeServerConfig(guid: String): ConfigProfileItem?
     fun removeServer(guid: String)
-    fun encodeSettings(key: String, value: String?): Boolean
+    fun encodeSettingsString(key: String, value: String?)
     fun decodeSettingsString(key: String): String?
 }

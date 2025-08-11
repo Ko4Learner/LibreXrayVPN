@@ -140,7 +140,7 @@ class VPNService : VpnService() {
             .addRoute(DEFAULT_ROUTE, 0)
             .addDnsServer(DEFAULT_DNS_SERVER)
             .setSession(serviceManager.getRunningServerName())
-            .addDisallowedApplication(Constants.ANG_PACKAGE)
+            .addDisallowedApplication(Constants.PACKAGE)
         try {
             if (::mInterface.isInitialized) mInterface.close()
         } catch (e: Exception) {

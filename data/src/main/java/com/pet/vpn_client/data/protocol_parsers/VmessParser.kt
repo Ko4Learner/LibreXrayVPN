@@ -86,7 +86,7 @@ class VmessParser @Inject constructor(val gson: Gson) : BaseParser() {
         config.password = uri.userInfo
         config.method = DEFAULT_SECURITY
 
-        getItemFormQuery(config, queryParam, allowInsecure)
+        getItemFromQuery(config, queryParam, allowInsecure)
 
         return config
     }

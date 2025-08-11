@@ -27,17 +27,24 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import kotlin.coroutines.cancellation.CancellationException
 
+/**
+ * Imports VPN server configurations from user-provided sources (clipboard, QR code)
+ * and persists them via [KeyValueStorage].
+ */
 class SubscriptionRepositoryImpl @Inject constructor(
-    val storage: KeyValueStorage,
-    val shadowsocksParser: ShadowsocksParser,
-    val socksParser: SocksParser,
-    val trojanParser: TrojanParser,
-    val vlessParser: VlessParser,
-    val vmessParser: VmessParser,
-    val wireguardParser: WireguardParser,
-    @ApplicationContext val context: Context
+    private val storage: KeyValueStorage,
+    private val shadowsocksParser: ShadowsocksParser,
+    private val socksParser: SocksParser,
+    private val trojanParser: TrojanParser,
+    private val vlessParser: VlessParser,
+    private val vmessParser: VmessParser,
+    private val wireguardParser: WireguardParser,
+    @ApplicationContext private val context: Context
 ) : SubscriptionRepository {
     //TODO уйти от цифр в результатах
+    /**
+     * Imports configuration(s) from the system clipboard.
+     */
     override suspend fun importClipboard(): ImportResult = try {
         val cmb = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         val text = cmb.primaryClip
@@ -57,6 +64,12 @@ class SubscriptionRepositoryImpl @Inject constructor(
         ImportResult.Error
     }
 
+    /**
+     * Imports configuration(s) from a QR code image frame.
+     *
+     * 1) Builds an [InputImage] from [frameData] (expects valid rotation 0/90/180/270 and image format).
+     * 2) Processes the image with ML Kit BarcodeScanner and obtains the first barcode value.
+     */
     override suspend fun importQrCode(frameData: FrameData): ImportResult {
         val image = InputImage.fromByteArray(
             frameData.bytes,
@@ -88,6 +101,10 @@ class SubscriptionRepositoryImpl @Inject constructor(
         }
     }
 
+    /**
+     * Attempts to parse and persist a batch of configs.
+     * @return Number of successfully parsed & stored entries (>0 means success for callers).
+     */
     private fun importBatchConfig(server: String?): Int {
         var count = parseBatchConfig(Utils.decode(server))
         if (count <= 0) {
@@ -96,6 +113,12 @@ class SubscriptionRepositoryImpl @Inject constructor(
         return count
     }
 
+    /**
+     * Parses multiple configuration lines and persists valid entries.
+     *
+     * Input format:
+     * - `servers` may contain multiple lines; each line is processed independently.
+     */
     private fun parseBatchConfig(servers: String?): Int {
         try {
             if (servers == null) {
@@ -121,6 +144,9 @@ class SubscriptionRepositoryImpl @Inject constructor(
         return 0
     }
 
+    /**
+     * Parses a single config string for supported protocols and persists it if valid.
+     */
     private fun parseConfig(
         str: String?,
         removedSelectedServer: ConfigProfileItem?

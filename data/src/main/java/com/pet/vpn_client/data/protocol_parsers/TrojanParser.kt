@@ -27,7 +27,7 @@ class TrojanParser @Inject constructor() : BaseParser() {
         } else {
             val queryParam = getQueryParam(uri)
 
-            getItemFormQuery(config, queryParam, allowInsecure)
+            getItemFromQuery(config, queryParam, allowInsecure)
             config.security = queryParam[SECURITY] ?: Constants.TLS
         }
 

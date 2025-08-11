@@ -1,5 +1,8 @@
 package com.pet.vpn_client.domain.models
 
+/**
+ * Raw camera frame data with associated metadata.
+ */
 data class FrameData(
     val bytes: ByteArray,
     val width: Int,

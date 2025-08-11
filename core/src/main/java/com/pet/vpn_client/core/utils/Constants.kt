@@ -1,7 +1,7 @@
 package com.pet.vpn_client.core.utils
 
 object Constants {
-    const val ANG_PACKAGE = "com.pet.vpn_client"
+    const val PACKAGE = "com.pet.vpn_client"
     const val TAG = "VpnApplication"
 
     const val AUTO_LOCALE_TAG = "auto"

@@ -22,7 +22,7 @@ class VlessParser @Inject constructor() : BaseParser() {
         config.password = uri.userInfo
         config.method = queryParam[ENCRYPTION] ?: NONE
 
-        getItemFormQuery(config, queryParam, allowInsecure)
+        getItemFromQuery(config, queryParam, allowInsecure)
 
         return config
     }

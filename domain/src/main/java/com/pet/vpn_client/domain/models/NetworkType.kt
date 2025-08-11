@@ -1,5 +1,10 @@
 package com.pet.vpn_client.domain.models
 
+/**
+ * Supported network transport protocols for outbound VPN connections.
+ * Utility:
+ * - [fromString] maps a raw string to its [NetworkType] value, falling back to [TCP] if unknown or null.
+ */
 enum class NetworkType(val type: String) {
     TCP("tcp"),
     KCP("kcp"),
