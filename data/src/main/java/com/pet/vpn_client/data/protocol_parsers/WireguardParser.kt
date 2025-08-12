@@ -8,7 +8,16 @@ import com.pet.vpn_client.core.utils.idnHost
 import java.net.URI
 import javax.inject.Inject
 
+/**
+ * Parses WireGuard configuration strings.
+ *
+ * Supported format (typical):
+ * - `wireguard://<privateKey>@host:port?address=...&publickey=...&presharedkey=...&mtu=...&reserved=...#remarks`
+ */
 class WireguardParser @Inject constructor() : BaseParser() {
+    /**
+     * Parses a `wireguard://` string and returns a [ConfigProfileItem] on success.
+     */
     fun parse(str: String): ConfigProfileItem? {
         val config = ConfigProfileItem.create(EConfigType.WIREGUARD)
 
@@ -24,7 +33,7 @@ class WireguardParser @Inject constructor() : BaseParser() {
         config.localAddress = queryParam[QUERY_ADDRESS] ?: Constants.WIREGUARD_LOCAL_ADDRESS_V4
         config.publicKey = queryParam[QUERY_PUBLIC_KEY].orEmpty()
         config.preSharedKey = queryParam[QUERY_PRESHARED_KEY]?.takeIf { it.isNotEmpty() }
-        config.mtu = (queryParam[QUERY_MTU] ?: Constants.WIREGUARD_LOCAL_MTU).toIntOrNull() ?: 0
+        config.mtu = (queryParam[QUERY_MTU] ?: WIREGUARD_LOCAL_MTU).toIntOrNull() ?: 0
         config.reserved = queryParam[QUERY_RESERVED] ?: DEFAULT_RESERVED
 
         return config
@@ -37,5 +46,6 @@ class WireguardParser @Inject constructor() : BaseParser() {
         private const val QUERY_MTU = "mtu"
         private const val QUERY_RESERVED = "reserved"
         private const val DEFAULT_RESERVED = "0,0,0"
+        private const val WIREGUARD_LOCAL_MTU = "1420"
     }
 }

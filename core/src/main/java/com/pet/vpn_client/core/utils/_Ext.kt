@@ -2,5 +2,9 @@ package com.pet.vpn_client.core.utils
 
 import java.net.URI
 
+/**
+ * Returns the host part of the URI without square brackets, typically used for IPv6 addresses.
+ * Always returns a non-null string, even if the host is absent.
+ */
 val URI.idnHost: String
     get() = host?.replace("[", "")?.replace("]", "").orEmpty()

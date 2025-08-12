@@ -20,10 +20,19 @@ import com.pet.vpn_client.core.utils.LocaleHelper
 import com.pet.vpn_client.presentation.view_model.SettingsScreenViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
+/**
+ * MainActivity - root activity for the VPN client UI.
+ *
+ * Responsibilities:
+ * - Hosts the Jetpack Compose content.
+ * - Applies dynamic locale updates based on SettingsScreenViewModel state.
+ * - Sets up the root navigation controller and app-wide Scaffold layout.
+ */
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Enable full content drawing under system bars (Material 3 edge-to-edge).
         enableEdgeToEdge()
         setContent {
             val viewModel: SettingsScreenViewModel = hiltViewModel()
@@ -35,12 +44,13 @@ class MainActivity : ComponentActivity() {
             VPN_ClientTheme {
                 val navController = rememberNavController()
                 Scaffold(
-                    modifier = Modifier.Companion
+                    modifier = Modifier
                         .systemBarsPadding()
                         .fillMaxSize()
                 ) { innerPadding ->
                     Navigation(
                         navController = navController, innerPadding = innerPadding,
+                        // Pass a localized string getter to navigation graph.
                         getString = { resId: Int ->
                             localizedContext.getString(resId)
                         })

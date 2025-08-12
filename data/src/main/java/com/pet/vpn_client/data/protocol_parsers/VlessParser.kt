@@ -7,7 +7,16 @@ import com.pet.vpn_client.core.utils.idnHost
 import java.net.URI
 import javax.inject.Inject
 
+/**
+ * Parses VLESS configuration strings.
+ *
+ * Supported format (typical):
+ * - `vless://<uuid>@host:port?encryption=none&...#remarks`
+ */
 class VlessParser @Inject constructor() : BaseParser() {
+    /**
+     * Parses a `vless://` string and returns a [ConfigProfileItem] on success.
+     */
     fun parse(str: String): ConfigProfileItem? {
         val allowInsecure = false
         val config = ConfigProfileItem.create(EConfigType.VLESS)

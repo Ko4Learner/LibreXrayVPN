@@ -10,12 +10,25 @@ import com.pet.vpn_client.core.utils.idnHost
 import java.net.URI
 import javax.inject.Inject
 
+/**
+ * Parses Shadowsocks subscription strings.
+ *
+ * Supported formats:
+ * - SIP002;
+ * - Legacy: older encoded formats that are still present in the wild.
+ */
 class ShadowsocksParser @Inject constructor() : BaseParser() {
+    /**
+     * Parses a Shadowsocks string trying SIP002 first, then legacy format.
+     */
     fun parse(str: String): ConfigProfileItem? {
         return parseSip002(str) ?: parseLegacy(str)
     }
 
-    fun parseSip002(str: String): ConfigProfileItem? {
+    /**
+     * Parses SIP002 format: `ss://method:password@host:port#remarks`
+     */
+    private fun parseSip002(str: String): ConfigProfileItem? {
         val config = ConfigProfileItem.create(EConfigType.SHADOWSOCKS)
 
         val uri = URI(Utils.fixIllegalUrl(str))
@@ -57,7 +70,10 @@ class ShadowsocksParser @Inject constructor() : BaseParser() {
         return config
     }
 
-    fun parseLegacy(str: String): ConfigProfileItem? {
+    /**
+     * Parses legacy Shadowsocks format.
+     */
+    private fun parseLegacy(str: String): ConfigProfileItem? {
         val config = ConfigProfileItem.create(EConfigType.SHADOWSOCKS)
         var result = str.replace(EConfigType.SHADOWSOCKS.protocolScheme, "")
         val indexSplit = result.indexOf("#")

@@ -7,7 +7,15 @@ import com.pet.vpn_client.core.utils.idnHost
 import java.net.URI
 import javax.inject.Inject
 
+/**
+ * Parses SOCKS configuration strings.
+ * Supported format:
+ * - `socks://[username:password@]host:port#remarks`
+ */
 class SocksParser @Inject constructor() : BaseParser() {
+    /**
+     * Parses a `socks://` string and returns a [ConfigProfileItem] on success.
+     */
     fun parse(str: String): ConfigProfileItem? {
         val config = ConfigProfileItem.create(EConfigType.SOCKS)
 

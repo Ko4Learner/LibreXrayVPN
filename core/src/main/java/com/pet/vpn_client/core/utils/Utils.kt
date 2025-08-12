@@ -8,6 +8,10 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.net.URLDecoder
 
+/**
+ * Utility object containing helper methods for working with
+ * IP addresses, URLs, Base64 encoding/decoding, and JSON parsing.
+ */
 object Utils {
     private val IPV4_REGEX =
         Regex("^(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])(\\.(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])){3}$")
@@ -15,10 +19,19 @@ object Utils {
         "^([0-9A-Fa-f]{1,4})?(:[0-9A-Fa-f]{1,4})*::([0-9A-Fa-f]{1,4})?(:[0-9A-Fa-f]{1,4})*|([0-9A-Fa-f]{1,4})(:[0-9A-Fa-f]{1,4}){7}$"
     )
 
+    /**
+     * Attempts to decode a Base64-encoded [text].
+     * Tries both standard and URL-safe Base64.
+     * If decoding fails, returns the original string or an empty string if null.
+     */
     fun decode(text: String?): String {
         return tryDecodeBase64(text) ?: text?.trimEnd('=')?.let { tryDecodeBase64(it) }.orEmpty()
     }
 
+    /**
+     * Attempts to decode a Base64 string in both standard and URL-safe formats.
+     * Returns null if decoding fails.
+     */
     fun tryDecodeBase64(text: String?): String? {
         if (text.isNullOrEmpty()) return null
 
@@ -35,6 +48,10 @@ object Utils {
         return null
     }
 
+    /**
+     * Validates whether [value] is a valid IPv4 or IPv6 address.
+     * Supports CIDR notation and IPv4-mapped IPv6 addresses.
+     */
     fun isIpAddress(value: String?): Boolean {
         if (value.isNullOrEmpty()) return false
         try {
@@ -69,10 +86,16 @@ object Utils {
         }
     }
 
+    /**
+     * Checks if [value] is strictly a valid IPv4 or IPv6 address without any CIDR notation.
+     */
     fun isPureIpAddress(value: String): Boolean {
         return isIpv4Address(value) || isIpv6Address(value)
     }
 
+    /**
+     * Validates whether [value] is a correct URL or domain name.
+     */
     fun isValidUrl(value: String?): Boolean {
         if (value.isNullOrEmpty()) return false
 
@@ -86,6 +109,10 @@ object Utils {
         }
     }
 
+    /**
+     * Decodes a percent-encoded URL string using UTF-8.
+     * Returns the original string if decoding fails.
+     */
     fun urlDecode(url: String): String {
         return try {
             URLDecoder.decode(url, Charsets.UTF_8.toString())
@@ -95,6 +122,9 @@ object Utils {
         }
     }
 
+    /**
+     * Wraps [address] in square brackets if it is a valid IPv6 address and does not already contain them.
+     */
     fun getIpv6Address(address: String?): String {
         if (address.isNullOrEmpty()) return ""
 
@@ -105,18 +135,26 @@ object Utils {
         }
     }
 
+    /**
+     * Replaces spaces and illegal characters (e.g., '|') in [str] with their URL-encoded equivalents.
+     */
     fun fixIllegalUrl(str: String): String {
         return str.replace(" ", "%20")
             .replace("|", "%7C")
     }
 
+    /**
+     * Inline Gson extension function for parsing JSON into a reified type [T].
+     */
     inline fun <reified T> Gson.fromJsonReified(json: String): T =
         fromJson(json, object : TypeToken<T>() {}.type)
 
+    // --- Internal IPv4validation method ---
     private fun isIpv4Address(value: String): Boolean {
         return IPV4_REGEX.matches(value)
     }
 
+    // --- Internal IPv6 validation method ---
     private fun isIpv6Address(value: String): Boolean {
         var addr = value
         if (addr.startsWith("[") && addr.endsWith("]")) {

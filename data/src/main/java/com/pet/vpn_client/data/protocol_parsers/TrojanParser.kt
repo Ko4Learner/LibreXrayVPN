@@ -9,7 +9,16 @@ import com.pet.vpn_client.core.utils.idnHost
 import java.net.URI
 import javax.inject.Inject
 
+/**
+ * Parses Trojan configuration strings.
+ *
+ * Supported format:
+ * - `trojan://password@host:port?\[query]#remarks`
+ */
 class TrojanParser @Inject constructor() : BaseParser() {
+    /**
+     * Parses a `trojan://` string and returns a [ConfigProfileItem] on success.
+     */
     fun parse(str: String): ConfigProfileItem? {
         val allowInsecure = false
         val config = ConfigProfileItem.create(EConfigType.TROJAN)
@@ -30,7 +39,6 @@ class TrojanParser @Inject constructor() : BaseParser() {
             getItemFromQuery(config, queryParam, allowInsecure)
             config.security = queryParam[SECURITY] ?: Constants.TLS
         }
-
         return config
     }
 
