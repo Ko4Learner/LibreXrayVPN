@@ -9,7 +9,6 @@ package com.pet.vpn_client.domain.models
  */
 data class ConfigProfileItem(
     val configType: EConfigType,
-    var subscriptionId: String = "",
     var addedTime: Long = System.currentTimeMillis(),
 
     var remarks: String = "",

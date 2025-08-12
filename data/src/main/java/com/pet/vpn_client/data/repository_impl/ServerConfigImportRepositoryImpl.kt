@@ -2,7 +2,6 @@ package com.pet.vpn_client.data.repository_impl
 
 import android.content.ClipboardManager
 import android.content.Context
-import android.text.TextUtils
 import android.util.Log
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.common.InputImage
@@ -15,8 +14,7 @@ import com.pet.vpn_client.data.protocol_parsers.VlessParser
 import com.pet.vpn_client.data.protocol_parsers.VmessParser
 import com.pet.vpn_client.data.protocol_parsers.WireguardParser
 import com.pet.vpn_client.domain.interfaces.KeyValueStorage
-import com.pet.vpn_client.domain.interfaces.repository.SubscriptionRepository
-import com.pet.vpn_client.domain.models.ConfigProfileItem
+import com.pet.vpn_client.domain.interfaces.repository.ServerConfigImportRepository
 import com.pet.vpn_client.domain.models.EConfigType
 import com.pet.vpn_client.domain.models.FrameData
 import com.pet.vpn_client.domain.models.ImportResult
@@ -31,7 +29,7 @@ import kotlin.coroutines.cancellation.CancellationException
  * Imports VPN server configurations from user-provided sources (clipboard, QR code)
  * and persists them via [KeyValueStorage].
  */
-class SubscriptionRepositoryImpl @Inject constructor(
+class ServerConfigImportRepositoryImpl @Inject constructor(
     private val storage: KeyValueStorage,
     private val shadowsocksParser: ShadowsocksParser,
     private val socksParser: SocksParser,
@@ -40,25 +38,28 @@ class SubscriptionRepositoryImpl @Inject constructor(
     private val vmessParser: VmessParser,
     private val wireguardParser: WireguardParser,
     @ApplicationContext private val context: Context
-) : SubscriptionRepository {
-    //TODO уйти от цифр в результатах
+) : ServerConfigImportRepository {
     /**
      * Imports configuration(s) from the system clipboard.
      */
-    override suspend fun importClipboard(): ImportResult = try {
-        val cmb = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-        val text = cmb.primaryClip
+    override suspend fun importFromClipboard(): ImportResult = try {
+        val cm = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        val text = cm.primaryClip
             ?.getItemAt(0)
             ?.coerceToText(context)
             ?.toString()
             ?.trim()
             .orEmpty()
-
-        when {
-            text.isEmpty() -> ImportResult.Empty
-            importBatchConfig(text) > 0 -> ImportResult.Success
-            else -> ImportResult.Empty
+        if (text.isEmpty()) {
+            ImportResult.Empty
+        } else {
+            withContext(Dispatchers.IO) { importBatchConfig(text) }
         }
+    } catch (c: CancellationException) {
+        throw c
+    } catch (e: SecurityException) {
+        Log.e(Constants.TAG, "Clipboard access denied", e)
+        ImportResult.Error
     } catch (e: Exception) {
         Log.e(Constants.TAG, "Failed to import config from clipboard", e)
         ImportResult.Error
@@ -70,7 +71,7 @@ class SubscriptionRepositoryImpl @Inject constructor(
      * 1) Builds an [InputImage] from [frameData] (expects valid rotation 0/90/180/270 and image format).
      * 2) Processes the image with ML Kit BarcodeScanner and obtains the first barcode value.
      */
-    override suspend fun importQrCode(frameData: FrameData): ImportResult {
+    override suspend fun importFromQrFrame(frameData: FrameData): ImportResult {
         val image = InputImage.fromByteArray(
             frameData.bytes,
             frameData.width,
@@ -85,8 +86,7 @@ class SubscriptionRepositoryImpl @Inject constructor(
             if (raw.isEmpty()) {
                 ImportResult.Empty
             } else {
-                val imported = withContext(Dispatchers.IO) { importBatchConfig(raw) }
-                if (imported > 0) ImportResult.Success else ImportResult.Empty
+                withContext(Dispatchers.IO) { importBatchConfig(raw) }
             }
         } catch (c: CancellationException) {
             throw c
@@ -103,14 +103,16 @@ class SubscriptionRepositoryImpl @Inject constructor(
 
     /**
      * Attempts to parse and persist a batch of configs.
-     * @return Number of successfully parsed & stored entries (>0 means success for callers).
      */
-    private fun importBatchConfig(server: String?): Int {
-        var count = parseBatchConfig(Utils.decode(server))
-        if (count <= 0) {
-            count = parseBatchConfig(server)
+    private fun importBatchConfig(server: String?): ImportResult {
+        return runCatching {
+            val addedDecoded = parseBatchConfig(Utils.decode(server))
+            val added = if (addedDecoded == 0) parseBatchConfig(server) else addedDecoded
+            if (added > 0) ImportResult.Success else ImportResult.Empty
+        }.getOrElse { e ->
+            Log.e(Constants.TAG, "Failed to import from text", e)
+            ImportResult.Error
         }
-        return count
     }
 
     /**
@@ -120,75 +122,45 @@ class SubscriptionRepositoryImpl @Inject constructor(
      * - `servers` may contain multiple lines; each line is processed independently.
      */
     private fun parseBatchConfig(servers: String?): Int {
-        try {
-            if (servers == null) {
-                return 0
-            }
-            //TODO нужно для добавления или нет в выбранный сервер
-            val removedSelectedServer = null
+        if (servers.isNullOrBlank()) return 0
 
-            var count = 0
-            servers.lines()
-                .distinct()
-                .reversed()
-                .forEach {
-                    val resId = parseConfig(it, removedSelectedServer)
-                    if (resId == 0) {
-                        count++
-                    }
-                }
-            return count
-        } catch (e: Exception) {
-            Log.e(Constants.TAG, "Failed to parse batch config", e)
+        val lines = servers
+            .lineSequence()
+            .map { it.trim() }
+            .filter { it.isNotEmpty() }
+            .distinct()
+            .toList()
+            .asReversed()
+
+        var added = 0
+        for (line in lines) {
+            if (parseConfig(line)) {
+                added++
+            }
         }
-        return 0
+        return added
     }
 
     /**
      * Parses a single config string for supported protocols and persists it if valid.
      */
     private fun parseConfig(
-        str: String?,
-        removedSelectedServer: ConfigProfileItem?
-    ): Int {
-        try {
-            if (str == null || TextUtils.isEmpty(str)) {
-                return 1
-            }
+        str: String
+    ): Boolean {
+        if (str.isBlank()) return false
 
-            val config = if (str.startsWith(EConfigType.VMESS.protocolScheme)) {
-                vmessParser.parse(str)
-            } else if (str.startsWith(EConfigType.SHADOWSOCKS.protocolScheme)) {
-                shadowsocksParser.parse(str)
-            } else if (str.startsWith(EConfigType.SOCKS.protocolScheme)) {
-                socksParser.parse(str)
-            } else if (str.startsWith(EConfigType.TROJAN.protocolScheme)) {
-                trojanParser.parse(str)
-            } else if (str.startsWith(EConfigType.VLESS.protocolScheme)) {
-                vlessParser.parse(str)
-            } else if (str.startsWith(EConfigType.WIREGUARD.protocolScheme)) {
-                wireguardParser.parse(str)
-            } else {
-                null
-            }
+        val config = when {
+            str.startsWith(EConfigType.VMESS.protocolScheme) -> vmessParser.parse(str)
+            str.startsWith(EConfigType.SHADOWSOCKS.protocolScheme) -> shadowsocksParser.parse(str)
+            str.startsWith(EConfigType.SOCKS.protocolScheme) -> socksParser.parse(str)
+            str.startsWith(EConfigType.TROJAN.protocolScheme) -> trojanParser.parse(str)
+            str.startsWith(EConfigType.VLESS.protocolScheme) -> vlessParser.parse(str)
+            str.startsWith(EConfigType.WIREGUARD.protocolScheme) -> wireguardParser.parse(str)
+            else -> null
+        } ?: return false
 
-            if (config == null) {
-                return 1
-            }
-
-            //TODO все сервера имеют один subId
-            config.subscriptionId = "1"
-            //TODO при добавлении разобраться когда менять выбранный сервер а когда нет
-            val guid = storage.encodeServerConfig("", config)
-            if (removedSelectedServer != null &&
-                config.server == removedSelectedServer.server && config.serverPort == removedSelectedServer.serverPort
-            ) {
-                storage.setSelectedServer(guid)
-            }
-        } catch (e: Exception) {
-            Log.e(Constants.TAG, "Failed to parse config", e)
-            return -1
-        }
-        return 0
+        val guid = storage.encodeServerConfig("", config)
+        storage.setSelectedServer(guid)
+        return true
     }
 }

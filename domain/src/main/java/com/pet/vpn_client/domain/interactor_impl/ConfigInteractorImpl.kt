@@ -1,7 +1,7 @@
 package com.pet.vpn_client.domain.interactor_impl
 
 import com.pet.vpn_client.domain.interfaces.KeyValueStorage
-import com.pet.vpn_client.domain.interfaces.repository.SubscriptionRepository
+import com.pet.vpn_client.domain.interfaces.repository.ServerConfigImportRepository
 import com.pet.vpn_client.domain.interfaces.interactor.ConfigInteractor
 import com.pet.vpn_client.domain.models.ConfigProfileItem
 import com.pet.vpn_client.domain.models.FrameData
@@ -10,15 +10,15 @@ import javax.inject.Inject
 
 
 class ConfigInteractorImpl @Inject constructor(
-    private val subscriptionRepository: SubscriptionRepository,
+    private val serverConfigImportRepository: ServerConfigImportRepository,
     private val keyValueStorage: KeyValueStorage
 ) : ConfigInteractor {
     override suspend fun importClipboardConfig(): ImportResult {
-        return subscriptionRepository.importClipboard()
+        return serverConfigImportRepository.importFromClipboard()
     }
 
     override suspend fun importQrCodeConfig(frameData: FrameData): ImportResult {
-        return subscriptionRepository.importQrCode(frameData)
+        return serverConfigImportRepository.importFromQrFrame(frameData)
     }
 
     override suspend fun getServerList(): List<String> {
