@@ -1,7 +1,7 @@
 package com.pet.vpn_client.data.protocol_parsers
 
 import com.pet.vpn_client.domain.models.ConfigProfileItem
-import com.pet.vpn_client.domain.models.EConfigType
+import com.pet.vpn_client.domain.models.ConfigType
 import com.pet.vpn_client.core.utils.Utils
 import com.pet.vpn_client.core.utils.idnHost
 import java.net.URI
@@ -17,7 +17,7 @@ class SocksParser @Inject constructor() : BaseParser() {
      * Parses a `socks://` string and returns a [ConfigProfileItem] on success.
      */
     fun parse(str: String): ConfigProfileItem? {
-        val config = ConfigProfileItem.create(EConfigType.SOCKS)
+        val config = ConfigProfileItem.create(ConfigType.SOCKS)
 
         val uri = URI(Utils.fixIllegalUrl(str))
         if (uri.idnHost.isEmpty()) return null

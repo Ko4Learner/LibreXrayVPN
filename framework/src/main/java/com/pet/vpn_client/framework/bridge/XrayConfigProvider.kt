@@ -16,7 +16,7 @@ import com.pet.vpn_client.core.utils.Utils
 import com.pet.vpn_client.domain.interfaces.KeyValueStorage
 import com.pet.vpn_client.domain.models.ConfigProfileItem
 import com.pet.vpn_client.domain.models.ConfigResult
-import com.pet.vpn_client.domain.models.EConfigType
+import com.pet.vpn_client.domain.models.ConfigType
 import com.pet.vpn_client.domain.models.NetworkType
 import com.pet.vpn_client.framework.models.XrayConfig
 import com.pet.vpn_client.framework.outbound_converter.HttpConverter
@@ -188,7 +188,7 @@ class XrayConfigProvider @Inject constructor(
             outbound.mux?.enabled = false
             outbound.mux?.concurrency = -1
 
-            if (protocol.equals(EConfigType.WIREGUARD.name, true)) {
+            if (protocol.equals(ConfigType.WIREGUARD.name, true)) {
                 var localTunAdd = if (outbound.settings?.address == null) {
                     listOf(Constants.WIREGUARD_LOCAL_ADDRESS_V4)
                 } else {
@@ -261,22 +261,22 @@ class XrayConfigProvider @Inject constructor(
      */
     private fun convertProfiletoOutbound(profileItem: ConfigProfileItem): XrayConfig.OutboundBean? {
         return when (profileItem.configType) {
-            EConfigType.VMESS -> vmessConverter.toOutbound(profileItem)
-            EConfigType.SHADOWSOCKS -> shadowsocksConverter.toOutbound(profileItem)
-            EConfigType.SOCKS -> socksConverter.toOutbound(profileItem)
-            EConfigType.VLESS -> vlessConverter.toOutbound(profileItem)
-            EConfigType.TROJAN -> trojanConverter.toOutbound(profileItem)
-            EConfigType.WIREGUARD -> wireguardConverter.toOutbound(profileItem)
-            EConfigType.HTTP -> httpConverter.toOutbound(profileItem)
+            ConfigType.VMESS -> vmessConverter.toOutbound(profileItem)
+            ConfigType.SHADOWSOCKS -> shadowsocksConverter.toOutbound(profileItem)
+            ConfigType.SOCKS -> socksConverter.toOutbound(profileItem)
+            ConfigType.VLESS -> vlessConverter.toOutbound(profileItem)
+            ConfigType.TROJAN -> trojanConverter.toOutbound(profileItem)
+            ConfigType.WIREGUARD -> wireguardConverter.toOutbound(profileItem)
+            ConfigType.HTTP -> httpConverter.toOutbound(profileItem)
         }
     }
 
     /**
      * Creates a minimal outbound skeleton for the given protocol type, used for initial drafts.
      */
-    fun createInitOutbound(configType: EConfigType): XrayConfig.OutboundBean? {
+    fun createInitOutbound(configType: ConfigType): XrayConfig.OutboundBean? {
         return when (configType) {
-            EConfigType.VMESS, EConfigType.VLESS -> XrayConfig.OutboundBean(
+            ConfigType.VMESS, ConfigType.VLESS -> XrayConfig.OutboundBean(
                 protocol = configType.name.lowercase(),
                 settings = XrayConfig.OutboundBean.OutSettingsBean(
                     vnext = listOf(
@@ -287,10 +287,10 @@ class XrayConfigProvider @Inject constructor(
                 ), streamSettings = XrayConfig.OutboundBean.StreamSettingsBean()
             )
 
-            EConfigType.SHADOWSOCKS,
-            EConfigType.SOCKS,
-            EConfigType.HTTP,
-            EConfigType.TROJAN -> XrayConfig.OutboundBean(
+            ConfigType.SHADOWSOCKS,
+            ConfigType.SOCKS,
+            ConfigType.HTTP,
+            ConfigType.TROJAN -> XrayConfig.OutboundBean(
                 protocol = configType.name.lowercase(),
                 settings = XrayConfig.OutboundBean.OutSettingsBean(
                     servers = listOf(XrayConfig.OutboundBean.OutSettingsBean.ServersBean())
@@ -298,7 +298,7 @@ class XrayConfigProvider @Inject constructor(
                 streamSettings = XrayConfig.OutboundBean.StreamSettingsBean()
             )
 
-            EConfigType.WIREGUARD -> XrayConfig.OutboundBean(
+            ConfigType.WIREGUARD -> XrayConfig.OutboundBean(
                 protocol = configType.name.lowercase(),
                 settings = XrayConfig.OutboundBean.OutSettingsBean(
                     secretKey = "",

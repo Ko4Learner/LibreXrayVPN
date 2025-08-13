@@ -8,7 +8,7 @@ package com.pet.vpn_client.domain.models
  *
  */
 data class ConfigProfileItem(
-    val configType: EConfigType,
+    val configType: ConfigType,
     var addedTime: Long = System.currentTimeMillis(),
 
     var remarks: String = "",
@@ -57,7 +57,7 @@ data class ConfigProfileItem(
     var bandwidthUp: String? = null,
 ) {
     companion object {
-        fun create(configType: EConfigType): ConfigProfileItem {
+        fun create(configType: ConfigType): ConfigProfileItem {
             return ConfigProfileItem(configType = configType)
         }
     }

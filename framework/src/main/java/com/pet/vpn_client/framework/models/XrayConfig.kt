@@ -1,7 +1,7 @@
 package com.pet.vpn_client.framework.models
 
 import com.pet.vpn_client.core.utils.Constants
-import com.pet.vpn_client.domain.models.EConfigType
+import com.pet.vpn_client.domain.models.ConfigType
 
 /**
  * Data model that mirrors the Xray core JSON configuration.
@@ -312,17 +312,17 @@ data class XrayConfig(
          * Returns null if not applicable or missing.
          */
         fun getServerAddress(): String? {
-            if (protocol.equals(EConfigType.VMESS.name, true)
-                || protocol.equals(EConfigType.VLESS.name, true)
+            if (protocol.equals(ConfigType.VMESS.name, true)
+                || protocol.equals(ConfigType.VLESS.name, true)
             ) {
                 return settings?.vnext?.first()?.address
-            } else if (protocol.equals(EConfigType.SHADOWSOCKS.name, true)
-                || protocol.equals(EConfigType.SOCKS.name, true)
-                || protocol.equals(EConfigType.HTTP.name, true)
-                || protocol.equals(EConfigType.TROJAN.name, true)
+            } else if (protocol.equals(ConfigType.SHADOWSOCKS.name, true)
+                || protocol.equals(ConfigType.SOCKS.name, true)
+                || protocol.equals(ConfigType.HTTP.name, true)
+                || protocol.equals(ConfigType.TROJAN.name, true)
             ) {
                 return settings?.servers?.first()?.address
-            } else if (protocol.equals(EConfigType.WIREGUARD.name, true)) {
+            } else if (protocol.equals(ConfigType.WIREGUARD.name, true)) {
                 return settings?.peers?.first()?.endpoint?.substringBeforeLast(":")
             }
             return null
@@ -410,7 +410,7 @@ data class XrayConfig(
      */
     fun getAllProxyOutbound(): List<OutboundBean> {
         return outbounds.filter { outbound ->
-            EConfigType.entries.any { it.name.equals(outbound.protocol, ignoreCase = true) }
+            ConfigType.entries.any { it.name.equals(outbound.protocol, ignoreCase = true) }
         }
     }
 

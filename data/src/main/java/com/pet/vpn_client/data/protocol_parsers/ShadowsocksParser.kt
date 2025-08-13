@@ -3,7 +3,7 @@ package com.pet.vpn_client.data.protocol_parsers
 import android.util.Log
 import com.pet.vpn_client.core.utils.Constants
 import com.pet.vpn_client.domain.models.ConfigProfileItem
-import com.pet.vpn_client.domain.models.EConfigType
+import com.pet.vpn_client.domain.models.ConfigType
 import com.pet.vpn_client.domain.models.NetworkType
 import com.pet.vpn_client.core.utils.Utils
 import com.pet.vpn_client.core.utils.idnHost
@@ -29,7 +29,7 @@ class ShadowsocksParser @Inject constructor() : BaseParser() {
      * Parses SIP002 format: `ss://method:password@host:port#remarks`
      */
     private fun parseSip002(str: String): ConfigProfileItem? {
-        val config = ConfigProfileItem.create(EConfigType.SHADOWSOCKS)
+        val config = ConfigProfileItem.create(ConfigType.SHADOWSOCKS)
 
         val uri = URI(Utils.fixIllegalUrl(str))
         if (uri.idnHost.isEmpty()) return null
@@ -74,8 +74,8 @@ class ShadowsocksParser @Inject constructor() : BaseParser() {
      * Parses legacy Shadowsocks format.
      */
     private fun parseLegacy(str: String): ConfigProfileItem? {
-        val config = ConfigProfileItem.create(EConfigType.SHADOWSOCKS)
-        var result = str.replace(EConfigType.SHADOWSOCKS.protocolScheme, "")
+        val config = ConfigProfileItem.create(ConfigType.SHADOWSOCKS)
+        var result = str.replace(ConfigType.SHADOWSOCKS.protocolScheme, "")
         val indexSplit = result.indexOf("#")
         if (indexSplit > 0) {
             try {

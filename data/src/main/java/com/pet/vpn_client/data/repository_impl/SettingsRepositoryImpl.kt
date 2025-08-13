@@ -3,6 +3,8 @@ package com.pet.vpn_client.data.repository_impl
 import com.pet.vpn_client.core.utils.Constants
 import com.pet.vpn_client.domain.interfaces.KeyValueStorage
 import com.pet.vpn_client.domain.interfaces.repository.SettingsRepository
+import com.pet.vpn_client.domain.models.AppLocale
+import com.pet.vpn_client.domain.models.ThemeMode
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import java.util.Locale
@@ -17,6 +19,13 @@ class SettingsRepositoryImpl @Inject constructor(private val storage: KeyValueSt
      * Hot stream emitting the current [Locale].
      */
     private val _localeFlow = MutableStateFlow(getLocale())
+
+    /**
+     * Hot stream emitting the current theme mode.
+     */
+    private val _themeFlow =
+        MutableStateFlow(ThemeMode.fromTag(storage.decodeSettingsString(THEME)))
+
     /**
      * Observes the user's preferred locale.
      */
@@ -25,23 +34,49 @@ class SettingsRepositoryImpl @Inject constructor(private val storage: KeyValueSt
     /**
      * Persists the preferred locale tag and updates observers.
      */
-    override suspend fun setLocale(localeTag: String) {
-        storage.encodeSettingsString(PREF_LANGUAGE, localeTag)
-        _localeFlow.value = getLocale()
+    override suspend fun setLocale(locale: AppLocale) {
+        storage.encodeSettingsString(LANGUAGE, locale.toTag())
+        _localeFlow.value = resolveEffectiveLocale(locale)
     }
 
     /**
      * Returns the current effective [Locale].
      */
-    override fun getLocale(): Locale {
-        val tag = storage.decodeSettingsString(PREF_LANGUAGE)
-        return when {
-            tag.isNullOrEmpty() || tag == Constants.AUTO_LOCALE_TAG -> Locale.getDefault()
-            else -> Locale.forLanguageTag(tag)
+    override fun getLocale(): Locale =
+        resolveEffectiveLocale(AppLocale.fromTag(storage.decodeSettingsString(LANGUAGE)))
+
+    /**
+     * Maps an [AppLocale] selection to a concrete [Locale].
+     *
+     * - [AppLocale.SYSTEM]: returns Russian for system `ru`, English for system `en`,
+     *   otherwise English (fallback).
+     */
+    private fun resolveEffectiveLocale(mode: AppLocale): Locale = when (mode) {
+        AppLocale.SYSTEM -> when (Locale.getDefault().language.lowercase(Locale.ROOT)) {
+            Constants.RU_LOCALE_TAG -> Locale.forLanguageTag(Constants.RU_LOCALE_TAG)
+            Constants.EN_LOCALE_TAG -> Locale.forLanguageTag(Constants.EN_LOCALE_TAG)
+            else -> Locale.forLanguageTag(Constants.EN_LOCALE_TAG)
         }
+
+        AppLocale.RU -> Locale.forLanguageTag(Constants.RU_LOCALE_TAG)
+        AppLocale.EN -> Locale.forLanguageTag(Constants.EN_LOCALE_TAG)
+    }
+
+    /**
+     * Observes the user's preferred theme mode.
+     */
+    override fun observeTheme(): Flow<ThemeMode> = _themeFlow
+
+    /**
+     * Persists the preferred theme mode and updates observers.
+     */
+    override suspend fun setTheme(theme: ThemeMode) {
+        storage.encodeSettingsString(THEME, theme.toTag())
+        _themeFlow.value = theme
     }
 
     companion object {
-        private const val PREF_LANGUAGE = "pref_language"
+        private const val LANGUAGE = "language"
+        private const val THEME = "theme"
     }
 }

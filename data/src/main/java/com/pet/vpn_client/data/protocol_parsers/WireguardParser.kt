@@ -2,7 +2,7 @@ package com.pet.vpn_client.data.protocol_parsers
 
 import com.pet.vpn_client.core.utils.Constants
 import com.pet.vpn_client.domain.models.ConfigProfileItem
-import com.pet.vpn_client.domain.models.EConfigType
+import com.pet.vpn_client.domain.models.ConfigType
 import com.pet.vpn_client.core.utils.Utils
 import com.pet.vpn_client.core.utils.idnHost
 import java.net.URI
@@ -19,7 +19,7 @@ class WireguardParser @Inject constructor() : BaseParser() {
      * Parses a `wireguard://` string and returns a [ConfigProfileItem] on success.
      */
     fun parse(str: String): ConfigProfileItem? {
-        val config = ConfigProfileItem.create(EConfigType.WIREGUARD)
+        val config = ConfigProfileItem.create(ConfigType.WIREGUARD)
 
         val uri = URI(Utils.fixIllegalUrl(str))
         if (uri.rawQuery.isNullOrEmpty()) return null

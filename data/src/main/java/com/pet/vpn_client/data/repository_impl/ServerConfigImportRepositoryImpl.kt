@@ -15,7 +15,7 @@ import com.pet.vpn_client.data.protocol_parsers.VmessParser
 import com.pet.vpn_client.data.protocol_parsers.WireguardParser
 import com.pet.vpn_client.domain.interfaces.KeyValueStorage
 import com.pet.vpn_client.domain.interfaces.repository.ServerConfigImportRepository
-import com.pet.vpn_client.domain.models.EConfigType
+import com.pet.vpn_client.domain.models.ConfigType
 import com.pet.vpn_client.domain.models.FrameData
 import com.pet.vpn_client.domain.models.ImportResult
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -150,12 +150,12 @@ class ServerConfigImportRepositoryImpl @Inject constructor(
         if (str.isBlank()) return false
 
         val config = when {
-            str.startsWith(EConfigType.VMESS.protocolScheme) -> vmessParser.parse(str)
-            str.startsWith(EConfigType.SHADOWSOCKS.protocolScheme) -> shadowsocksParser.parse(str)
-            str.startsWith(EConfigType.SOCKS.protocolScheme) -> socksParser.parse(str)
-            str.startsWith(EConfigType.TROJAN.protocolScheme) -> trojanParser.parse(str)
-            str.startsWith(EConfigType.VLESS.protocolScheme) -> vlessParser.parse(str)
-            str.startsWith(EConfigType.WIREGUARD.protocolScheme) -> wireguardParser.parse(str)
+            str.startsWith(ConfigType.VMESS.protocolScheme) -> vmessParser.parse(str)
+            str.startsWith(ConfigType.SHADOWSOCKS.protocolScheme) -> shadowsocksParser.parse(str)
+            str.startsWith(ConfigType.SOCKS.protocolScheme) -> socksParser.parse(str)
+            str.startsWith(ConfigType.TROJAN.protocolScheme) -> trojanParser.parse(str)
+            str.startsWith(ConfigType.VLESS.protocolScheme) -> vlessParser.parse(str)
+            str.startsWith(ConfigType.WIREGUARD.protocolScheme) -> wireguardParser.parse(str)
             else -> null
         } ?: return false
 

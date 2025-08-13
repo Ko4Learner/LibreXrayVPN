@@ -1,7 +1,7 @@
 package com.pet.vpn_client.framework.outbound_converter
 
 import com.pet.vpn_client.domain.models.ConfigProfileItem
-import com.pet.vpn_client.domain.models.EConfigType
+import com.pet.vpn_client.domain.models.ConfigType
 import com.pet.vpn_client.framework.models.XrayConfig.OutboundBean
 import com.pet.vpn_client.framework.bridge.XrayConfigProvider
 import dagger.Lazy
@@ -21,7 +21,7 @@ class VmessConverter @Inject constructor(private val xrayConfigProviderLazy: Laz
      */
     fun toOutbound(profileItem: ConfigProfileItem): OutboundBean? {
         val xrayConfigProvider = xrayConfigProviderLazy.get()
-        val outboundBean = xrayConfigProvider.createInitOutbound(EConfigType.VMESS)
+        val outboundBean = xrayConfigProvider.createInitOutbound(ConfigType.VMESS)
 
         outboundBean?.settings?.vnext?.first()?.let { vnext ->
             vnext.address = profileItem.server.orEmpty()

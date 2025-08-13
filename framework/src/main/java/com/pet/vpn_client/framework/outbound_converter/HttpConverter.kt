@@ -1,7 +1,7 @@
 package com.pet.vpn_client.framework.outbound_converter
 
 import com.pet.vpn_client.domain.models.ConfigProfileItem
-import com.pet.vpn_client.domain.models.EConfigType
+import com.pet.vpn_client.domain.models.ConfigType
 import com.pet.vpn_client.framework.models.XrayConfig.OutboundBean
 import com.pet.vpn_client.framework.bridge.XrayConfigProvider
 import dagger.Lazy
@@ -21,7 +21,7 @@ class HttpConverter @Inject constructor(private val xrayConfigProviderLazy: Lazy
      */
     fun toOutbound(profileItem: ConfigProfileItem): OutboundBean? {
         val xrayConfigProvider = xrayConfigProviderLazy.get()
-        val outboundBean = xrayConfigProvider.createInitOutbound(EConfigType.HTTP)
+        val outboundBean = xrayConfigProvider.createInitOutbound(ConfigType.HTTP)
 
         outboundBean?.settings?.servers?.first()?.let { server ->
             server.address = profileItem.server.orEmpty()

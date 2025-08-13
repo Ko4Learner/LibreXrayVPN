@@ -2,7 +2,7 @@ package com.pet.vpn_client.data.protocol_parsers
 
 import com.pet.vpn_client.core.utils.Constants
 import com.pet.vpn_client.domain.models.ConfigProfileItem
-import com.pet.vpn_client.domain.models.EConfigType
+import com.pet.vpn_client.domain.models.ConfigType
 import com.pet.vpn_client.domain.models.NetworkType
 import com.pet.vpn_client.core.utils.Utils
 import com.pet.vpn_client.core.utils.idnHost
@@ -21,7 +21,7 @@ class TrojanParser @Inject constructor() : BaseParser() {
      */
     fun parse(str: String): ConfigProfileItem? {
         val allowInsecure = false
-        val config = ConfigProfileItem.create(EConfigType.TROJAN)
+        val config = ConfigProfileItem.create(ConfigType.TROJAN)
 
         val uri = URI(Utils.fixIllegalUrl(str))
         config.remarks = Utils.urlDecode(uri.fragment.orEmpty())

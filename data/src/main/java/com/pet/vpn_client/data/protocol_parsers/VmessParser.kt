@@ -5,7 +5,7 @@ import android.util.Log
 import com.google.gson.Gson
 import com.pet.vpn_client.core.utils.Constants
 import com.pet.vpn_client.domain.models.ConfigProfileItem
-import com.pet.vpn_client.domain.models.EConfigType
+import com.pet.vpn_client.domain.models.ConfigType
 import com.pet.vpn_client.domain.models.NetworkType
 import com.pet.vpn_client.core.utils.Utils
 import com.pet.vpn_client.core.utils.idnHost
@@ -36,9 +36,9 @@ class VmessParser @Inject constructor(private val gson: Gson) : BaseParser() {
         }
 
         val allowInsecure = false
-        val config = ConfigProfileItem.create(EConfigType.VMESS)
+        val config = ConfigProfileItem.create(ConfigType.VMESS)
 
-        var result = str.replace(EConfigType.VMESS.protocolScheme, "")
+        var result = str.replace(ConfigType.VMESS.protocolScheme, "")
         result = Utils.decode(result)
         if (TextUtils.isEmpty(result)) {
             Log.w(Constants.TAG, "Base64 decoding failed")
@@ -94,7 +94,7 @@ class VmessParser @Inject constructor(private val gson: Gson) : BaseParser() {
      */
     private fun parseVmessStd(str: String): ConfigProfileItem? {
         val allowInsecure = false
-        val config = ConfigProfileItem.create(EConfigType.VMESS)
+        val config = ConfigProfileItem.create(ConfigType.VMESS)
 
         val uri = URI(Utils.fixIllegalUrl(str))
         if (uri.rawQuery.isNullOrEmpty()) return null
