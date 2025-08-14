@@ -8,4 +8,5 @@ data class VpnScreenState(
     val serverItemList: List<ServerItemModel> = listOf(),
     val delay: Long? = null,
     val error: String? = null,
+    val selectedServerId: String? = null
 )

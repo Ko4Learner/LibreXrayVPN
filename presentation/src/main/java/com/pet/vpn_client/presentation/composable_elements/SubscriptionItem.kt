@@ -18,10 +18,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.pet.vpn_client.presentation.intent.VpnScreenIntent
-import com.pet.vpn_client.presentation.models.SubscriptionItemModel
+import com.pet.vpn_client.presentation.models.ServerItemModel
 
 @Composable
-fun SubscriptionItem(onIntent: (VpnScreenIntent) -> Unit, item: SubscriptionItemModel) {
+fun SubscriptionItem(onIntent: (VpnScreenIntent) -> Unit, item: ServerItemModel) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -62,7 +62,7 @@ fun SubscriptionItem(onIntent: (VpnScreenIntent) -> Unit, item: SubscriptionItem
                 )
             }
             Button(
-                onClick = { onIntent(VpnScreenIntent.DeleteItem(item.id)) },
+                onClick = { onIntent(VpnScreenIntent.DeleteItem(item.guid)) },
                 shape = MaterialTheme.shapes.small,
                 modifier = Modifier.padding(4.dp),
                 colors = ButtonDefaults.buttonColors(Color.Gray)
