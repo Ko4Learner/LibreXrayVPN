@@ -16,7 +16,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -49,14 +49,18 @@ class ServiceManagerImpl @Inject constructor(
     }
 
     /**
-     * Restarts the VPN service, waiting for the service state to become idle or stopped.
+     * Restarts the VPN service, awaiting both service and core to be fully stopped.
      */
     override fun restartService() {
         stopService()
         scope.launch {
-            stateRepository.serviceState
-                .filter { it is ServiceState.Idle || it is ServiceState.Stopped }
-                .first()
+            combine(
+                stateRepository.serviceState,
+                coreVpnBridge.coreState
+            ) { service, coreRunning ->
+                (service is ServiceState.Idle || service is ServiceState.Stopped) && !coreRunning
+            }
+                .first { it }
             startContextService()
         }
     }
@@ -66,7 +70,7 @@ class ServiceManagerImpl @Inject constructor(
      * Only starts if not already running and config is valid.
      */
     private fun startContextService() {
-        if (coreVpnBridge.isRunning()) return
+        if (coreVpnBridge.coreState.value) return
         val guid = storage.getSelectedServer() ?: return
         val config = storage.decodeServerConfig(guid) ?: return
         if (!Utils.isValidUrl(config.server)
@@ -100,7 +104,7 @@ class ServiceManagerImpl @Inject constructor(
      */
     override fun startCoreLoop(): Boolean {
         return if (coreVpnBridge.startCoreLoop()) {
-            coreVpnBridge.isRunning()
+            coreVpnBridge.coreState.value
         } else false
     }
 

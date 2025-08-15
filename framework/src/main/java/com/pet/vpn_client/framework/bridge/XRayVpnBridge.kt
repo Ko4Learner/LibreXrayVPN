@@ -7,6 +7,10 @@ import com.pet.vpn_client.domain.interfaces.KeyValueStorage
 import com.pet.vpn_client.domain.interfaces.ServiceManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import libv2ray.CoreCallbackHandler
 import libv2ray.CoreController
@@ -24,7 +28,9 @@ class XRayVpnBridge @Inject constructor(
     private val xrayConfigProvider: XrayConfigProvider
 ) : CoreVpnBridge {
     private val coreController: CoreController = Libv2ray.newCoreController(CoreCallback())
-    override fun isRunning(): Boolean = coreController.isRunning
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val _coreState = MutableStateFlow(false)
+    override val coreState: StateFlow<Boolean> = _coreState.asStateFlow()
 
     /**
      * Starts the Xray core loop if not already running.
@@ -37,28 +43,31 @@ class XRayVpnBridge @Inject constructor(
         val result = xrayConfigProvider.getCoreConfig(guid)
         if (!result.status) return false
 
-        try {
+        return try {
             coreController.startLoop(result.content)
             coreController.isRunning = true
+            true
         } catch (e: Exception) {
             Log.e(Constants.TAG, "Failed to start Core loop", e)
-            return false
+            false
+        } finally {
+            _coreState.value = coreController.isRunning
         }
-        return true
     }
 
-    //TODO разобраться с корутиной
     /**
      * Stops the Xray core loop asynchronously if running.
      * Launches coroutine for IO operations.
      */
     override fun stopCoreLoop() {
         if (coreController.isRunning) {
-            CoroutineScope(Dispatchers.IO).launch {
+            scope.launch {
                 try {
                     coreController.stopLoop()
                 } catch (e: Exception) {
                     Log.e(Constants.TAG, "Failed to stop XRay loop", e)
+                } finally {
+                    _coreState.value = coreController.isRunning
                 }
             }
         }
@@ -107,6 +116,7 @@ class XRayVpnBridge @Inject constructor(
      */
     private inner class CoreCallback : CoreCallbackHandler {
         override fun startup(): Long {
+            _coreState.value = coreController.isRunning
             return 0
         }
 
@@ -116,6 +126,8 @@ class XRayVpnBridge @Inject constructor(
                 0
             } catch (_: Exception) {
                 -1
+            } finally {
+                _coreState.value = coreController.isRunning
             }
         }
 
@@ -124,7 +136,7 @@ class XRayVpnBridge @Inject constructor(
         }
     }
 
-    companion object{
+    companion object {
         private const val DELAY_TEST_URL = "https://www.gstatic.com/generate_204"
         private const val DELAY_TEST_URL2 = "https://www.google.com/generate_204"
     }
