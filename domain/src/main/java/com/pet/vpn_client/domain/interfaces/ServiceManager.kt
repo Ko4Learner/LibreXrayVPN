@@ -18,10 +18,10 @@ package com.pet.vpn_client.domain.interfaces
  * - stopCoreLoop():
  *     Requests the core engine loop to stop.
  *
+ * - restartService():
+ *
  * - measureDelay():
  *     Measures round-trip latency to a predefined target and returns it in **milliseconds**,
- *
- * - restartService():
  */
 interface ServiceManager {
     fun startService()
@@ -29,6 +29,6 @@ interface ServiceManager {
     fun getRunningServerName(): String
     fun startCoreLoop(): Boolean
     fun stopCoreLoop()
-    suspend fun measureDelay(): Long?
     fun restartService()
+    suspend fun measureDelay(): Long?
 }

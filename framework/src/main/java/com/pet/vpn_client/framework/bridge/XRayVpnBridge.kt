@@ -73,7 +73,6 @@ class XRayVpnBridge @Inject constructor(
         }
     }
 
-    //TODO получение статистики по тегу, использовать в будущем на главном экране
     /**
      * Queries traffic statistics by tag and link.
      *

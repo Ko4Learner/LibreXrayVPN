@@ -1,5 +1,8 @@
 package com.pet.vpn_client.domain.interfaces.interactor
 
+import com.pet.vpn_client.domain.models.TagSpeed
+import kotlinx.coroutines.flow.Flow
+
 /**
  * Controls VPN lifecycle at the domain level.
  *
@@ -14,4 +17,8 @@ interface ConnectionInteractor {
     suspend fun stopConnection()
     suspend fun testConnection(): Long?
     fun restartConnection()
+    fun observeTagSpeed(
+        tags: List<String>,
+        periodMs: Long = 3000
+    ): Flow<List<TagSpeed>>
 }
