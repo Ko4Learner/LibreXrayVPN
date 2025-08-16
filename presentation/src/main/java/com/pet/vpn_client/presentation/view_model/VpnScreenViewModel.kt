@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -29,7 +30,6 @@ class VpnScreenViewModel @Inject constructor(
     private val connectionInteractor: ConnectionInteractor,
     stateRepository: ServiceStateRepository
 ) : ViewModel() {
-
     private val _state = MutableStateFlow(VpnScreenState())
     val state: StateFlow<VpnScreenState> = _state.asStateFlow()
 
@@ -45,8 +45,15 @@ class VpnScreenViewModel @Inject constructor(
             updateServerList(configInteractor.getServerList())
         }
         viewModelScope.launch {
-            serviceState.collect { serviceState ->
-                _state.update { it.copy(isRunning = serviceState == ServiceState.Connected) }
+            serviceState.collectLatest { serviceState ->
+                if (serviceState == ServiceState.Connected) {
+                    _state.update { it.copy(isRunning = true) }
+                    connectionInteractor.observeSpeed().collect { speed ->
+                        _state.update { it.copy(connectionSpeed = speed) }
+                    }
+                } else {
+                    _state.update { it.copy(isRunning = false, connectionSpeed = null) }
+                }
             }
         }
     }
@@ -65,11 +72,7 @@ class VpnScreenViewModel @Inject constructor(
 
     private fun toggleConnection() {
         viewModelScope.launch(Dispatchers.IO) {
-            if (state.value.isRunning) {
-                stopConnection()
-            } else {
-                startConnection()
-            }
+            if (state.value.isRunning) stopConnection() else startConnection()
         }
     }
 

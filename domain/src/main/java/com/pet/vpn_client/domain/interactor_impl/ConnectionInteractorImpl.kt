@@ -4,7 +4,7 @@ import android.os.SystemClock
 import com.pet.vpn_client.domain.interfaces.CoreVpnBridge
 import com.pet.vpn_client.domain.interfaces.ServiceManager
 import com.pet.vpn_client.domain.interfaces.interactor.ConnectionInteractor
-import com.pet.vpn_client.domain.models.TagSpeed
+import com.pet.vpn_client.domain.models.ConnectionSpeed
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
@@ -35,43 +35,70 @@ class ConnectionInteractorImpl @Inject constructor(
         serviceManager.restartService()
     }
 
-    override fun observeTagSpeed(
-        tags: List<String>,
-        periodMs: Long
-    ): Flow<List<TagSpeed>> = flow {
-        val allTags = (tags + "direct").distinct()
-
-        var prev: Map<String, Pair<Long, Long>>? = null
-        var prevT = SystemClock.elapsedRealtime()
+    /**
+     * Observes connection throughput statistics by periodically querying the VPN core.
+     *
+     * Implementation details:
+     * - The method launches a cold [Flow] that, once collected, enters an infinite loop
+     *   (until the coroutine scope is cancelled).
+     * - Each iteration:
+     *   1. Captures the current time and queries VPN core stats for proxy and direct
+     *      uplink/downlink counters (monotonic byte totals).
+     *   2. Computes elapsed time since the previous iteration (`deltaTimeSeconds`).
+     *   3. Derives per-second rates by subtracting the previous counters and dividing
+     *      by the elapsed time.
+     *   4. Emits a [ConnectionSpeed] sample.
+     * - The very first emission is always zeros because no baseline is available yet.
+     *
+     * Timing:
+     * - The loop sleeps for [PERIOD_MS] (default 3 seconds) between samples.
+     * - [SystemClock.elapsedRealtime] is used to ensure monotonic timing resilient to wall clock changes.
+     *
+     * Threading:
+     * - The flow runs on [Dispatchers.IO] via [flowOn], making it safe to collect from main.
+     *
+     * Cancellation:
+     * - Terminates cleanly when the collector scope is cancelled.
+     */
+    override fun observeSpeed(): Flow<ConnectionSpeed> = flow {
+        var prevProxy: Pair<Long, Long>? = null
+        var prevDirect: Pair<Long, Long>? = null
+        var prevTime = SystemClock.elapsedRealtime()
 
         while (currentCoroutineContext().isActive) {
             val now = SystemClock.elapsedRealtime()
-            val dtSec = ((now - prevT).coerceAtLeast(1)).toDouble() / 1000.0
+            val deltaTimeSeconds = ((now - prevTime).coerceAtLeast(1)).toDouble() / 1000.0
 
-            val curr = allTags.associateWith { tag ->
-                val up = coreVpnBridge.queryStats(tag, "uplink")
-                val down = coreVpnBridge.queryStats(tag, "downlink")
-                up to down
-            }
+            val proxyNow = coreVpnBridge.queryStats(TAG_PROXY, TAG_UPLINK) to
+                    coreVpnBridge.queryStats(TAG_PROXY, TAG_DOWNLINK)
+            val directNow = coreVpnBridge.queryStats(TAG_DIRECT, TAG_UPLINK) to
+                    coreVpnBridge.queryStats(TAG_DIRECT, TAG_DOWNLINK)
 
-            val speeds = if (prev == null) {
-                curr.map { (tag, _) -> TagSpeed(tag, 0.0, 0.0, now) }
+            val speeds = if (prevProxy == null || prevDirect == null) {
+                ConnectionSpeed(0.0, 0.0, 0.0, 0.0)
             } else {
-                curr.map { (tag, nowPair) ->
-                    val (pu, pd) = prev[tag] ?: (0L to 0L)
-                    TagSpeed(
-                        tag = tag,
-                        uplinkBps = (nowPair.first - pu).coerceAtLeast(0) / dtSec,
-                        downlinkBps = (nowPair.second - pd).coerceAtLeast(0) / dtSec,
-                        timestampMs = now
-                    )
-                }
+                ConnectionSpeed(
+                    proxyUplinkBps = (proxyNow.first - prevProxy.first).coerceAtLeast(0) / deltaTimeSeconds,
+                    proxyDownlinkBps = (proxyNow.second - prevProxy.second).coerceAtLeast(0) / deltaTimeSeconds,
+                    directUplinkBps = (directNow.first - prevDirect.first).coerceAtLeast(0) / deltaTimeSeconds,
+                    directDownlinkBps = (directNow.second - prevDirect.second).coerceAtLeast(0) / deltaTimeSeconds
+                )
             }
 
-            emit(speeds.sortedBy { it.tag })
-            prev = curr
-            prevT = now
-            delay(periodMs)
+            emit(speeds)
+
+            prevProxy = proxyNow
+            prevDirect = directNow
+            prevTime = now
+            delay(PERIOD_MS)
         }
     }.flowOn(Dispatchers.IO)
+
+    companion object {
+        private const val PERIOD_MS = 3000L
+        private const val TAG_PROXY = "proxy"
+        private const val TAG_DIRECT = "direct"
+        private const val TAG_UPLINK = "uplink"
+        private const val TAG_DOWNLINK = "downlink"
+    }
 }

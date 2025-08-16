@@ -11,9 +11,13 @@ import android.net.VpnService
 import android.os.ParcelFileDescriptor
 import android.os.StrictMode
 import android.util.Log
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import com.pet.vpn_client.core.utils.Constants
 import com.pet.vpn_client.domain.interfaces.ServiceManager
+import com.pet.vpn_client.domain.interfaces.interactor.ConnectionInteractor
 import com.pet.vpn_client.domain.interfaces.repository.ServiceStateRepository
+import com.pet.vpn_client.domain.models.ConnectionSpeed
 import com.pet.vpn_client.domain.state.ServiceState
 import com.pet.vpn_client.framework.notification.NotificationFactory
 import dagger.hilt.android.AndroidEntryPoint
@@ -24,6 +28,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.File
+import java.util.Locale
 import javax.inject.Inject
 
 /**
@@ -44,10 +49,14 @@ class VPNService : VpnService() {
     @Inject
     lateinit var serviceStateRepository: ServiceStateRepository
 
+    @Inject
+    lateinit var connectionInteractor: ConnectionInteractor
+
     private lateinit var mInterface: ParcelFileDescriptor
     private var isRunning = false
     private lateinit var process: Process
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private lateinit var builder: NotificationCompat.Builder
 
     //TODO необходимость connectivityManager, networkRequest, networkCallback
     private val connectivityManager by lazy { getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager }
@@ -85,7 +94,18 @@ class VPNService : VpnService() {
         super.onCreate()
         val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
         StrictMode.setThreadPolicy(policy)
-        startForeground(1, notificationFactory.createNotification("Vpn"))
+        startForeground(1, notificationFactory.createNotificationBuilder("Vpn").build())
+        serviceScope.launch {
+            connectionInteractor.observeSpeed().collect { speed ->
+                val text = formatSpeedLine(speed)
+                NotificationManagerCompat.from(this@VPNService).notify(
+                    1,
+                    builder.setContentText(text)
+                        .setStyle(NotificationCompat.BigTextStyle().bigText(text))
+                        .build()
+                )
+            }
+        }
     }
 
     /**
@@ -270,6 +290,21 @@ class VPNService : VpnService() {
     override fun onDestroy() {
         super.onDestroy()
         serviceScope.cancel()
+        stopForeground(STOP_FOREGROUND_REMOVE)
+    }
+
+    private fun formatSpeedLine(speed: ConnectionSpeed): String =
+        "Proxy ↑ ${fmtBps(speed.proxyUplinkBps)} ↓ ${fmtBps(speed.proxyDownlinkBps)}  |  " +
+                "Direct ↑ ${fmtBps(speed.directUplinkBps)} ↓ ${fmtBps(speed.directDownlinkBps)}"
+
+    private fun fmtBps(bps: Double): String {
+        val kb = bps / 1024.0
+        val mb = kb / 1024.0
+        return when {
+            mb >= 1 -> String.format(Locale.US, "%.2f MB/s", mb)
+            kb >= 1 -> String.format(Locale.US, "%.0f KB/s", kb)
+            else -> String.format(Locale.US, "%.0f B/s", bps)
+        }
     }
 
     companion object {

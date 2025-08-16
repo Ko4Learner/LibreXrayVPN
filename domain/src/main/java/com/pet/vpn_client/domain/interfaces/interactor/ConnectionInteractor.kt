@@ -1,6 +1,6 @@
 package com.pet.vpn_client.domain.interfaces.interactor
 
-import com.pet.vpn_client.domain.models.TagSpeed
+import com.pet.vpn_client.domain.models.ConnectionSpeed
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -11,14 +11,13 @@ import kotlinx.coroutines.flow.Flow
  * - stopConnection()
  * - testConnection(): returns round-trip latency in **ms**, or null if failed.
  * - restartConnection()
+ * - observeTagSpeed(): Exposes a continuous [Flow] of [ConnectionSpeed] samples
+ *   for both proxy and direct channels.
  */
 interface ConnectionInteractor {
     suspend fun startConnection()
     suspend fun stopConnection()
     suspend fun testConnection(): Long?
     fun restartConnection()
-    fun observeTagSpeed(
-        tags: List<String>,
-        periodMs: Long = 3000
-    ): Flow<List<TagSpeed>>
+    fun observeSpeed(): Flow<ConnectionSpeed>
 }

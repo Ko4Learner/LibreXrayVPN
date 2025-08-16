@@ -1,6 +1,5 @@
 package com.pet.vpn_client.framework.notification
 
-import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -17,10 +16,12 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
 /**
- * Factory class for creating VPN service notifications.
+ * Factory for localized foreground notifications used by the VPN service.
  *
- * Responsible for building localized, persistent notifications for the VPN service,
- * including actions for restarting and stopping the VPN.
+ * Responsibilities:
+ * - Produces a preconfigured [NotificationCompat.Builder] for persistent VPN status.
+ * - Applies the user's locale to notification content.
+ * - Wires actions (open app / restart / stop VPN) via [PendingIntentProvider].
  */
 class NotificationFactory @Inject constructor(
     @ApplicationContext private val context: Context,
@@ -29,12 +30,9 @@ class NotificationFactory @Inject constructor(
 ) {
     //TODO строки в ресурсы
     /**
-     * Creates and returns a localized persistent notification for the VPN service.
-     *
-     * @param title The title of the notification.
-     * @return Configured [Notification] object.
+     * Creates a localized, preconfigured notification builder for the VPN service.
      */
-    fun createNotification(title: String): Notification {
+    fun createNotificationBuilder(title: String): NotificationCompat.Builder {
         val locale = settingsRepository.getLocale()
         val localizedContext = LocaleHelper.updateLocale(context, locale)
         val channelId = "Vpn_Client"
@@ -50,7 +48,8 @@ class NotificationFactory @Inject constructor(
         return NotificationCompat.Builder(localizedContext, channelId)
             .setSmallIcon(R.drawable.ic_launcher_background)
             .setContentTitle(title)
-            .setContentText("$title запущен")
+            .setOnlyAlertOnce(true)
+            .setOngoing(true)
             .setContentIntent(createMainActivityPendingIntent(localizedContext))
             .addAction(
                 R.drawable.outline_3d_rotation_24,
@@ -62,8 +61,6 @@ class NotificationFactory @Inject constructor(
                 "Выключить",
                 createStopServicePendingIntent(localizedContext)
             )
-            .setOngoing(true)
-            .build()
     }
 
     /**
