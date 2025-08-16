@@ -95,17 +95,17 @@ class VPNService : VpnService() {
         val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
         StrictMode.setThreadPolicy(policy)
         startForeground(1, notificationFactory.createNotificationBuilder("Vpn").build())
-        serviceScope.launch {
-            connectionInteractor.observeSpeed().collect { speed ->
-                val text = formatSpeedLine(speed)
-                NotificationManagerCompat.from(this@VPNService).notify(
-                    1,
-                    builder.setContentText(text)
-                        .setStyle(NotificationCompat.BigTextStyle().bigText(text))
-                        .build()
-                )
-            }
-        }
+//        serviceScope.launch {
+//            connectionInteractor.observeSpeed().collect { speed ->
+//                val text = formatSpeedLine(speed)
+//                NotificationManagerCompat.from(this@VPNService).notify(
+//                    1,
+//                    builder.setContentText(text)
+//                        .setStyle(NotificationCompat.BigTextStyle().bigText(text))
+//                        .build()
+//                )
+//            }
+//        }
     }
 
     /**
