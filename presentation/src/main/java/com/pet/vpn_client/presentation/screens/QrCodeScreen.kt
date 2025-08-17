@@ -23,8 +23,10 @@ import com.pet.vpn_client.presentation.view_model.QrCodeScreenViewModel
 import com.pet.vpn_client.presentation.composable_elements.CameraView
 import android.Manifest
 import android.content.pm.PackageManager
+import android.util.Log
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
+import com.pet.vpn_client.core.utils.Constants
 import kotlinx.coroutines.delay
 
 @Composable
@@ -73,7 +75,7 @@ fun QrCodeScreen(
             }
         }
     } else {
-        //TODO уведомление о необходимости разрешения
+        Log.d(Constants.TAG, "permission denied")
     }
 
     LaunchedEffect(state.configFound) {

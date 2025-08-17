@@ -23,6 +23,7 @@ class QrCodeScreenViewModel @Inject constructor(
 ) : ViewModel() {
     private val _state = MutableStateFlow(QrCodeScreenState())
     val state: StateFlow<QrCodeScreenState> = _state.asStateFlow()
+    private var hasProcessed = false
 
     fun onIntent(intent: QrCodeScreenIntent) {
         when (intent) {
@@ -35,8 +36,6 @@ class QrCodeScreenViewModel @Inject constructor(
         }
     }
 
-    //TODO выглядит как костыль + нужно сбрасывать при пересоздании экрана
-    private var hasProcessed = false
     fun onAnalyzeFrame(imageProxy: ImageProxy) {
         if (hasProcessed) {
             imageProxy.close()

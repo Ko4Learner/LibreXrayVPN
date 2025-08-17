@@ -12,7 +12,6 @@ import android.os.ParcelFileDescriptor
 import android.os.StrictMode
 import android.util.Log
 import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
 import com.pet.vpn_client.core.utils.Constants
 import com.pet.vpn_client.domain.interfaces.ServiceManager
 import com.pet.vpn_client.domain.interfaces.interactor.ConnectionInteractor
@@ -55,6 +54,7 @@ class VPNService : VpnService() {
     private lateinit var mInterface: ParcelFileDescriptor
     private var isRunning = false
     private lateinit var process: Process
+
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private lateinit var builder: NotificationCompat.Builder
 
@@ -94,18 +94,21 @@ class VPNService : VpnService() {
         super.onCreate()
         val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
         StrictMode.setThreadPolicy(policy)
-        startForeground(1, notificationFactory.createNotificationBuilder("Vpn").build())
-//        serviceScope.launch {
-//            connectionInteractor.observeSpeed().collect { speed ->
-//                val text = formatSpeedLine(speed)
-//                NotificationManagerCompat.from(this@VPNService).notify(
-//                    1,
-//                    builder.setContentText(text)
-//                        .setStyle(NotificationCompat.BigTextStyle().bigText(text))
-//                        .build()
-//                )
-//            }
-//        }
+
+        builder = notificationFactory.createNotificationBuilder("Vpn")
+        startForeground(1, builder.build())
+
+
+        serviceScope.launch {
+            connectionInteractor.observeSpeed().collect { speed ->
+                val text = formatSpeedLine(speed)
+                val updated = builder
+                    .setContentText(text)
+                    .setStyle(NotificationCompat.BigTextStyle().bigText(text))
+                    .build()
+                startForeground(1, updated)
+            }
+        }
     }
 
     /**
@@ -113,7 +116,7 @@ class VPNService : VpnService() {
      * Stops VPN and cleans up resources.
      */
     override fun onRevoke() {
-        stopVpn()
+        stopVpn(true)
     }
 
     /**
@@ -281,6 +284,7 @@ class VPNService : VpnService() {
                 Log.e(Constants.TAG, "Failed to close interface: ${e.message}")
             }
         }
+        stopForeground(STOP_FOREGROUND_REMOVE)
         serviceStateRepository.updateState(ServiceState.Stopped)
     }
 
@@ -293,17 +297,37 @@ class VPNService : VpnService() {
         stopForeground(STOP_FOREGROUND_REMOVE)
     }
 
-    private fun formatSpeedLine(speed: ConnectionSpeed): String =
-        "Proxy ↑ ${fmtBps(speed.proxyUplinkBps)} ↓ ${fmtBps(speed.proxyDownlinkBps)}  |  " +
-                "Direct ↑ ${fmtBps(speed.directUplinkBps)} ↓ ${fmtBps(speed.directDownlinkBps)}"
+    /**
+     * Builds a readable line showing uplink and downlink speeds
+     * for both proxy and direct connections.
+     *
+     * Example output:
+     * "Proxy ↑ 1.25 MB/s ↓ 800 KB/s  |  Direct ↑ 0 B/s ↓ 0 B/s"
+     *
+     * @param s ConnectionSpeed containing uplink/downlink values in bps.
+     * @return A formatted speed line string.
+     */
+    private fun formatSpeedLine(s: ConnectionSpeed): String =
+        "${Constants.LABEL_PROXY} ${Constants.ARROW_UP} ${fmtBps(s.proxyUplinkBps)} " +
+                "${Constants.ARROW_DOWN} ${fmtBps(s.proxyDownlinkBps)}  \n" +
+                "${Constants.LABEL_DIRECT} ${Constants.ARROW_UP} ${fmtBps(s.directUplinkBps)} " +
+                "${Constants.ARROW_DOWN} ${fmtBps(s.directDownlinkBps)}"
 
+    /**
+     * Formats a bit-per-second [bps] value into a readable string.
+     * Values are converted into MB/s, KB/s, or B/s depending on size.
+     * Uses [Locale.ENGLISH] to ensure a dot as the decimal separator.
+     *
+     * @param bps Speed in bytes per second.
+     * @return Formatted speed string.
+     */
     private fun fmtBps(bps: Double): String {
         val kb = bps / 1024.0
         val mb = kb / 1024.0
         return when {
-            mb >= 1 -> String.format(Locale.US, "%.2f MB/s", mb)
-            kb >= 1 -> String.format(Locale.US, "%.0f KB/s", kb)
-            else -> String.format(Locale.US, "%.0f B/s", bps)
+            mb >= 1 -> String.format(Locale.ENGLISH, "%.2f ${Constants.UNIT_MB}", mb)
+            kb >= 1 -> String.format(Locale.ENGLISH, "%.0f ${Constants.UNIT_KB}", kb)
+            else -> String.format(Locale.ENGLISH, "%.0f ${Constants.UNIT_B}", bps)
         }
     }
 

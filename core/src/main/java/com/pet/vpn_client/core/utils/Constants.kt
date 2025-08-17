@@ -37,4 +37,14 @@ object Constants {
     const val COMMAND_START_SERVICE = "START_SERVICE"
     const val COMMAND_STOP_SERVICE = "STOP_SERVICE"
     const val COMMAND_RESTART_SERVICE = "RESTART_SERVICE"
+
+    // --- Speed format labels ---
+    const val LABEL_PROXY = "Proxy"
+    const val LABEL_DIRECT = "Direct"
+    const val ARROW_UP = "↑"
+    const val ARROW_DOWN = "↓"
+    const val UNIT_MB = "MB/s"
+    const val UNIT_KB = "KB/s"
+    const val UNIT_B = "B/s"
+
 }
