@@ -1,4 +1,4 @@
-package com.pet.vpn_client.framework.bridge
+package com.pet.vpn_client.framework.bridge_to_core
 
 import android.content.Context
 import android.text.TextUtils

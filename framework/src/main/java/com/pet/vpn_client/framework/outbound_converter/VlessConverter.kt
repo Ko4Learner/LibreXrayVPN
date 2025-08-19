@@ -3,7 +3,7 @@ package com.pet.vpn_client.framework.outbound_converter
 import com.pet.vpn_client.domain.models.ConfigProfileItem
 import com.pet.vpn_client.domain.models.ConfigType
 import com.pet.vpn_client.framework.models.XrayConfig.OutboundBean
-import com.pet.vpn_client.framework.bridge.XrayConfigProvider
+import com.pet.vpn_client.framework.bridge_to_core.XrayConfigProvider
 import dagger.Lazy
 import javax.inject.Inject
 

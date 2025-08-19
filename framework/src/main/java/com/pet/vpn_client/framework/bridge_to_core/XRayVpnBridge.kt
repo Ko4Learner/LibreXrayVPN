@@ -1,4 +1,4 @@
-package com.pet.vpn_client.framework.bridge
+package com.pet.vpn_client.framework.bridge_to_core
 
 import android.util.Log
 import com.pet.vpn_client.core.utils.Constants

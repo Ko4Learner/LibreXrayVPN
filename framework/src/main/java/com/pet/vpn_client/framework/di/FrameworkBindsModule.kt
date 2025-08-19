@@ -7,7 +7,7 @@ import com.pet.vpn_client.domain.interfaces.interactor.ConnectionInteractor
 import com.pet.vpn_client.domain.interfaces.repository.ServiceStateRepository
 import com.pet.vpn_client.framework.ServiceManagerImpl
 import com.pet.vpn_client.framework.ServiceStateRepositoryImpl
-import com.pet.vpn_client.framework.bridge.XRayVpnBridge
+import com.pet.vpn_client.framework.bridge_to_core.XRayVpnBridge
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
