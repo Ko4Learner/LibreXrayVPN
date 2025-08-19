@@ -58,20 +58,54 @@ class VPNService : VpnService() {
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private lateinit var builder: NotificationCompat.Builder
 
-    //TODO необходимость connectivityManager, networkRequest, networkCallback
+    /**
+     * Provides access to the Android networking stack.
+     *
+     * Used to request and monitor the system’s physical networks (Wi-Fi, Cellular, etc.)
+     * and declare them as VPN underlay networks via [VpnService.setUnderlyingNetworks].
+     * This prevents traffic loops (VPN→VPN) and enables correct handover when the
+     * transport changes (e.g., Wi-Fi → Cellular).
+     */
     private val connectivityManager by lazy { getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager }
+
+    /**
+     * Describes the type of network the service requests as the VPN’s uplink.
+     *
+     * - [NetworkCapabilities.NET_CAPABILITY_INTERNET] — requires that the network
+     *   is capable of accessing the Internet.
+     * - [NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED] — requires that the
+     *   network is not restricted (e.g., not an enterprise/limited profile).
+     */
     private val networkRequest by lazy {
         NetworkRequest.Builder()
             .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
             .addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED)
             .build()
     }
+
+    /**
+     * Callback for lifecycle events of matching networks.
+     *
+     * Each event updates the VPN’s declared underlay networks via
+     * [VpnService.setUnderlyingNetworks]. This explicitly binds the outbound sockets
+     * (tun2socks/Xray) to the device’s physical network, preventing routing loops
+     * and ensuring correct behavior during network transitions.
+     */
     private val networkCallback by lazy {
         object : ConnectivityManager.NetworkCallback() {
+            /**
+             * Called when a network matching [networkRequest] becomes available.
+             * Declares this network as the current underlay for the VPN so that
+             * core traffic is routed on top of it.
+             */
             override fun onAvailable(network: Network) {
                 setUnderlyingNetworks(arrayOf(network))
             }
 
+            /**
+             * Called when a network’s capabilities change (e.g., validated, captive portal, transport).
+             * Re-declares the underlay to ensure the VPN uses the latest available conditions.
+             */
             override fun onCapabilitiesChanged(
                 network: Network,
                 networkCapabilities: NetworkCapabilities
@@ -79,6 +113,11 @@ class VPNService : VpnService() {
                 setUnderlyingNetworks(arrayOf(network))
             }
 
+            /**
+             * Called when a previously available network is lost.
+             * Resets the VPN underlay, allowing the system to fall back
+             * to the default network or wait for a new one.
+             */
             override fun onLost(network: Network) {
                 setUnderlyingNetworks(null)
             }
