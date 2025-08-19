@@ -1,10 +1,10 @@
 package com.pet.vpn_client.presentation.models
 
-import com.pet.vpn_client.domain.models.ConfigProfileItem
-
 data class ServerItemModel(
-    val guid: String,
-    //TODO отдельная модель для ui
-    val profile: ConfigProfileItem
+    val guid: String = "",
+    val name: String,
+    val ip: String,
+    val protocol: String,
+    val isSelected: Boolean = false
 )
 

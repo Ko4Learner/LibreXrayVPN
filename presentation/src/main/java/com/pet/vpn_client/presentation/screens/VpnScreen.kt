@@ -26,7 +26,7 @@ import com.pet.vpn_client.presentation.view_model.VpnScreenViewModel
 import com.pet.vpn_client.presentation.composable_elements.ConfigDropDownMenu
 import com.pet.vpn_client.presentation.composable_elements.RestartButton
 import com.pet.vpn_client.presentation.composable_elements.TestConnectionButton
-import com.pet.vpn_client.presentation.composable_elements.StartVpnButton
+import com.pet.vpn_client.presentation.composable_elements.ConnectToggle
 import com.pet.vpn_client.presentation.composable_elements.SubscriptionsList
 
 @Composable
@@ -85,7 +85,7 @@ fun VpnScreenContent(
             SubscriptionsList(onIntent, state.serverItemList)
         }
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            StartVpnButton(onIntent, state.isRunning)
+            ConnectToggle(onIntent, state.isRunning)
             Row(
                 modifier = Modifier
                     .fillMaxWidth(),

@@ -31,6 +31,5 @@ fun RestartButton(onIntent: (VpnScreenIntent) -> Unit) {
             color = colorScheme.onSecondary,
             style = MaterialTheme.typography.titleSmall
         )
-        //TODO Add VPN icon
     }
 }

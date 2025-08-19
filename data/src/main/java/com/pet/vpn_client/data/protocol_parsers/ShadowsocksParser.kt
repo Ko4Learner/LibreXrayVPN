@@ -1,25 +1,35 @@
-package com.pet.vpn_client.data.config_formatter
+package com.pet.vpn_client.data.protocol_parsers
 
 import android.util.Log
 import com.pet.vpn_client.core.utils.Constants
-import com.pet.vpn_client.domain.models.XrayConfig.OutboundBean
-import com.pet.vpn_client.domain.interfaces.repository.ConfigRepository
 import com.pet.vpn_client.domain.models.ConfigProfileItem
-import com.pet.vpn_client.domain.models.EConfigType
+import com.pet.vpn_client.domain.models.ConfigType
 import com.pet.vpn_client.domain.models.NetworkType
 import com.pet.vpn_client.core.utils.Utils
 import com.pet.vpn_client.core.utils.idnHost
 import java.net.URI
 import javax.inject.Inject
-import javax.inject.Provider
 
-class ShadowsocksFormatter @Inject constructor(private val configRepository: Provider<ConfigRepository>) : BaseFormatter() {
+/**
+ * Parses Shadowsocks subscription strings.
+ *
+ * Supported formats:
+ * - SIP002;
+ * - Legacy: older encoded formats that are still present in the wild.
+ */
+class ShadowsocksParser @Inject constructor() : BaseParser() {
+    /**
+     * Parses a Shadowsocks string trying SIP002 first, then legacy format.
+     */
     fun parse(str: String): ConfigProfileItem? {
         return parseSip002(str) ?: parseLegacy(str)
     }
 
-    fun parseSip002(str: String): ConfigProfileItem? {
-        val config = ConfigProfileItem.create(EConfigType.SHADOWSOCKS)
+    /**
+     * Parses SIP002 format: `ss://method:password@host:port#remarks`
+     */
+    private fun parseSip002(str: String): ConfigProfileItem? {
+        val config = ConfigProfileItem.create(ConfigType.SHADOWSOCKS)
 
         val uri = URI(Utils.fixIllegalUrl(str))
         if (uri.idnHost.isEmpty()) return null
@@ -42,27 +52,30 @@ class ShadowsocksFormatter @Inject constructor(private val configRepository: Pro
 
         if (!uri.rawQuery.isNullOrEmpty()) {
             val queryParam = getQueryParam(uri)
-            if (queryParam["plugin"]?.contains("obfs=http") == true) {
+            if (queryParam[QUERY_PLUGIN]?.contains(OBFS_HTTP) == true) {
                 val queryPairs = HashMap<String, String>()
-                for (pair in queryParam["plugin"]?.split(";") ?: listOf()) {
+                for (pair in queryParam[QUERY_PLUGIN]?.split(";") ?: listOf()) {
                     val idx = pair.split("=")
                     if (idx.count() == 2) {
-                        queryPairs.put(idx.first(), idx.last())
+                        queryPairs[idx.first()] = idx.last()
                     }
                 }
                 config.network = NetworkType.TCP.type
-                config.headerType = "http"
-                config.host = queryPairs["obfs-host"]
-                config.path = queryPairs["path"]
+                config.headerType = HEADER_TYPE_HTTP
+                config.host = queryPairs[OBFS_HOST]
+                config.path = queryPairs[PATH]
             }
         }
 
         return config
     }
 
-    fun parseLegacy(str: String): ConfigProfileItem? {
-        val config = ConfigProfileItem.create(EConfigType.SHADOWSOCKS)
-        var result = str.replace(EConfigType.SHADOWSOCKS.protocolScheme, "")
+    /**
+     * Parses legacy Shadowsocks format.
+     */
+    private fun parseLegacy(str: String): ConfigProfileItem? {
+        val config = ConfigProfileItem.create(ConfigType.SHADOWSOCKS)
+        var result = str.replace(ConfigType.SHADOWSOCKS.protocolScheme, "")
         val indexSplit = result.indexOf("#")
         if (indexSplit > 0) {
             try {
@@ -75,7 +88,6 @@ class ShadowsocksFormatter @Inject constructor(private val configRepository: Pro
             result = result.substring(0, indexSplit)
         }
 
-        //part decode
         val indexS = result.indexOf("@")
         result = if (indexS > 0) {
             Utils.decode(result.substring(0, indexS)) + result.substring(
@@ -97,24 +109,11 @@ class ShadowsocksFormatter @Inject constructor(private val configRepository: Pro
         return config
     }
 
-    fun toOutbound(profileItem: ConfigProfileItem): OutboundBean? {
-        val outboundBean = configRepository.get().createInitOutbound(EConfigType.SHADOWSOCKS)
-
-        outboundBean?.settings?.servers?.first()?.let { server ->
-            server.address = profileItem.server.orEmpty()
-            server.port = profileItem.serverPort.orEmpty().toInt()
-            server.password = profileItem.password
-            server.method = profileItem.method
-        }
-
-        val sni = outboundBean?.streamSettings?.let {
-            configRepository.get().populateTransportSettings(it, profileItem)
-        }
-
-        outboundBean?.streamSettings?.let {
-            configRepository.get().populateTlsSettings(it, profileItem, sni)
-        }
-
-        return outboundBean
+    companion object {
+        private const val QUERY_PLUGIN = "plugin"
+        private const val OBFS_HTTP = "obfs=http"
+        private const val OBFS_HOST = "obfs-host"
+        private const val PATH = "path"
+        private const val HEADER_TYPE_HTTP = "http"
     }
 }

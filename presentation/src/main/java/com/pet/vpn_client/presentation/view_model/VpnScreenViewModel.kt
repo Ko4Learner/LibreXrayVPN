@@ -5,7 +5,9 @@ import androidx.lifecycle.viewModelScope
 import com.pet.vpn_client.domain.interfaces.interactor.ConfigInteractor
 import com.pet.vpn_client.domain.interfaces.interactor.ConnectionInteractor
 import com.pet.vpn_client.domain.interfaces.repository.ServiceStateRepository
+import com.pet.vpn_client.domain.models.ImportResult
 import com.pet.vpn_client.domain.state.ServiceState
+import com.pet.vpn_client.presentation.formatter.toServerItemModel
 import com.pet.vpn_client.presentation.intent.VpnScreenIntent
 import com.pet.vpn_client.presentation.models.ServerItemModel
 import com.pet.vpn_client.presentation.state.VpnScreenState
@@ -15,10 +17,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.coroutines.cancellation.CancellationException
 
 @HiltViewModel
 class VpnScreenViewModel @Inject constructor(
@@ -26,7 +30,6 @@ class VpnScreenViewModel @Inject constructor(
     private val connectionInteractor: ConnectionInteractor,
     stateRepository: ServiceStateRepository
 ) : ViewModel() {
-
     private val _state = MutableStateFlow(VpnScreenState())
     val state: StateFlow<VpnScreenState> = _state.asStateFlow()
 
@@ -38,10 +41,19 @@ class VpnScreenViewModel @Inject constructor(
         )
 
     init {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             updateServerList(configInteractor.getServerList())
-            serviceState.collect { serviceState ->
-                _state.update { it.copy(isRunning = serviceState == ServiceState.Connected) }
+        }
+        viewModelScope.launch {
+            serviceState.collectLatest { serviceState ->
+                if (serviceState == ServiceState.Connected) {
+                    _state.update { it.copy(isRunning = true) }
+                    connectionInteractor.observeSpeed().collect { speed ->
+                        _state.update { it.copy(connectionSpeed = speed) }
+                    }
+                } else {
+                    _state.update { it.copy(isRunning = false, connectionSpeed = null) }
+                }
             }
         }
     }
@@ -54,31 +66,33 @@ class VpnScreenViewModel @Inject constructor(
             VpnScreenIntent.ToggleConnection -> toggleConnection()
             is VpnScreenIntent.DeleteItem -> deleteItem(intent.id)
             VpnScreenIntent.RefreshItemList -> refreshItemList()
+            is VpnScreenIntent.SetSelectedServer -> TODO()
         }
     }
 
     private fun toggleConnection() {
-        viewModelScope.launch {
-            if (state.value.isRunning) {
-                stopConnection()
-            } else {
-                startConnection()
-            }
+        viewModelScope.launch(Dispatchers.IO) {
+            if (state.value.isRunning) stopConnection() else startConnection()
         }
     }
 
 
-    private fun deleteItem(id: String) {
-        _state.update { it ->
-            it.copy(
-                isLoading = true,
-                serverItemList = it.serverItemList - it.serverItemList.first { it.guid == id }
-            )
-        }
+    private fun deleteItem(guid: String) {
+        val before = state.value.serverItemList
+        val after = before.filterNot { it.guid == guid }
+        _state.update { it.copy(serverItemList = after) }
+
         viewModelScope.launch(Dispatchers.IO) {
-            configInteractor.deleteItem(id)
+            runCatching { configInteractor.deleteItem(guid) }
+                .onFailure { e ->
+                    _state.update {
+                        it.copy(
+                            serverItemList = before,
+                            error = e.message ?: "Delete failed"
+                        )
+                    }
+                }
         }
-        _state.update { it.copy(isLoading = false) }
     }
 
     private fun testConnection() {
@@ -98,15 +112,20 @@ class VpnScreenViewModel @Inject constructor(
 
     private fun importConfigFromClipboard() {
         viewModelScope.launch(Dispatchers.IO) {
-            if (configInteractor.importClipboardConfig() >= 0) {
-                updateServerList(configInteractor.getServerList())
-            } else {
-                _state.update {
+            when (configInteractor.importClipboardConfig()) {
+                ImportResult.Empty -> _state.update {
                     it.copy(
-                        serverItemList = listOf(),
+                        error = "Empty config"
+                    )
+                }
+
+                ImportResult.Error -> _state.update {
+                    it.copy(
                         error = "Config imported error"
                     )
                 }
+
+                ImportResult.Success -> updateServerList(configInteractor.getServerList())
             }
         }
     }
@@ -118,19 +137,17 @@ class VpnScreenViewModel @Inject constructor(
     }
 
     private suspend fun updateServerList(serverList: List<String>) {
-        _state.update { it.copy(isLoading = true, serverItemList = mutableListOf(), error = null) }
-        serverList.forEach { guid ->
-            val profile = configInteractor.getServerConfig(guid)
-            if (profile != null) {
-                _state.update {
-                    it.copy(
-                        isLoading = true,
-                        serverItemList = it.serverItemList + ServerItemModel(guid, profile)
-                    )
-                }
+        _state.update { it.copy(isLoading = true, error = null) }
+        try {
+            val items: List<ServerItemModel> = serverList.mapNotNull { guid ->
+                configInteractor.getServerConfig(guid)?.toServerItemModel(guid)
             }
+            _state.update { it.copy(isLoading = false, serverItemList = items) }
+        } catch (ce: CancellationException) {
+            throw ce
+        } catch (t: Throwable) {
+            _state.update { it.copy(isLoading = false, error = t.message ?: "Unknown error") }
         }
-        _state.update { it.copy(isLoading = false) }
     }
 
     private suspend fun startConnection() {

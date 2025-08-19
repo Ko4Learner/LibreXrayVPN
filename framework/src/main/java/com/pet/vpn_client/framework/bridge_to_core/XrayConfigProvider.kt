@@ -1,4 +1,4 @@
-package com.pet.vpn_client.data.repository_impl
+package com.pet.vpn_client.framework.bridge_to_core
 
 import android.content.Context
 import android.text.TextUtils
@@ -12,41 +12,50 @@ import com.google.gson.JsonSerializationContext
 import com.google.gson.JsonSerializer
 import com.google.gson.reflect.TypeToken
 import com.pet.vpn_client.core.utils.Constants
-import com.pet.vpn_client.domain.models.XrayConfig
-import com.pet.vpn_client.data.config_formatter.HttpFormatter
-import com.pet.vpn_client.data.config_formatter.ShadowsocksFormatter
-import com.pet.vpn_client.data.config_formatter.SocksFormatter
-import com.pet.vpn_client.data.config_formatter.TrojanFormatter
-import com.pet.vpn_client.data.config_formatter.VlessFormatter
-import com.pet.vpn_client.data.config_formatter.VmessFormatter
-import com.pet.vpn_client.data.config_formatter.WireguardFormatter
-import com.pet.vpn_client.domain.interfaces.repository.ConfigRepository
+import com.pet.vpn_client.core.utils.Utils
 import com.pet.vpn_client.domain.interfaces.KeyValueStorage
 import com.pet.vpn_client.domain.models.ConfigProfileItem
 import com.pet.vpn_client.domain.models.ConfigResult
-import com.pet.vpn_client.domain.models.EConfigType
+import com.pet.vpn_client.domain.models.ConfigType
 import com.pet.vpn_client.domain.models.NetworkType
-import com.pet.vpn_client.core.utils.Utils
+import com.pet.vpn_client.framework.models.XrayConfig
+import com.pet.vpn_client.framework.outbound_converter.HttpConverter
+import com.pet.vpn_client.framework.outbound_converter.ShadowsocksConverter
+import com.pet.vpn_client.framework.outbound_converter.SocksConverter
+import com.pet.vpn_client.framework.outbound_converter.TrojanConverter
+import com.pet.vpn_client.framework.outbound_converter.VlessConverter
+import com.pet.vpn_client.framework.outbound_converter.VmessConverter
+import com.pet.vpn_client.framework.outbound_converter.WireguardConverter
+import dagger.hilt.android.qualifiers.ApplicationContext
 import java.lang.reflect.Type
 import java.net.Inet6Address
 import java.net.InetAddress
 import javax.inject.Inject
 
-class ConfigRepositoryImpl @Inject constructor(
-    val storage: KeyValueStorage,
-    val gson: Gson,
-    val httpFormatter: HttpFormatter,
-    val shadowsocksFormatter: ShadowsocksFormatter,
-    val socksFormatter: SocksFormatter,
-    val trojanFormatter: TrojanFormatter,
-    val vlessFormatter: VlessFormatter,
-    val vmessFormatter: VmessFormatter,
-    val wireguardFormatter: WireguardFormatter,
-    val context: Context
-) : ConfigRepository {
+/**
+ * Builds Xray core configuration from a base template and a protocol profile.
+ */
+class XrayConfigProvider @Inject constructor(
+    private val storage: KeyValueStorage,
+    private val gson: Gson,
+    private val httpConverter: HttpConverter,
+    private val shadowsocksConverter: ShadowsocksConverter,
+    private val socksConverter: SocksConverter,
+    private val trojanConverter: TrojanConverter,
+    private val vlessConverter: VlessConverter,
+    private val vmessConverter: VmessConverter,
+    private val wireguardConverter: WireguardConverter,
+    @ApplicationContext private val context: Context
+) {
     private var initConfigCache: String? = null
 
-    override fun getCoreConfig(guid: String): ConfigResult {
+    /**
+     * Returns a composed Xray configuration for the given profile GUID.
+     *
+     * @return [ConfigResult] where `status=true` and `content` is a JSON string on success.
+     *         If the profile is missing or invalid, returns `status=false`.
+     */
+    fun getCoreConfig(guid: String): ConfigResult {
         try {
             val config = storage.decodeServerConfig(guid) ?: return ConfigResult(false)
             return getXrayNormalConfig(context, guid, config)
@@ -57,6 +66,10 @@ class ConfigRepositoryImpl @Inject constructor(
         }
     }
 
+    /**
+     * Composes a full config by validating the profile, updating base template and
+     * wiring inbounds/outbounds, DNS and routing.
+     */
     private fun getXrayNormalConfig(
         context: Context,
         guid: String,
@@ -75,11 +88,11 @@ class ConfigRepositoryImpl @Inject constructor(
         val xRayConfig = initXrayConfig(context) ?: return result
         xRayConfig.log.loglevel = LOG_LEVEL
         xRayConfig.remarks = config.remarks
-        xRayConfig.routing.domainStrategy = "IPIfNonMatch"
+        xRayConfig.routing.domainStrategy = IP_IF_NON_MATCH
 
         getInbounds(xRayConfig)
 
-        getOutbounds(xRayConfig, config) ?: return result
+        if (!getOutbounds(xRayConfig, config)) return result
 
         getDns(xRayConfig)
 
@@ -91,8 +104,11 @@ class ConfigRepositoryImpl @Inject constructor(
         return result
     }
 
+    /**
+     * Loads the base Xray JSON template from assets (cached after first read).
+     */
     private fun initXrayConfig(context: Context): XrayConfig? {
-        val assets = initConfigCache ?: Utils.readTextFromAssets(context, EMPTY_CONFIG)
+        val assets = initConfigCache ?: readTextFromAssets(context)
         if (TextUtils.isEmpty(assets)) {
             return null
         }
@@ -101,12 +117,15 @@ class ConfigRepositoryImpl @Inject constructor(
         return config
     }
 
+    /**
+     * Configures inbound listeners (loopback, ports, sniffing) on the template.
+     */
     private fun getInbounds(xrayConfig: XrayConfig): Boolean {
         try {
             xrayConfig.inbounds.forEach { curInbound ->
-                curInbound.listen = Constants.LOOPBACK
+                curInbound.listen = LOOPBACK
             }
-            xrayConfig.inbounds[0].port = 10808
+            xrayConfig.inbounds[0].port = LOCAL_SOCKS_PORT
             xrayConfig.inbounds[0].sniffing?.enabled = true
             xrayConfig.inbounds[0].sniffing?.routeOnly = false
             xrayConfig.inbounds.removeAt(1)
@@ -117,10 +136,13 @@ class ConfigRepositoryImpl @Inject constructor(
         return true
     }
 
-    private fun getOutbounds(xrayConfig: XrayConfig, config: ConfigProfileItem): Boolean? {
-        val outbound = convertProfile2Outbound(config) ?: return null
+    /**
+     * Builds an outbound from a profile and injects it into the template.
+     */
+    private fun getOutbounds(xrayConfig: XrayConfig, config: ConfigProfileItem): Boolean {
+        val outbound = convertProfiletoOutbound(config) ?: return false
         val ret = updateOutboundWithGlobalSettings(outbound)
-        if (!ret) return null
+        if (!ret) return false
 
         if (xrayConfig.outbounds.isNotEmpty()) {
             xrayConfig.outbounds[0] = outbound
@@ -130,18 +152,21 @@ class ConfigRepositoryImpl @Inject constructor(
         return true
     }
 
+    /**
+     * Applies DNS servers and host remappings to the template.
+     */
     private fun getDns(xrayConfig: XrayConfig): Boolean {
         try {
-            val hosts = mutableMapOf<String, Any>().apply {
-                put(Constants.GOOGLEAPIS_CN_DOMAIN, Constants.GOOGLEAPIS_COM_DOMAIN)
-                put(Constants.DNS_ALIDNS_DOMAIN, Constants.DNS_ALIDNS_ADDRESSES)
-                put(Constants.DNS_CLOUDFLARE_DOMAIN, Constants.DNS_CLOUDFLARE_ADDRESSES)
-                put(Constants.DNS_DNSPOD_DOMAIN, Constants.DNS_DNSPOD_ADDRESSES)
-                put(Constants.DNS_GOOGLE_DOMAIN, Constants.DNS_GOOGLE_ADDRESSES)
-                put(Constants.DNS_QUAD9_DOMAIN, Constants.DNS_QUAD9_ADDRESSES)
-                put(Constants.DNS_YANDEX_DOMAIN, Constants.DNS_YANDEX_ADDRESSES)
-            }
-            val servers = arrayListOf<Any>(Constants.DNS_PROXY)
+            val hosts = mapOf(
+                GOOGLEAPIS_CN_DOMAIN to GOOGLEAPIS_COM_DOMAIN,
+                DNS_ALIDNS_DOMAIN to DNS_ALIDNS_ADDRESSES,
+                DNS_CLOUDFLARE_DOMAIN to DNS_CLOUDFLARE_ADDRESSES,
+                DNS_DNSPOD_DOMAIN to DNS_DNSPOD_ADDRESSES,
+                DNS_GOOGLE_DOMAIN to DNS_GOOGLE_ADDRESSES,
+                DNS_QUAD9_DOMAIN to DNS_QUAD9_ADDRESSES,
+                DNS_YANDEX_DOMAIN to DNS_YANDEX_ADDRESSES
+            )
+            val servers = arrayListOf<Any>(DNS_PROXY)
 
             xrayConfig.dns = XrayConfig.DnsBean(
                 servers = servers,
@@ -154,13 +179,16 @@ class ConfigRepositoryImpl @Inject constructor(
         return true
     }
 
+    /**
+     * Applies global adjustments to the outbound (e.g., mux, HTTP header stealth, WireGuard address).
+     */
     private fun updateOutboundWithGlobalSettings(outbound: XrayConfig.OutboundBean): Boolean {
         try {
             val protocol = outbound.protocol
             outbound.mux?.enabled = false
             outbound.mux?.concurrency = -1
 
-            if (protocol.equals(EConfigType.WIREGUARD.name, true)) {
+            if (protocol.equals(ConfigType.WIREGUARD.name, true)) {
                 var localTunAdd = if (outbound.settings?.address == null) {
                     listOf(Constants.WIREGUARD_LOCAL_ADDRESS_V4)
                 } else {
@@ -171,7 +199,7 @@ class ConfigRepositoryImpl @Inject constructor(
             }
 
             if (outbound.streamSettings?.network == Constants.DEFAULT_NETWORK
-                && outbound.streamSettings?.tcpSettings?.header?.type == Constants.HEADER_TYPE_HTTP
+                && outbound.streamSettings?.tcpSettings?.header?.type == HEADER_TYPE_HTTP
             ) {
                 val path = outbound.streamSettings?.tcpSettings?.header?.request?.path
                 val host = outbound.streamSettings?.tcpSettings?.header?.request?.headers?.Host
@@ -200,7 +228,10 @@ class ConfigRepositoryImpl @Inject constructor(
         return true
     }
 
-
+    /**
+     * Resolves outbound target domains to IP addresses and writes them into DNS hosts.
+     * Also sets domain strategy to prefer both IPv4 and IPv6 where applicable.
+     */
     private fun resolveOutboundDomainsToHosts(xrayConfig: XrayConfig) {
         val proxyOutboundList = xrayConfig.getAllProxyOutbound()
         val dns = xrayConfig.dns ?: return
@@ -214,7 +245,7 @@ class ConfigRepositoryImpl @Inject constructor(
             val resolvedIps = resolveHostToIP(domain)
             if (resolvedIps.isNullOrEmpty()) continue
 
-            item.ensureSockopt().domainStrategy = "UseIPv4v6"
+            item.ensureSockopt().domainStrategy = USE_IPV4V6
             newHosts[domain] = if (resolvedIps.size == 1) {
                 resolvedIps[0]
             } else {
@@ -225,21 +256,27 @@ class ConfigRepositoryImpl @Inject constructor(
         dns.hosts = newHosts
     }
 
-    private fun convertProfile2Outbound(profileItem: ConfigProfileItem): XrayConfig.OutboundBean? {
+    /**
+     * Converts a profile into an outbound according to its protocol type.
+     */
+    private fun convertProfiletoOutbound(profileItem: ConfigProfileItem): XrayConfig.OutboundBean? {
         return when (profileItem.configType) {
-            EConfigType.VMESS -> vmessFormatter.toOutbound(profileItem)
-            EConfigType.SHADOWSOCKS -> shadowsocksFormatter.toOutbound(profileItem)
-            EConfigType.SOCKS -> socksFormatter.toOutbound(profileItem)
-            EConfigType.VLESS -> vlessFormatter.toOutbound(profileItem)
-            EConfigType.TROJAN -> trojanFormatter.toOutbound(profileItem)
-            EConfigType.WIREGUARD -> wireguardFormatter.toOutbound(profileItem)
-            EConfigType.HTTP -> httpFormatter.toOutbound(profileItem)
+            ConfigType.VMESS -> vmessConverter.toOutbound(profileItem)
+            ConfigType.SHADOWSOCKS -> shadowsocksConverter.toOutbound(profileItem)
+            ConfigType.SOCKS -> socksConverter.toOutbound(profileItem)
+            ConfigType.VLESS -> vlessConverter.toOutbound(profileItem)
+            ConfigType.TROJAN -> trojanConverter.toOutbound(profileItem)
+            ConfigType.WIREGUARD -> wireguardConverter.toOutbound(profileItem)
+            ConfigType.HTTP -> httpConverter.toOutbound(profileItem)
         }
     }
 
-    override fun createInitOutbound(configType: EConfigType): XrayConfig.OutboundBean? {
+    /**
+     * Creates a minimal outbound skeleton for the given protocol type, used for initial drafts.
+     */
+    fun createInitOutbound(configType: ConfigType): XrayConfig.OutboundBean? {
         return when (configType) {
-            EConfigType.VMESS, EConfigType.VLESS -> XrayConfig.OutboundBean(
+            ConfigType.VMESS, ConfigType.VLESS -> XrayConfig.OutboundBean(
                 protocol = configType.name.lowercase(),
                 settings = XrayConfig.OutboundBean.OutSettingsBean(
                     vnext = listOf(
@@ -250,10 +287,10 @@ class ConfigRepositoryImpl @Inject constructor(
                 ), streamSettings = XrayConfig.OutboundBean.StreamSettingsBean()
             )
 
-            EConfigType.SHADOWSOCKS,
-            EConfigType.SOCKS,
-            EConfigType.HTTP,
-            EConfigType.TROJAN -> XrayConfig.OutboundBean(
+            ConfigType.SHADOWSOCKS,
+            ConfigType.SOCKS,
+            ConfigType.HTTP,
+            ConfigType.TROJAN -> XrayConfig.OutboundBean(
                 protocol = configType.name.lowercase(),
                 settings = XrayConfig.OutboundBean.OutSettingsBean(
                     servers = listOf(XrayConfig.OutboundBean.OutSettingsBean.ServersBean())
@@ -261,7 +298,7 @@ class ConfigRepositoryImpl @Inject constructor(
                 streamSettings = XrayConfig.OutboundBean.StreamSettingsBean()
             )
 
-            EConfigType.WIREGUARD -> XrayConfig.OutboundBean(
+            ConfigType.WIREGUARD -> XrayConfig.OutboundBean(
                 protocol = configType.name.lowercase(),
                 settings = XrayConfig.OutboundBean.OutSettingsBean(
                     secretKey = "",
@@ -271,7 +308,12 @@ class ConfigRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun populateTransportSettings(
+    /**
+     * Fills transport-specific stream settings (TCP/WS/GRPC/etc) from a profile.
+     *
+     * @return The inferred SNI (if any) to be used later in TLS/REALITY settings.
+     */
+    fun populateTransportSettings(
         streamSettings: XrayConfig.OutboundBean.StreamSettingsBean,
         profileItem: ConfigProfileItem
     ): String? {
@@ -291,8 +333,8 @@ class ConfigRepositoryImpl @Inject constructor(
         when (streamSettings.network) {
             NetworkType.TCP.type -> {
                 val tcpSetting = XrayConfig.OutboundBean.StreamSettingsBean.TcpSettingsBean()
-                if (headerType == Constants.HEADER_TYPE_HTTP) {
-                    tcpSetting.header.type = Constants.HEADER_TYPE_HTTP
+                if (headerType == HEADER_TYPE_HTTP) {
+                    tcpSetting.header.type = HEADER_TYPE_HTTP
                     if (!TextUtils.isEmpty(host) || !TextUtils.isEmpty(path)) {
                         val requestObj =
                             XrayConfig.OutboundBean.StreamSettingsBean.TcpSettingsBean.HeaderBean.RequestBean()
@@ -304,7 +346,7 @@ class ConfigRepositoryImpl @Inject constructor(
                         sni = requestObj.headers.Host?.getOrNull(0)
                     }
                 } else {
-                    tcpSetting.header.type = "none"
+                    tcpSetting.header.type = NONE
                     sni = host
                 }
                 streamSettings.tcpSettings = tcpSetting
@@ -312,7 +354,7 @@ class ConfigRepositoryImpl @Inject constructor(
 
             NetworkType.KCP.type -> {
                 val kcpsetting = XrayConfig.OutboundBean.StreamSettingsBean.KcpSettingsBean()
-                kcpsetting.header.type = headerType ?: "none"
+                kcpsetting.header.type = headerType ?: NONE
                 if (seed.isNullOrEmpty()) {
                     kcpsetting.seed = null
                 } else {
@@ -365,7 +407,7 @@ class ConfigRepositoryImpl @Inject constructor(
 
             NetworkType.GRPC.type -> {
                 val grpcSetting = XrayConfig.OutboundBean.StreamSettingsBean.GrpcSettingsBean()
-                grpcSetting.multiMode = mode == "multi"
+                grpcSetting.multiMode = mode == MULTI
                 grpcSetting.serviceName = serviceName.orEmpty()
                 grpcSetting.authority = authority.orEmpty()
                 grpcSetting.idle_timeout = 60
@@ -377,7 +419,12 @@ class ConfigRepositoryImpl @Inject constructor(
         return sni
     }
 
-    override fun populateTlsSettings(
+    /**
+     * Applies TLS or REALITY settings onto the stream based on profile values.
+     *
+     * @param sniExt SNI suggested by transport (e.g., first Host), used if profile SNI is empty.
+     */
+    fun populateTlsSettings(
         streamSettings: XrayConfig.OutboundBean.StreamSettingsBean,
         profileItem: ConfigProfileItem,
         sniExt: String?
@@ -412,6 +459,10 @@ class ConfigRepositoryImpl @Inject constructor(
         }
     }
 
+    /**
+     * Resolves a domain to a list of IP addresses (IPv4 first, then IPv6).
+     * Returns null if input is already an IP or resolution fails.
+     */
     private fun resolveHostToIP(host: String): List<String>? {
         try {
             if (Utils.isPureIpAddress(host)) {
@@ -432,13 +483,16 @@ class ConfigRepositoryImpl @Inject constructor(
         }
     }
 
+    /**
+     * Serializes an object to JSON. Doubles are coerced to Ints where required.
+     */
     private fun toJsonPretty(src: Any?): String? {
         if (src == null)
             return null
         val gsonPre = GsonBuilder()
             .setPrettyPrinting()
             .disableHtmlEscaping()
-            .registerTypeAdapter( // custom serializer is needed here since JSON by default parse number as Double, core will fail to start
+            .registerTypeAdapter(
                 object : TypeToken<Double>() {}.type,
                 JsonSerializer { src: Double?, _: Type?, _: JsonSerializationContext? ->
                     JsonPrimitive(
@@ -450,6 +504,9 @@ class ConfigRepositoryImpl @Inject constructor(
         return gsonPre.toJson(src)
     }
 
+    /**
+     * Safely parses a JSON string into [JsonObject], returning null on failure.
+     */
     private fun parseString(src: String?): JsonObject? {
         if (src == null)
             return null
@@ -461,10 +518,70 @@ class ConfigRepositoryImpl @Inject constructor(
         }
     }
 
+    /**
+     * Reads the base config template from the app assets folder.
+     */
+    private fun readTextFromAssets(context: Context?): String {
+        if (context == null) return ""
+
+        return try {
+            context.assets.open(EMPTY_CONFIG).use { inputStream ->
+                inputStream.bufferedReader().use { reader ->
+                    reader.readText()
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(Constants.TAG, "Failed to read asset file: $EMPTY_CONFIG", e)
+            ""
+        }
+    }
+
     companion object {
         private const val STEALTH_HTTP_HEADERS_JSON =
             """{"version":"1.1","method":"GET","headers":{"userAgent":["Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.6478.122 Mobile Safari/537.36"],"Accept":["text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8"],"acceptEncoding":["gzip, deflate, br"],"Accept-Language":["ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7"],"Connection":["keep-alive"],"Upgrade-Insecure-Requests":["1"],"Sec-Fetch-Site":["none"],"Sec-Fetch-Mode":["navigate"],"Sec-Fetch-User":["?1"],"Sec-Fetch-Dest":["document"],"Pragma":["no-cache"],"Cache-Control":["no-cache"]}}"""
         private const val LOG_LEVEL = "warning"
         private const val EMPTY_CONFIG = "xRay_config.json"
+        private const val LOOPBACK = "127.0.0.1"
+        private const val LOCAL_SOCKS_PORT = 10808
+        private const val DNS_PROXY = "1.1.1.1"
+        private const val HEADER_TYPE_HTTP = "http"
+        private const val IP_IF_NON_MATCH = "IPIfNonMatch"
+        private const val USE_IPV4V6 = "UseIPv4v6"
+        private const val NONE = "none"
+        private const val MULTI = "multi"
+
+        /**
+         * DNS service domains for popular public DNS providers and specialized endpoints.
+         *
+         * These constants represent DNS-over-HTTPS (DoH), DNS-over-TLS (DoT), or other DNS service domains
+         * required by the application to configure upstream DNS servers or remap domains.
+         */
+        private const val GOOGLEAPIS_CN_DOMAIN = "domain:googleapis.cn"
+        private const val GOOGLEAPIS_COM_DOMAIN = "googleapis.com"
+        private const val DNS_DNSPOD_DOMAIN = "dot.pub"
+        private const val DNS_ALIDNS_DOMAIN = "dns.alidns.com"
+        private const val DNS_CLOUDFLARE_DOMAIN = "one.one.one.one"
+        private const val DNS_GOOGLE_DOMAIN = "dns.google"
+        private const val DNS_QUAD9_DOMAIN = "dns.quad9.net"
+        private const val DNS_YANDEX_DOMAIN = "common.dot.dns.yandex.net"
+
+        /**
+         * Lists of public DNS resolver IP addresses (IPv4/IPv6) for each provider.
+         *
+         * These address lists are used to configure upstream DNS resolvers within the application
+         * and provide direct IP options for various providers (AliDNS, Cloudflare, Google, DNSPod, Quad9, Yandex).
+         * IPv6 addresses are included when available.
+         */
+        private val DNS_ALIDNS_ADDRESSES =
+            listOf("223.5.5.5", "223.6.6.6", "2400:3200::1", "2400:3200:baba::1")
+        private val DNS_CLOUDFLARE_ADDRESSES =
+            listOf("1.1.1.1", "1.0.0.1", "2606:4700:4700::1111", "2606:4700:4700::1001")
+        private val DNS_DNSPOD_ADDRESSES = listOf("1.12.12.12", "120.53.53.53")
+        private val DNS_GOOGLE_ADDRESSES =
+            listOf("8.8.8.8", "8.8.4.4", "2001:4860:4860::8888", "2001:4860:4860::8844")
+        private val DNS_QUAD9_ADDRESSES =
+            listOf("9.9.9.9", "149.112.112.112", "2620:fe::fe", "2620:fe::9")
+        private val DNS_YANDEX_ADDRESSES =
+            listOf("77.88.8.8", "77.88.8.1", "2a02:6b8::feed:0ff", "2a02:6b8:0:1::feed:0ff")
     }
 }

@@ -23,7 +23,7 @@ import com.pet.vpn_client.core.utils.Constants
 import com.pet.vpn_client.presentation.intent.VpnScreenIntent
 
 @Composable
-fun StartVpnButton(onIntent: (VpnScreenIntent) -> Unit, isRunning: Boolean) {
+fun ConnectToggle(onIntent: (VpnScreenIntent) -> Unit, isRunning: Boolean) {
     val context = LocalContext.current
     val vpnPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
@@ -31,7 +31,7 @@ fun StartVpnButton(onIntent: (VpnScreenIntent) -> Unit, isRunning: Boolean) {
         if (result.resultCode == Activity.RESULT_OK) {
             onIntent(VpnScreenIntent.ToggleConnection)
         } else {
-            Log.d(Constants.TAG, "Permission denied")
+            Log.d(Constants.TAG, "VPN permission denied")
         }
     }
 
@@ -56,6 +56,5 @@ fun StartVpnButton(onIntent: (VpnScreenIntent) -> Unit, isRunning: Boolean) {
             color = colorScheme.onSecondary,
             style = MaterialTheme.typography.titleMedium
         )
-        //TODO Add VPN icon
     }
 }

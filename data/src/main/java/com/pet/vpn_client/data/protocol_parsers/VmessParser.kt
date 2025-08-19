@@ -1,48 +1,56 @@
-package com.pet.vpn_client.data.config_formatter
+package com.pet.vpn_client.data.protocol_parsers
 
 import android.text.TextUtils
 import android.util.Log
 import com.google.gson.Gson
 import com.pet.vpn_client.core.utils.Constants
-import com.pet.vpn_client.domain.interfaces.repository.ConfigRepository
-import com.pet.vpn_client.domain.models.XrayConfig.OutboundBean
-import com.pet.vpn_client.domain.interfaces.KeyValueStorage
 import com.pet.vpn_client.domain.models.ConfigProfileItem
-import com.pet.vpn_client.domain.models.EConfigType
+import com.pet.vpn_client.domain.models.ConfigType
 import com.pet.vpn_client.domain.models.NetworkType
 import com.pet.vpn_client.core.utils.Utils
 import com.pet.vpn_client.core.utils.idnHost
 import java.net.URI
 import javax.inject.Inject
-import javax.inject.Provider
 
-class VmessFormatter @Inject constructor(
-    val configRepository: Provider<ConfigRepository>,
-    val storage: KeyValueStorage,
-    val gson: Gson
-) : BaseFormatter() {
+/**
+ * Parses VMess configuration strings in two known formats:
+ *
+ * 1) **Base64 JSON (VMess QR code)**:
+ *    `vmess://<base64-encoded JSON>`
+ *    The JSON typically contains: `add` (host), `port`, `id` (UUID), `net`, `type`, `host`, `path`,
+ *    `scy` (security), `tls`, `sni`, `alpn`, `fp`, etc.
+ *
+ * 2) **URI-style (VMess-URI)**:
+ *    `vmess://<uuid>@host:port?[query]#remarks`
+ *    Transport/TLS details are provided via query parameters and applied through [BaseParser].
+ */
+class VmessParser @Inject constructor(private val gson: Gson) : BaseParser() {
+    /**
+     * Parses a VMess string:
+     * - URI-style if the heuristic matches (contains both `'?'` and `'&'`),
+     * - otherwise Base64-decoded JSON.
+     */
     fun parse(str: String): ConfigProfileItem? {
         if (str.indexOf('?') > 0 && str.indexOf('&') > 0) {
             return parseVmessStd(str)
         }
 
         val allowInsecure = false
-        val config = ConfigProfileItem.create(EConfigType.VMESS)
+        val config = ConfigProfileItem.create(ConfigType.VMESS)
 
-        var result = str.replace(EConfigType.VMESS.protocolScheme, "")
+        var result = str.replace(ConfigType.VMESS.protocolScheme, "")
         result = Utils.decode(result)
         if (TextUtils.isEmpty(result)) {
-            Log.w(Constants.TAG, "Toast decoding failed")
+            Log.w(Constants.TAG, "Base64 decoding failed")
             return null
         }
         val vmessQRCode = gson.fromJson(result, VmessQRCode::class.java)
-        // Although VmessQRCode fields are non null, looks like Gson may still create null fields
         if (TextUtils.isEmpty(vmessQRCode.add)
             || TextUtils.isEmpty(vmessQRCode.port)
             || TextUtils.isEmpty(vmessQRCode.id)
             || TextUtils.isEmpty(vmessQRCode.net)
         ) {
-            Log.w(Constants.TAG, "Toast incorrect protocol")
+            Log.w(Constants.TAG, "Incorrect protocol")
             return null
         }
 
@@ -51,7 +59,7 @@ class VmessFormatter @Inject constructor(
         config.serverPort = vmessQRCode.port
         config.password = vmessQRCode.id
         config.method =
-            if (TextUtils.isEmpty(vmessQRCode.scy)) Constants.DEFAULT_SECURITY else vmessQRCode.scy
+            if (TextUtils.isEmpty(vmessQRCode.scy)) DEFAULT_SECURITY else vmessQRCode.scy
 
         config.network = vmessQRCode.net.ifEmpty { NetworkType.TCP.type }
         config.headerType = vmessQRCode.type
@@ -81,9 +89,12 @@ class VmessFormatter @Inject constructor(
         return config
     }
 
-    fun parseVmessStd(str: String): ConfigProfileItem? {
+    /**
+     * Parses the URI-style VMess format: `vmess://<uuid>@host:port?\[query]#remarks`
+     */
+    private fun parseVmessStd(str: String): ConfigProfileItem? {
         val allowInsecure = false
-        val config = ConfigProfileItem.create(EConfigType.VMESS)
+        val config = ConfigProfileItem.create(ConfigType.VMESS)
 
         val uri = URI(Utils.fixIllegalUrl(str))
         if (uri.rawQuery.isNullOrEmpty()) return null
@@ -93,36 +104,23 @@ class VmessFormatter @Inject constructor(
         config.server = uri.idnHost
         config.serverPort = uri.port.toString()
         config.password = uri.userInfo
-        config.method = Constants.DEFAULT_SECURITY
+        config.method = DEFAULT_SECURITY
 
-        getItemFormQuery(config, queryParam, allowInsecure)
+        getItemFromQuery(config, queryParam, allowInsecure)
 
         return config
     }
 
-    fun toOutbound(profileItem: ConfigProfileItem): OutboundBean? {
-        val outboundBean = configRepository.get().createInitOutbound(EConfigType.VMESS)
-
-        outboundBean?.settings?.vnext?.first()?.let { vnext ->
-            vnext.address = profileItem.server.orEmpty()
-            vnext.port = profileItem.serverPort.orEmpty().toInt()
-            vnext.users[0].id = profileItem.password.orEmpty()
-            vnext.users[0].security = profileItem.method
-        }
-
-        val sni = outboundBean?.streamSettings?.let {
-            configRepository.get().populateTransportSettings(it, profileItem)
-        }
-
-        outboundBean?.streamSettings?.let {
-            configRepository.get().populateTlsSettings(it, profileItem, sni)
-        }
-
-        return outboundBean
+    companion object {
+        private const val DEFAULT_SECURITY = "auto"
     }
 }
 
-data class VmessQRCode(
+/**
+ * Payload model for Base64-encoded VMess QR JSON.
+ * Only fields used by the parser are included.
+ */
+private data class VmessQRCode(
     var v: String = "",
     var ps: String = "",
     var add: String = "",

@@ -1,7 +1,11 @@
-package com.pet.vpn_client.domain.models
+package com.pet.vpn_client.framework.models
 
 import com.pet.vpn_client.core.utils.Constants
+import com.pet.vpn_client.domain.models.ConfigType
 
+/**
+ * Data model that mirrors the Xray core JSON configuration.
+ */
 data class XrayConfig(
     var remarks: String? = null,
     var stats: Any? = null,
@@ -19,7 +23,9 @@ data class XrayConfig(
     var observatory: Any? = null,
     var burstObservatory: Any? = null
 ) {
-
+    /**
+     * Logging options for the Xray core.
+     */
     data class LogBean(
         val access: String? = null,
         val error: String? = null,
@@ -27,6 +33,9 @@ data class XrayConfig(
         val dnsLog: Boolean? = null
     )
 
+    /**
+     * Inbound listener definition (local entry points).
+     */
     data class InboundBean(
         var tag: String,
         var port: Int,
@@ -37,6 +46,9 @@ data class XrayConfig(
         val streamSettings: Any? = null,
         val allocate: Any? = null
     ) {
+        /**
+         * Controls protocol sniffing on inbound traffic, e.g., to detect HTTP/HTTPS and domains.
+         */
         data class SniffingBean(
             var enabled: Boolean,
             val destOverride: ArrayList<String>,
@@ -45,8 +57,16 @@ data class XrayConfig(
         )
     }
 
+    /**
+     * Outbound (proxy) definition. This is where the remote server/protocol is configured.
+     *
+     * - `protocol` must match one of the supported types (see `EConfigType`).
+     * - `settings` shape depends on the protocol (vmess/vless/shadowsocks/etc).
+     * - `streamSettings` configures transport (TCP/WS/gRPC/…) and security (TLS/REALITY).
+     * - `mux` toggles multiplexing and related options.
+     */
     data class OutboundBean(
-        var tag: String = "proxy",
+        var tag: String = PROXY,
         var protocol: String,
         var settings: OutSettingsBean? = null,
         var streamSettings: StreamSettingsBean? = null,
@@ -54,6 +74,9 @@ data class XrayConfig(
         val sendThrough: String? = null,
         var mux: MuxBean? = MuxBean(false)
     ) {
+        /**
+         * Protocol-specific settings container (shape differs per protocol).
+         */
         data class OutSettingsBean(
             var vnext: List<VnextBean>? = null,
             var fragment: FragmentBean? = null,
@@ -135,6 +158,14 @@ data class XrayConfig(
             )
         }
 
+        /**
+         * Per-connection transport and security settings.
+         *
+         * - `network`: transport type (e.g., "tcp", "ws", "grpc", "h2" …).
+         * - `security`: null, "tls" or "reality".
+         *   If "tls" → use `tlsSettings`; if "reality" → use `realitySettings`; do not set both.
+         * - `sockopt`: low-level socket options and `domainStrategy` overrides when needed.
+         */
         data class StreamSettingsBean(
             var network: String = Constants.DEFAULT_NETWORK,
             var security: String? = null,
@@ -157,7 +188,7 @@ data class XrayConfig(
                 val acceptProxyProtocol: Boolean? = null
             ) {
                 data class HeaderBean(
-                    var type: String = "none",
+                    var type: String = NONE,
                     var request: RequestBean? = null,
                     var response: Any? = null
                 ) {
@@ -190,7 +221,7 @@ data class XrayConfig(
                 var seed: String? = null
             ) {
                 data class HeaderBean(
-                    var type: String = "none",
+                    var type: String = NONE,
                     var domain: String? = null
                 )
             }
@@ -253,11 +284,11 @@ data class XrayConfig(
             )
 
             data class QuicSettingBean(
-                var security: String = "none",
+                var security: String = NONE,
                 var key: String = "",
                 var header: HeaderBean = HeaderBean()
             ) {
-                data class HeaderBean(var type: String = "none")
+                data class HeaderBean(var type: String = NONE)
             }
 
             data class GrpcSettingsBean(
@@ -276,23 +307,30 @@ data class XrayConfig(
             var xudpProxyUDP443: String? = null,
         )
 
+        /**
+         * Accessor to read the server address from protocol-specific settings.
+         * Returns null if not applicable or missing.
+         */
         fun getServerAddress(): String? {
-            if (protocol.equals(EConfigType.VMESS.name, true)
-                || protocol.equals(EConfigType.VLESS.name, true)
+            if (protocol.equals(ConfigType.VMESS.name, true)
+                || protocol.equals(ConfigType.VLESS.name, true)
             ) {
                 return settings?.vnext?.first()?.address
-            } else if (protocol.equals(EConfigType.SHADOWSOCKS.name, true)
-                || protocol.equals(EConfigType.SOCKS.name, true)
-                || protocol.equals(EConfigType.HTTP.name, true)
-                || protocol.equals(EConfigType.TROJAN.name, true)
+            } else if (protocol.equals(ConfigType.SHADOWSOCKS.name, true)
+                || protocol.equals(ConfigType.SOCKS.name, true)
+                || protocol.equals(ConfigType.HTTP.name, true)
+                || protocol.equals(ConfigType.TROJAN.name, true)
             ) {
                 return settings?.servers?.first()?.address
-            } else if (protocol.equals(EConfigType.WIREGUARD.name, true)) {
+            } else if (protocol.equals(ConfigType.WIREGUARD.name, true)) {
                 return settings?.peers?.first()?.endpoint?.substringBeforeLast(":")
             }
             return null
         }
 
+        /**
+         * Ensures a non-null `sockopt` object and returns it, creating defaults if needed.
+         */
         fun ensureSockopt(): StreamSettingsBean.SockoptBean {
             val stream = streamSettings ?: StreamSettingsBean().also {
                 streamSettings = it
@@ -306,6 +344,12 @@ data class XrayConfig(
         }
     }
 
+    /**
+     * DNS configuration for the core.
+     *
+     * - `servers`: resolver endpoints (IPs/strings/objects per Xray schema).
+     * - `hosts`: domain remapping (domain → IP or list of IPs).
+     */
     data class DnsBean(
         var servers: ArrayList<Any>? = null,
         var hosts: Map<String, Any>? = null,
@@ -314,6 +358,13 @@ data class XrayConfig(
         val queryStrategy: String? = null,
         val tag: String? = null
     )
+
+    /**
+     * Routing configuration and rules.
+     *
+     * - `domainStrategy` (e.g., "IPIfNonMatch", "AsIs") determines how domains resolve for rules.
+     * - `rules` select traffic by domain/ip/network/inboundTag and route it to the desired outbound tag.
+     */
     data class RoutingBean(
         var domainStrategy: String,
         var domainMatcher: String? = null,
@@ -322,7 +373,7 @@ data class XrayConfig(
     ) {
 
         data class RulesBean(
-            var type: String = "field",
+            var type: String = FIELD,
             var ip: ArrayList<String>? = null,
             var domain: ArrayList<String>? = null,
             var outboundTag: String = "",
@@ -354,9 +405,18 @@ data class XrayConfig(
         )
     }
 
+    /**
+     * Returns only the outbounds whose `protocol` matches known proxy types (see `EConfigType`).
+     */
     fun getAllProxyOutbound(): List<OutboundBean> {
         return outbounds.filter { outbound ->
-            EConfigType.entries.any { it.name.equals(outbound.protocol, ignoreCase = true) }
+            ConfigType.entries.any { it.name.equals(outbound.protocol, ignoreCase = true) }
         }
+    }
+
+    companion object {
+        private const val PROXY = "proxy"
+        private const val NONE = "none"
+        private const val FIELD = "field"
     }
 }

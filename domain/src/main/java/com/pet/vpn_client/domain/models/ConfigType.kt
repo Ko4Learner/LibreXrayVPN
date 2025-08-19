@@ -2,7 +2,10 @@ package com.pet.vpn_client.domain.models
 
 import com.pet.vpn_client.core.utils.Constants
 
-enum class EConfigType(val value: Int, val protocolScheme: String) {
+/**
+ * Enumerates supported VPN/proxy configuration types.
+ */
+enum class ConfigType(val value: Int, val protocolScheme: String) {
     VMESS(1, Constants.VMESS),
     SHADOWSOCKS(2, Constants.SHADOWSOCKS),
     SOCKS(3, Constants.SOCKS),
