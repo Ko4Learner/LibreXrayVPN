@@ -52,4 +52,5 @@ dependencies {
 
     // Robolectric
     testImplementation(libs.robolectric)
+    testImplementation(kotlin("test"))
 }
