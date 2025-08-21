@@ -1,4 +1,4 @@
-package com.pet.vpn_client.core.ui.theme
+package com.pet.vpn_client.presentation.theme
 
 import androidx.compose.ui.graphics.Color
 
