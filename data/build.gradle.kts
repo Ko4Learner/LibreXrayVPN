@@ -38,6 +38,15 @@ android {
             jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
         }
     }
+
+    packaging {
+        resources {
+            pickFirsts += listOf(
+                "META-INF/LICENSE.md",
+                "META-INF/LICENSE-notice.md"
+            )
+        }
+    }
 }
 
 dependencies {
@@ -73,7 +82,18 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
+
+    //JUnit
+    testImplementation(libs.coroutines.test)
+    testImplementation(libs.mockK)
     testImplementation(libs.junit)
+    testImplementation(libs.truth)
+    testImplementation(libs.robolectric)
+
+    //Instrumental tests
     androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.truth)
+    androidTestImplementation(libs.androidx.test.core)
+    androidTestImplementation(libs.mockk.android)
     androidTestImplementation(libs.androidx.espresso.core)
 }
