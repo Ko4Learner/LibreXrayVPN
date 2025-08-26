@@ -2,10 +2,8 @@ package com.pet.vpn_client.data.repository_impl
 
 import android.content.ClipboardManager
 import android.content.Context
-import android.util.Log
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.common.InputImage
-import com.pet.vpn_client.core.utils.Constants
 import com.pet.vpn_client.core.utils.Utils
 import com.pet.vpn_client.data.protocol_parsers.ShadowsocksParser
 import com.pet.vpn_client.data.protocol_parsers.SocksParser
@@ -58,10 +56,10 @@ class ServerConfigImportRepositoryImpl @Inject constructor(
     } catch (c: CancellationException) {
         throw c
     } catch (e: SecurityException) {
-        Log.e(Constants.TAG, "Clipboard access denied", e)
+        Utils.error("Clipboard access denied", e)
         ImportResult.Error
     } catch (e: Exception) {
-        Log.e(Constants.TAG, "Failed to import config from clipboard", e)
+        Utils.error("Failed to import config from clipboard", e)
         ImportResult.Error
     }
 
@@ -76,7 +74,7 @@ class ServerConfigImportRepositoryImpl @Inject constructor(
             frameData.bytes,
             frameData.width,
             frameData.height,
-            frameData.rotationDegrees,  // ensure 0/90/180/270 upstream
+            frameData.rotationDegrees,
             frameData.imageFormat
         )
         val scanner = BarcodeScanning.getClient()
@@ -91,7 +89,7 @@ class ServerConfigImportRepositoryImpl @Inject constructor(
         } catch (c: CancellationException) {
             throw c
         } catch (e: Exception) {
-            Log.e(Constants.TAG, "Failed to import config from QR", e)
+            Utils.error("Failed to import config from QR", e)
             ImportResult.Error
         } finally {
             try {
@@ -110,7 +108,7 @@ class ServerConfigImportRepositoryImpl @Inject constructor(
             val added = if (addedDecoded == 0) parseBatchConfig(server) else addedDecoded
             if (added > 0) ImportResult.Success else ImportResult.Empty
         }.getOrElse { e ->
-            Log.e(Constants.TAG, "Failed to import from text", e)
+            Utils.error("Failed to import from text", e)
             ImportResult.Error
         }
     }
