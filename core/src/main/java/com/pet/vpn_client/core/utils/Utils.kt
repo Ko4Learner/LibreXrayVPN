@@ -1,7 +1,6 @@
 package com.pet.vpn_client.core.utils
 
 import android.util.Base64
-import android.util.Log
 import android.util.Patterns
 import android.webkit.URLUtil
 import com.google.gson.Gson
@@ -18,6 +17,16 @@ object Utils {
     private val IPV6_REGEX = Regex(
         "^([0-9A-Fa-f]{1,4})?(:[0-9A-Fa-f]{1,4})*::([0-9A-Fa-f]{1,4})?(:[0-9A-Fa-f]{1,4})*|([0-9A-Fa-f]{1,4})(:[0-9A-Fa-f]{1,4}){7}$"
     )
+
+    /**
+     * Global error handler callback.
+     *
+     * - Default implementation does nothing, which allows
+     *   running unit tests without Android dependencies.
+     * - In production, this is reassigned in MyApp to log errors via Log.e.
+     */
+    @Volatile
+    var error: (String, Throwable?) -> Unit = { _, _ -> }
 
     /**
      * Attempts to decode a Base64-encoded [text].
@@ -38,12 +47,12 @@ object Utils {
         try {
             return Base64.decode(text, Base64.NO_WRAP).toString(Charsets.UTF_8)
         } catch (e: Exception) {
-            Log.e(Constants.TAG, "Failed to decode standard base64", e)
+            error("Failed to decode standard base64", e)
         }
         try {
             return Base64.decode(text, Base64.NO_WRAP.or(Base64.URL_SAFE)).toString(Charsets.UTF_8)
         } catch (e: Exception) {
-            Log.e(Constants.TAG, "Failed to decode URL-safe base64", e)
+            error( "Failed to decode URL-safe base64", e)
         }
         return null
     }
@@ -81,7 +90,7 @@ object Utils {
 
             return isIpv6Address(addr)
         } catch (e: Exception) {
-            Log.e(Constants.TAG, "Failed to validate IP address", e)
+            error("Failed to validate IP address", e)
             return false
         }
     }
@@ -104,7 +113,7 @@ object Utils {
                     Patterns.DOMAIN_NAME.matcher(value).matches() ||
                     URLUtil.isValidUrl(value)
         } catch (e: Exception) {
-            Log.e(Constants.TAG, "Failed to validate URL", e)
+            error("Failed to validate URL", e)
             false
         }
     }
@@ -117,7 +126,7 @@ object Utils {
         return try {
             URLDecoder.decode(url, Charsets.UTF_8.toString())
         } catch (e: Exception) {
-            Log.e(Constants.TAG, "Failed to decode URL", e)
+            error("Failed to decode URL", e)
             url
         }
     }

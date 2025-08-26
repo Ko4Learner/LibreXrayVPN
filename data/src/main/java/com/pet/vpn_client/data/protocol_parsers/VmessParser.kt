@@ -1,9 +1,7 @@
 package com.pet.vpn_client.data.protocol_parsers
 
 import android.text.TextUtils
-import android.util.Log
 import com.google.gson.Gson
-import com.pet.vpn_client.core.utils.Constants
 import com.pet.vpn_client.domain.models.ConfigProfileItem
 import com.pet.vpn_client.domain.models.ConfigType
 import com.pet.vpn_client.domain.models.NetworkType
@@ -41,7 +39,6 @@ class VmessParser @Inject constructor(private val gson: Gson) : BaseParser() {
         var result = str.replace(ConfigType.VMESS.protocolScheme, "")
         result = Utils.decode(result)
         if (TextUtils.isEmpty(result)) {
-            Log.w(Constants.TAG, "Base64 decoding failed")
             return null
         }
         val vmessQRCode = gson.fromJson(result, VmessQRCode::class.java)
@@ -50,7 +47,6 @@ class VmessParser @Inject constructor(private val gson: Gson) : BaseParser() {
             || TextUtils.isEmpty(vmessQRCode.id)
             || TextUtils.isEmpty(vmessQRCode.net)
         ) {
-            Log.w(Constants.TAG, "Incorrect protocol")
             return null
         }
 
