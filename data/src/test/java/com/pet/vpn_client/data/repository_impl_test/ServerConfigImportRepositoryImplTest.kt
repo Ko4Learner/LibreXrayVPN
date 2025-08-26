@@ -10,7 +10,6 @@ import com.google.android.gms.tasks.Tasks
 import com.google.mlkit.vision.barcode.BarcodeScanner
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.common.InputImage
-import com.pet.vpn_client.data.MainDispatcherRule
 import com.pet.vpn_client.data.protocol_parsers.*
 import com.pet.vpn_client.data.repository_impl.ServerConfigImportRepositoryImpl
 import com.pet.vpn_client.domain.interfaces.KeyValueStorage
@@ -25,9 +24,6 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class ServerConfigImportRepositoryImplTest {
-    @get:Rule
-    val coroutines = MainDispatcherRule()
-
     private val storage = mockk<KeyValueStorage>(relaxed = true)
     private val shadowsocks = mockk<ShadowsocksParser>()
     private val socks = mockk<SocksParser>()

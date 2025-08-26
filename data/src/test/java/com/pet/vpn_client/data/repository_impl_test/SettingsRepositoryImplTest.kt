@@ -3,7 +3,6 @@ package com.pet.vpn_client.data.repository_impl_test
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.pet.vpn_client.core.utils.Constants
-import com.pet.vpn_client.data.MainDispatcherRule
 import com.pet.vpn_client.data.repository_impl.SettingsRepositoryImpl
 import com.pet.vpn_client.domain.interfaces.KeyValueStorage
 import com.pet.vpn_client.domain.models.AppLocale
@@ -12,14 +11,10 @@ import io.mockk.*
 import kotlinx.coroutines.test.*
 import org.junit.After
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 import java.util.Locale
 
 class SettingsRepositoryImplTest {
-    @get:Rule
-    val coroutines = MainDispatcherRule()
-
     private lateinit var storage: KeyValueStorage
     private lateinit var repo: SettingsRepositoryImpl
 
@@ -74,10 +69,7 @@ class SettingsRepositoryImplTest {
     fun `setLocale persists tag and updates flow`() = runTest {
         repo.observeLocale().test {
             awaitItem()
-
             repo.setLocale(AppLocale.RU)
-            coroutines.testDispatcher.scheduler.advanceUntilIdle()
-
             verify { storage.encodeSettingsString("language", AppLocale.RU.toTag()) }
             assertThat(awaitItem()).isEqualTo(Locale.forLanguageTag(Constants.RU_LOCALE_TAG))
             cancelAndIgnoreRemainingEvents()
@@ -108,10 +100,7 @@ class SettingsRepositoryImplTest {
     fun `setTheme persists tag and updates flow`() = runTest {
         repo.observeTheme().test {
             awaitItem()
-
             repo.setTheme(ThemeMode.LIGHT)
-            coroutines.testDispatcher.scheduler.advanceUntilIdle()
-
             verify { storage.encodeSettingsString("theme", ThemeMode.LIGHT.toTag()) }
             assertThat(awaitItem()).isEqualTo(ThemeMode.LIGHT)
             cancelAndIgnoreRemainingEvents()
