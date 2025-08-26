@@ -16,7 +16,6 @@ import java.util.regex.Pattern
 
 @RunWith(AndroidJUnit4::class)
 class MMKVStorageInstrumentedTest {
-
     private lateinit var context: Context
     private lateinit var storage: MMKVStorage
 

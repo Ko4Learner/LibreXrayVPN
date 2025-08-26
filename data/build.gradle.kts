@@ -97,5 +97,5 @@ dependencies {
     androidTestImplementation(libs.truth)
     androidTestImplementation(libs.androidx.test.core)
     androidTestImplementation(libs.mockk.android)
-    androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(libs.androidx.test.runner)
 }

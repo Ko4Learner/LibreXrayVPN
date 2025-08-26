@@ -76,8 +76,19 @@ dependencies {
 
     implementation(libs.androidx.core.ktx)
 
-    // Test
+    //JUnit
+    testImplementation(libs.coroutines.test)
+    testImplementation(libs.mockK)
     testImplementation(libs.junit)
+    testImplementation(libs.truth)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.test.core)
+    testImplementation(libs.turbine)
+
+    //Instrumental tests
     androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(libs.truth)
+    androidTestImplementation(libs.androidx.test.core)
+    androidTestImplementation(libs.mockk.android)
+    androidTestImplementation(libs.androidx.test.runner)
 }
