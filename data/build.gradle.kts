@@ -54,6 +54,7 @@ dependencies {
     implementation(project(":domain"))
     implementation(project(":core"))
 
+    //TODO (использование workManager)
 
     // Background Task Libraries (WorkManager)
     implementation(libs.work.runtime.ktx)

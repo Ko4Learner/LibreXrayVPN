@@ -43,4 +43,11 @@ dependencies {
 
     implementation(libs.javax.inject)
     implementation(libs.androidx.core.ktx)
+
+    //JUnit
+    testImplementation(libs.mockK)
+    testImplementation(libs.junit)
+    testImplementation(libs.truth)
+    testImplementation(libs.turbine)
+    testImplementation(libs.robolectric)
 }
