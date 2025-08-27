@@ -15,7 +15,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.rememberNavController
 import com.pet.vpn_client.presentation.navigation.Navigation
-import com.pet.vpn_client.core.ui.theme.VPN_ClientTheme
+import com.pet.vpn_client.presentation.theme.VPN_ClientTheme
 import com.pet.vpn_client.core.utils.LocaleHelper
 import com.pet.vpn_client.presentation.view_model.SettingsScreenViewModel
 import dagger.hilt.android.AndroidEntryPoint

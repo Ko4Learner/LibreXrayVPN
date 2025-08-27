@@ -1,7 +1,5 @@
 package com.pet.vpn_client.data.protocol_parsers
 
-import android.util.Log
-import com.pet.vpn_client.core.utils.Constants
 import com.pet.vpn_client.domain.models.ConfigProfileItem
 import com.pet.vpn_client.domain.models.ConfigType
 import com.pet.vpn_client.domain.models.NetworkType
@@ -82,7 +80,7 @@ class ShadowsocksParser @Inject constructor() : BaseParser() {
                 config.remarks =
                     Utils.urlDecode(result.substring(indexSplit + 1, result.length))
             } catch (e: Exception) {
-                Log.e(Constants.TAG, "Failed to decode remarks in SS legacy URL", e)
+                Utils.error("Failed to decode remarks in SS legacy URL", e)
             }
 
             result = result.substring(0, indexSplit)

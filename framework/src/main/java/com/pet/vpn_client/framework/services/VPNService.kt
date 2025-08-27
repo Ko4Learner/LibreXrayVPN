@@ -11,6 +11,7 @@ import android.net.VpnService
 import android.os.ParcelFileDescriptor
 import android.os.StrictMode
 import android.util.Log
+import androidx.annotation.VisibleForTesting
 import androidx.core.app.NotificationCompat
 import com.pet.vpn_client.core.utils.Constants
 import com.pet.vpn_client.domain.interfaces.ServiceManager
@@ -38,7 +39,7 @@ import javax.inject.Inject
  * and manages notifications and network callbacks.
  */
 @AndroidEntryPoint
-class VPNService : VpnService() {
+open class VPNService : VpnService() {
     @Inject
     lateinit var serviceManager: ServiceManager
 
@@ -341,12 +342,14 @@ class VPNService : VpnService() {
      * for both proxy and direct connections.
      *
      * Example output:
-     * "Proxy ↑ 1.25 MB/s ↓ 800 KB/s  |  Direct ↑ 0 B/s ↓ 0 B/s"
+     * "Proxy ↑ 1.25 MB/s ↓ 800 KB/s
+     *  Direct ↑ 0 B/s ↓ 0 B/s"
      *
      * @param s ConnectionSpeed containing uplink/downlink values in bps.
      * @return A formatted speed line string.
      */
-    private fun formatSpeedLine(s: ConnectionSpeed): String =
+    @VisibleForTesting
+    internal fun formatSpeedLine(s: ConnectionSpeed): String =
         "${Constants.LABEL_PROXY} ${Constants.ARROW_UP} ${fmtBps(s.proxyUplinkBps)} " +
                 "${Constants.ARROW_DOWN} ${fmtBps(s.proxyDownlinkBps)}  \n" +
                 "${Constants.LABEL_DIRECT} ${Constants.ARROW_UP} ${fmtBps(s.directUplinkBps)} " +
@@ -360,7 +363,8 @@ class VPNService : VpnService() {
      * @param bps Speed in bytes per second.
      * @return Formatted speed string.
      */
-    private fun fmtBps(bps: Double): String {
+    @VisibleForTesting
+    internal fun fmtBps(bps: Double): String {
         val kb = bps / 1024.0
         val mb = kb / 1024.0
         return when {
