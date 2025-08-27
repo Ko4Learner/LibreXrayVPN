@@ -84,6 +84,8 @@ dependencies {
     testImplementation(libs.robolectric)
     testImplementation(libs.androidx.test.core)
     testImplementation(libs.turbine)
+    testImplementation(libs.hilt.android.testing)
+    kspTest(libs.hilt.android.testing)
 
     //Instrumental tests
     androidTestImplementation(libs.androidx.junit)
