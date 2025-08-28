@@ -19,7 +19,7 @@ The project is built with a modern technology stack and inspired by [v2rayNG](ht
 - Latency testing for servers
 - Real-time traffic display
 - VPN tunnel management through **VpnService**
-- Light and dark themes, RU/EN localization
+- Light and dark themes, RU/EN localization **(UI in progress)**
 
 ### License
 This project is licensed under **GPL-3.0-or-later**.  
@@ -46,7 +46,7 @@ LibreXrayVPN — Android VPN-клиент с открытым исходным �
 - Тестирование задержки серверов
 - Отображение трафика в реальном времени
 - Управление VPN-туннелем через **VpnService**
-- Светлая и тёмная темы, локализация RU/EN
+- Светлая и тёмная темы, локализация RU/EN **(UI в разработке)**
 
 ### Лицензия
 Проект распространяется по лицензии **GPL-3.0-or-later**.  
