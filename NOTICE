@@ -1,0 +1,13 @@
+LibreXrayVPN — Android VPN Client based on Xray core
+Copyright (C) 2025 Nikita (Ko4Learner)
+
+This project is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This project is based on:
+- v2rayNG (https://github.com/2dust/v2rayNG), licensed under GPL-3.0
+- AndroidLibXrayLite (https://github.com/2dust/AndroidLibXrayLite), licensed under GPL-3.0
+
+Third-party libraries are used under their respective licenses.
