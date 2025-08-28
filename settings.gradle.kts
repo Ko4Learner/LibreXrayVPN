@@ -22,7 +22,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "VPN_Client"
+rootProject.name = "LibreXrayVPN"
 include(":app")
 include(":domain")
 include(":core")

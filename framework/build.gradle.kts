@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.pet.vpn_client.framework"
+    namespace = "org.librexray.vpn.framework"
     compileSdk = 35
 
     defaultConfig {
