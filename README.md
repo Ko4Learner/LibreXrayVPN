@@ -1,8 +1,8 @@
 # LibreXrayVPN
 
 ## English
-LibreXrayVPN is an open-source Android VPN client based on **Xray core**.  
-The project is built with a modern technology stack and inspired by [v2rayNG](https://github.com/2dust/v2rayNG) and [AndroidLibXrayLite](https://github.com/2dust/AndroidLibXrayLite).
+LibreXrayVPN is an open-source Android VPN client based on **Xray core**([AndroidLibXrayLite](https://github.com/2dust/AndroidLibXrayLite)).  
+The project is built with a modern technology stack and inspired by [v2rayNG](https://github.com/2dust/v2rayNG).
 
 ### Tech stack
 - **Kotlin**, **Coroutines / Flow**
@@ -25,8 +25,8 @@ See [LICENSE](LICENSE) and [NOTICE](NOTICE) for details.
 ---
 
 ## Русский
-LibreXrayVPN — Android VPN-клиент с открытым исходным кодом на основе **Xray core**.  
-Проект создан с упором на современный стек технологий и вдохновлён [v2rayNG](https://github.com/2dust/v2rayNG) и [AndroidLibXrayLite](https://github.com/2dust/AndroidLibXrayLite).
+LibreXrayVPN — Android VPN-клиент с открытым исходным кодом на основе **Xray core**([AndroidLibXrayLite](https://github.com/2dust/AndroidLibXrayLite)).  
+Проект создан с упором на современный стек технологий и вдохновлён [v2rayNG](https://github.com/2dust/v2rayNG).
 
 ### Технологии
 - **Kotlin**, **Coroutines / Flow**
