@@ -2,14 +2,13 @@
 
 ## English
 LibreXrayVPN is an open-source Android VPN client based on **Xray core**.  
-The project provides a modern and modular implementation, inspired by [v2rayNG](https://github.com/2dust/v2rayNG) and [AndroidLibXrayLite](https://github.com/2dust/AndroidLibXrayLite).
+The project is built with a modern technology stack and inspired by [v2rayNG](https://github.com/2dust/v2rayNG) and [AndroidLibXrayLite](https://github.com/2dust/AndroidLibXrayLite).
 
 ### Tech stack
 - **Kotlin**, **Coroutines / Flow**
 - **Jetpack Compose** (UI)
 - **Hilt** (dependency injection)
 - **MMKV** (local storage)
-- **Clean Architecture**
 - **ML Kit** (QR code scanning)
 
 ### Features
@@ -27,19 +26,18 @@ See [LICENSE](LICENSE) and [NOTICE](NOTICE) for details.
 
 ## Русский
 LibreXrayVPN — Android VPN-клиент с открытым исходным кодом на основе **Xray core**.  
-Проект создан с упором на модульность и современный стек технологий, вдохновлён [v2rayNG](https://github.com/2dust/v2rayNG) и [AndroidLibXrayLite](https://github.com/2dust/AndroidLibXrayLite).
+Проект создан с упором на современный стек технологий и вдохновлён [v2rayNG](https://github.com/2dust/v2rayNG) и [AndroidLibXrayLite](https://github.com/2dust/AndroidLibXrayLite).
 
 ### Технологии
 - **Kotlin**, **Coroutines / Flow**
 - **Jetpack Compose** (UI)
 - **Hilt** (внедрение зависимостей)
 - **MMKV** (локальное хранилище)
-- **Чистая архитектура**
 - **ML Kit** (сканирование QR-кодов)
 
 ### Возможности
 - Импорт конфигураций через **QR-код** и **буфер обмена**
-- Управление подключением через **уведомления**
+- Управление подключением через ***notifications**
 - Тестирование задержки серверов
 - Отображение трафика в реальном времени
 - Управление VPN-туннелем через **VpnService**
