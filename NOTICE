@@ -10,4 +10,9 @@ This project is based on:
 - v2rayNG (https://github.com/2dust/v2rayNG), licensed under GPL-3.0
 - AndroidLibXrayLite (https://github.com/2dust/AndroidLibXrayLite), licensed under GPL-3.0
 
+Native dependencies:
+- `libv2ray.aar` and `libv2ray-sources.jar` are from AndroidLibXrayLite
+- `libtun2socks.so` (per-ABI, e.g. `arm64-v8a`, `armeabi-v7a`, `x86_64`)  
+  is not stored in Git; obtain from LibreXrayVPN Releases or other VPN projects bundling tun2socks
+
 Third-party libraries are used under their respective licenses.
