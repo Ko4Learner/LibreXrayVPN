@@ -1,3 +1,10 @@
+/* SPDX-License-Identifier: GPL-3.0-or-later */
+/*
+ * This file is part of LibreXrayVPN.
+ *
+ * Modified from v2rayNG (https://github.com/2dust/v2rayNG).
+ */
+
 package org.librexray.vpn.data.protocol_parsers
 
 import org.librexray.vpn.core.utils.Constants
