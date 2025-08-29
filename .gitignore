@@ -1,18 +1,23 @@
 *.iml
 .gradle
-/local.properties
+local.properties
+
+# IDEA
 /.idea/caches
 /.idea/libraries
 /.idea/modules.xml
 /.idea/workspace.xml
 /.idea/navEditor.xml
 /.idea/assetWizardSettings.xml
+
+# OS
 .DS_Store
-/build
-/captures
-.externalNativeBuild
-.cxx
-local.properties
+
+# Build dirs
+**/build/
+captures/
+.externalNativeBuild/
+.cxx/
 
 # Ignore go libs file
 *.aar
