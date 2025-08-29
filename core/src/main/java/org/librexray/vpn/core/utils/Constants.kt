@@ -46,5 +46,4 @@ object Constants {
     const val UNIT_MB = "MB/s"
     const val UNIT_KB = "KB/s"
     const val UNIT_B = "B/s"
-
 }
