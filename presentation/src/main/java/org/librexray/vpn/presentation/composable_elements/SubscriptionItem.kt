@@ -6,16 +6,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.Card
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import org.librexray.vpn.presentation.intent.VpnScreenIntent
 import org.librexray.vpn.presentation.models.ServerItemModel
@@ -27,15 +25,13 @@ fun SubscriptionItem(onIntent: (VpnScreenIntent) -> Unit, item: ServerItemModel)
             .fillMaxWidth()
             .padding(vertical = 8.dp),
         shape = MaterialTheme.shapes.medium,
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 4.dp
-        )
+        elevation = 8.dp
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 8.dp)
-                .background(color = Color.Gray),
+                .background(color = MaterialTheme.colors.surface),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -47,33 +43,34 @@ fun SubscriptionItem(onIntent: (VpnScreenIntent) -> Unit, item: ServerItemModel)
             ) {
                 Text(
                     text = item.name,
-                    style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.primary
+                    style = MaterialTheme.typography.h6,
+                    color = MaterialTheme.colors.onSurface
                 )
                 Text(
                     text = item.ip,
-                    style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.primary
+                    style = MaterialTheme.typography.h6,
+                    color = MaterialTheme.colors.onSurface.copy(alpha = 0.7f)
                 )
                 Text(
                     text = item.protocol,
-                    style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.primary
+                    style = MaterialTheme.typography.h6,
+                    color = MaterialTheme.colors.onSurface.copy(alpha = 0.7f)
                 )
             }
             Button(
                 onClick = { onIntent(VpnScreenIntent.DeleteItem(item.guid)) },
                 shape = MaterialTheme.shapes.small,
                 modifier = Modifier.padding(4.dp),
-                colors = ButtonDefaults.buttonColors(Color.Gray)
+                colors = ButtonDefaults.buttonColors(
+                    backgroundColor = MaterialTheme.colors.onSecondary
+                )
             ) {
                 Text(
                     text = "Del",
-                    style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.primary
+                    style = MaterialTheme.typography.h6,
+                    color = MaterialTheme.colors.onSurface
                 )
             }
-
         }
     }
 }

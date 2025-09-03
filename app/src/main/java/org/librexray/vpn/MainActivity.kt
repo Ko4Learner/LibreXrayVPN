@@ -6,7 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.systemBarsPadding
-import androidx.compose.material3.Scaffold
+import androidx.compose.material.Scaffold
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -15,7 +15,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.rememberNavController
 import org.librexray.vpn.presentation.navigation.Navigation
-import org.librexray.vpn.presentation.theme.LibreXrayVPNTheme
+import org.librexray.vpn.presentation.designsystem.theme.LibreXrayVPNTheme
 import org.librexray.vpn.core.utils.LocaleHelper
 import org.librexray.vpn.presentation.view_model.SettingsScreenViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -32,7 +32,6 @@ import dagger.hilt.android.AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Enable full content drawing under system bars (Material 3 edge-to-edge).
         enableEdgeToEdge()
         setContent {
             val viewModel: SettingsScreenViewModel = hiltViewModel()

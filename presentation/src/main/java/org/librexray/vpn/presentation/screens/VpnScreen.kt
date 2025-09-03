@@ -8,14 +8,15 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -67,24 +68,32 @@ fun VpnScreenContent(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(Color.Gray),
+            .background(MaterialTheme.colors.background),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(64.dp),
-            horizontalArrangement = Arrangement.End,
+                .height(64.dp)
+                .padding(8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
+            Text(
+                text = "LibreXrayVpn",
+                color = MaterialTheme.colors.onBackground
+            )
             ConfigDropDownMenu(onIntent, onQrCodeClick)
         }
 
         Column(modifier = Modifier.weight(1f)) {
             SubscriptionsList(onIntent, state.serverItemList)
         }
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(
+            modifier = Modifier.padding(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             ConnectToggle(onIntent, state.isRunning)
             Row(
                 modifier = Modifier
@@ -97,7 +106,7 @@ fun VpnScreenContent(
             }
             Text(
                 text = if (state.delay != null) "Delay: ${state.delay} ms" else "ERROR",
-                color = Color.Black
+                color = MaterialTheme.colors.onBackground
             )
         }
     }
