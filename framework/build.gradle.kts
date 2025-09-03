@@ -59,7 +59,7 @@ android {
 
 dependencies {
     implementation(project(":domain"))
-    implementation(project(":core"))
+    implementation(project(":core-android"))
 
     // XrayCore libs
     implementation(mapOf("name" to "libv2ray", "ext" to "aar"))
