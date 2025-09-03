@@ -1,4 +1,4 @@
-package org.librexray.vpn.presentation.designsystem.theme
+package org.librexray.vpn.presentation.design_system.theme
 
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.darkColors

@@ -15,7 +15,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.rememberNavController
 import org.librexray.vpn.presentation.navigation.Navigation
-import org.librexray.vpn.presentation.designsystem.theme.LibreXrayVPNTheme
+import org.librexray.vpn.presentation.design_system.theme.LibreXrayVPNTheme
 import org.librexray.vpn.core.utils.LocaleHelper
 import org.librexray.vpn.presentation.view_model.SettingsScreenViewModel
 import dagger.hilt.android.AndroidEntryPoint

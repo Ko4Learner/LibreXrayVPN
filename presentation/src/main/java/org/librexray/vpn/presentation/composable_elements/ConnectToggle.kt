@@ -18,7 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalContext
 import org.librexray.vpn.core.utils.Constants
-import org.librexray.vpn.presentation.designsystem.icon.AppIcons
+import org.librexray.vpn.presentation.design_system.icon.AppIcons
 import org.librexray.vpn.presentation.intent.VpnScreenIntent
 
 @Composable

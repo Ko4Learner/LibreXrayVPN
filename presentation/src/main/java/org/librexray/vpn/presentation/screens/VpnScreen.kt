@@ -81,7 +81,7 @@ fun VpnScreenContent(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "LibreXrayVpn",
+                text = "LibreXrayVpn", style = MaterialTheme.typography.h6,
                 color = MaterialTheme.colors.onBackground
             )
             ConfigDropDownMenu(onIntent, onQrCodeClick)
@@ -106,6 +106,7 @@ fun VpnScreenContent(
             }
             Text(
                 text = if (state.delay != null) "Delay: ${state.delay} ms" else "ERROR",
+                style = MaterialTheme.typography.body1,
                 color = MaterialTheme.colors.onBackground
             )
         }

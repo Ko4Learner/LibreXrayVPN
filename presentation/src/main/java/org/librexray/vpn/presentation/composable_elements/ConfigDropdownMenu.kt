@@ -8,7 +8,7 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import org.librexray.vpn.presentation.designsystem.icon.AppIcons
+import org.librexray.vpn.presentation.design_system.icon.AppIcons
 import org.librexray.vpn.presentation.intent.VpnScreenIntent
 
 @Composable
@@ -41,7 +41,10 @@ fun ConfigDropDownMenu(onIntent: (VpnScreenIntent) -> Unit, onQrCodeClick: () ->
                     tint = MaterialTheme.colors.onSurface
                 )
                 Spacer(Modifier.width(8.dp))
-                Text(text = "QR")
+                Text(
+                    text = "QR", style = MaterialTheme.typography.body1,
+                    color = MaterialTheme.colors.onSurface
+                )
             }
             DropdownMenuItem(
                 onClick = {
@@ -55,7 +58,10 @@ fun ConfigDropDownMenu(onIntent: (VpnScreenIntent) -> Unit, onQrCodeClick: () ->
                     tint = MaterialTheme.colors.onSurface
                 )
                 Spacer(Modifier.width(8.dp))
-                Text(text = "Буфер обмена")
+                Text(
+                    text = "Буфер обмена", style = MaterialTheme.typography.body1,
+                    color = MaterialTheme.colors.onSurface
+                )
             }
         }
     }
