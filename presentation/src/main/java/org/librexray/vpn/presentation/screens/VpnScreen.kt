@@ -1,14 +1,20 @@
 package org.librexray.vpn.presentation.screens
 
 import android.content.res.Configuration
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -65,47 +71,117 @@ fun VpnScreenContent(
     onIntent: (VpnScreenIntent) -> Unit,
     onQrCodeClick: () -> Unit
 ) {
-    Column(
+    Box(
         modifier = modifier
             .fillMaxSize()
-            .background(MaterialTheme.colors.background),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Top
+            .background(MaterialTheme.colors.background)
     ) {
+        // ЦЕНТР — всегда в геометрическом центре экрана
+        MiddleSection(
+            isRunning = state.isRunning,
+            onIntent = onIntent,
+            modifier = Modifier.fillMaxSize() // критично: центр сам занимает весь слой
+        )
+
+        // ВЕРХ — как есть, просто выровнен кверху
+        Box(
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .fillMaxWidth()
+                .statusBarsPadding()
+                .padding(horizontal = 8.dp, vertical = 8.dp)
+        ) {
+            TopSection(
+                onIntent = onIntent,
+                onQrCodeClick = onQrCodeClick,
+                state = state
+            )
+        }
+
+        // НИЗ — как есть, выровнен книзу
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .navigationBarsPadding()
+                .imePadding()
+                .padding(8.dp)
+        ) {
+            BottomSection(
+                visible = state.isRunning,
+                delayMs = state.delay,
+                onIntent = onIntent
+            )
+        }
+    }
+}
+
+@Composable
+private fun TopSection(
+    onIntent: (VpnScreenIntent) -> Unit,
+    onQrCodeClick: () -> Unit,
+    state: VpnScreenState
+) {
+    Column {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(64.dp)
-                .padding(8.dp),
+                .height(56.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "LibreXrayVpn", style = MaterialTheme.typography.h6,
+                text = "LibreXrayVpn",
+                style = MaterialTheme.typography.h6,
                 color = MaterialTheme.colors.onBackground
             )
             ConfigDropDownMenu(onIntent, onQrCodeClick)
         }
 
-        Column(modifier = Modifier.weight(1f)) {
+        AnimatedVisibility(visible = !state.serverItemList.isEmpty()) {
             SubscriptionsList(onIntent, state.serverItemList)
         }
+    }
+}
+
+@Composable
+private fun MiddleSection(
+    isRunning: Boolean,
+    onIntent: (VpnScreenIntent) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier.fillMaxWidth(),
+        contentAlignment = Alignment.Center
+    ) {
+        ConnectToggle(onIntent = onIntent, isRunning = isRunning)
+    }
+}
+
+@Composable
+private fun BottomSection(
+    visible: Boolean,
+    delayMs: Long?,
+    onIntent: (VpnScreenIntent) -> Unit
+) {
+    AnimatedVisibility(visible = visible) {
         Column(
-            modifier = Modifier.padding(8.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            ConnectToggle(onIntent, state.isRunning)
             Row(
-                modifier = Modifier
-                    .fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 RestartButton(onIntent)
                 TestConnectionButton(onIntent)
             }
+            Spacer(Modifier.height(8.dp))
             Text(
-                text = if (state.delay != null) "Delay: ${state.delay} ms" else "ERROR",
+                text = delayMs?.let { "Delay: $it ms" } ?: "—",
                 style = MaterialTheme.typography.body1,
                 color = MaterialTheme.colors.onBackground
             )
