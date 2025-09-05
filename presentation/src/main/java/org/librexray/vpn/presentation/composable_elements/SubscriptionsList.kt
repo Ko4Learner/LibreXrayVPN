@@ -7,7 +7,11 @@ import org.librexray.vpn.presentation.intent.VpnScreenIntent
 import org.librexray.vpn.presentation.models.ServerItemModel
 
 @Composable
-fun SubscriptionsList(onIntent: (VpnScreenIntent) -> Unit, itemList: List<ServerItemModel>) {
+fun SubscriptionsList(
+    onIntent: (VpnScreenIntent) -> Unit,
+    itemList: List<ServerItemModel>,
+    showBottomSheet: () -> Unit
+) {
     val list: MutableList<ServerItemModel> = mutableListOf()
     for (item in itemList) {
         list.add(
@@ -24,7 +28,7 @@ fun SubscriptionsList(onIntent: (VpnScreenIntent) -> Unit, itemList: List<Server
             items = list
         )
         { _, item ->
-            SubscriptionItem(onIntent = onIntent, item = item)
+            SubscriptionItem(onIntent = onIntent, item = item, showBottomSheet = showBottomSheet)
         }
     }
 }

@@ -1,5 +1,6 @@
 package org.librexray.vpn.presentation.composable_elements
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -20,7 +21,11 @@ import org.librexray.vpn.presentation.intent.VpnScreenIntent
 import org.librexray.vpn.presentation.models.ServerItemModel
 
 @Composable
-fun SubscriptionItem(onIntent: (VpnScreenIntent) -> Unit, item: ServerItemModel) {
+fun SubscriptionItem(
+    onIntent: (VpnScreenIntent) -> Unit,
+    item: ServerItemModel,
+    showBottomSheet: () -> Unit
+) {
     Card(
         modifier = Modifier
             .padding(8.dp)
@@ -37,7 +42,10 @@ fun SubscriptionItem(onIntent: (VpnScreenIntent) -> Unit, item: ServerItemModel)
         ) {
             Column(
                 modifier = Modifier
-                    .padding(8.dp),
+                    .padding(8.dp)
+                    .clickable {
+                        showBottomSheet()
+                    },
                 horizontalAlignment = Alignment.Start,
                 verticalArrangement = Arrangement.SpaceEvenly
             ) {

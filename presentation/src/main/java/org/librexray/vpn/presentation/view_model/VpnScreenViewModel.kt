@@ -43,6 +43,7 @@ class VpnScreenViewModel @Inject constructor(
     init {
         viewModelScope.launch(Dispatchers.IO) {
             updateServerList(configInteractor.getServerList())
+            getSelectedServer()
         }
         viewModelScope.launch {
             serviceState.collectLatest { serviceState ->
@@ -148,6 +149,11 @@ class VpnScreenViewModel @Inject constructor(
         } catch (t: Throwable) {
             _state.update { it.copy(isLoading = false, error = t.message ?: "Unknown error") }
         }
+    }
+
+    private suspend fun getSelectedServer() {
+        val selectedServer = configInteractor.getSelectedServer()
+        _state.update { it.copy(selectedServerId = selectedServer) }
     }
 
     private suspend fun startConnection() {
