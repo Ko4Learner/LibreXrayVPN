@@ -17,7 +17,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -46,15 +45,18 @@ class VpnScreenViewModel @Inject constructor(
             getSelectedServer()
         }
         viewModelScope.launch {
-            serviceState.collectLatest { serviceState ->
-                if (serviceState == ServiceState.Connected) {
-                    _state.update { it.copy(isRunning = true) }
-                    connectionInteractor.observeSpeed().collect { speed ->
-                        _state.update { it.copy(connectionSpeed = speed) }
-                    }
-                } else {
-                    _state.update { it.copy(isRunning = false, connectionSpeed = null) }
+            serviceState.collect { serviceState ->
+                _state.update {
+                    it.copy(
+                        isRunning = serviceState == ServiceState.Connected,
+                        connectionSpeed = if (serviceState == ServiceState.Connected) it.connectionSpeed else null
+                    )
                 }
+            }
+        }
+        viewModelScope.launch {
+            connectionInteractor.observeSpeed().collect { speed ->
+                _state.update { it.copy(connectionSpeed = speed) }
             }
         }
     }
@@ -67,7 +69,7 @@ class VpnScreenViewModel @Inject constructor(
             VpnScreenIntent.ToggleConnection -> toggleConnection()
             is VpnScreenIntent.DeleteItem -> deleteItem(intent.id)
             VpnScreenIntent.RefreshItemList -> refreshItemList()
-            is VpnScreenIntent.SetSelectedServer -> TODO()
+            is VpnScreenIntent.SetSelectedServer -> setSelectedServer(intent.id)
         }
     }
 
@@ -81,6 +83,7 @@ class VpnScreenViewModel @Inject constructor(
     private fun deleteItem(guid: String) {
         val before = state.value.serverItemList
         val after = before.filterNot { it.guid == guid }
+
         _state.update { it.copy(serverItemList = after) }
 
         viewModelScope.launch(Dispatchers.IO) {
@@ -89,10 +92,15 @@ class VpnScreenViewModel @Inject constructor(
                     _state.update {
                         it.copy(
                             serverItemList = before,
-                            error = e.message ?: "Delete failed"
+                            error = e.message ?: "Delete failed",
+                            selectedServerId = guid
                         )
                     }
                 }
+        }
+        if (guid == state.value.selectedServerId) {
+            val newSelected = after.firstOrNull()?.guid ?: return
+            setSelectedServer(newSelected)
         }
     }
 
@@ -138,6 +146,7 @@ class VpnScreenViewModel @Inject constructor(
     }
 
     private suspend fun updateServerList(serverList: List<String>) {
+        getSelectedServer()
         _state.update { it.copy(isLoading = true, error = null) }
         try {
             val items: List<ServerItemModel> = serverList.mapNotNull { guid ->
@@ -154,6 +163,13 @@ class VpnScreenViewModel @Inject constructor(
     private suspend fun getSelectedServer() {
         val selectedServer = configInteractor.getSelectedServer()
         _state.update { it.copy(selectedServerId = selectedServer) }
+    }
+
+    private fun setSelectedServer(serverId: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            configInteractor.setSelectedServer(serverId)
+            _state.update { it.copy(selectedServerId = serverId) }
+        }
     }
 
     private suspend fun startConnection() {

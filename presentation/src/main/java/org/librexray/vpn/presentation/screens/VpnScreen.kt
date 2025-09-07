@@ -24,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,14 +34,14 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import kotlinx.coroutines.launch
+import org.librexray.vpn.domain.models.ConnectionSpeed
 import org.librexray.vpn.presentation.composable_elements.BottomSheetContent
 import org.librexray.vpn.presentation.intent.VpnScreenIntent
 import org.librexray.vpn.presentation.state.VpnScreenState
 import org.librexray.vpn.presentation.view_model.VpnScreenViewModel
 import org.librexray.vpn.presentation.composable_elements.ConfigDropDownMenu
-import org.librexray.vpn.presentation.composable_elements.RestartButton
-import org.librexray.vpn.presentation.composable_elements.TestConnectionButton
 import org.librexray.vpn.presentation.composable_elements.ConnectToggle
+import org.librexray.vpn.presentation.composable_elements.ConnectionSpeedView
 import org.librexray.vpn.presentation.composable_elements.SubscriptionItem
 import org.librexray.vpn.presentation.design_system.theme.LibreXrayVPNTheme
 import org.librexray.vpn.presentation.models.ServerItemModel
@@ -128,6 +129,7 @@ fun VpnScreenContent(
         BottomSection(
             visible = state.isRunning,
             delayMs = state.delay,
+            connectionSpeed = state.connectionSpeed,
             onIntent = onIntent,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
@@ -146,6 +148,10 @@ private fun TopSection(
     modifier: Modifier,
     showBottomSheet: () -> Unit
 ) {
+    val selectedServer = remember(state.serverItemList, state.selectedServerId) {
+        state.serverItemList.firstOrNull { it.guid == state.selectedServerId }
+    }
+
     Box(modifier = modifier) {
         Column {
             Row(
@@ -163,12 +169,14 @@ private fun TopSection(
                 ConfigDropDownMenu(onIntent, onQrCodeClick)
             }
 
-            AnimatedVisibility(visible = state.serverItemList.isNotEmpty() && !state.selectedServerId.isNullOrBlank()) {
-                SubscriptionItem(
-                    onIntent,
-                    state.serverItemList.first { it.guid == state.selectedServerId },
-                    showBottomSheet
-                )
+            AnimatedVisibility(visible = selectedServer != null) {
+                selectedServer?.let {
+                    SubscriptionItem(
+                        onIntent,
+                        it,
+                        showBottomSheet
+                    )
+                }
             }
         }
     }
@@ -192,6 +200,7 @@ private fun MiddleSection(
 private fun BottomSection(
     visible: Boolean,
     delayMs: Long?,
+    connectionSpeed: ConnectionSpeed?,
     onIntent: (VpnScreenIntent) -> Unit,
     modifier: Modifier
 ) {
@@ -199,18 +208,10 @@ private fun BottomSection(
         AnimatedVisibility(visible = visible) {
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
+                    .fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    RestartButton(onIntent)
-                    TestConnectionButton(onIntent)
-                }
+                ConnectionSpeedView(connectionSpeed)
                 Spacer(Modifier.height(8.dp))
                 Text(
                     text = delayMs?.let { "Delay: $it ms" } ?: "—",
@@ -230,8 +231,13 @@ fun PreviewVpnScreen() {
             modifier = Modifier,
             state = VpnScreenState(
                 isRunning = true, delay = 1000, serverItemList = listOf(
-                    ServerItemModel(name = "My server", ip = "1.2.3", protocol = "Vless")
-                )
+                    ServerItemModel(
+                        guid = "1",
+                        name = "My server",
+                        ip = "1.2.3",
+                        protocol = "Vless"
+                    )
+                ), selectedServerId = "1"
             ),
             onQrCodeClick = {},
             onIntent = {},

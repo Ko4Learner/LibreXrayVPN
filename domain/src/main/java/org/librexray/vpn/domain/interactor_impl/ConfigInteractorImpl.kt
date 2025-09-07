@@ -36,4 +36,8 @@ class ConfigInteractorImpl @Inject constructor(
     override suspend fun getSelectedServer(): String? {
         return keyValueStorage.getSelectedServer()
     }
+
+    override suspend fun setSelectedServer(serverId: String) {
+        keyValueStorage.setSelectedServer(serverId)
+    }
 }
