@@ -14,6 +14,7 @@ import org.librexray.vpn.domain.models.ImportResult
  * - getServerConfig(guid): returns ConfigProfileItem or null if not found.
  * - deleteItem(guid): removing a non-existing id has no effect.
  * - getSelectedServer(): returns the selected id (GUID) or null.
+ * - setSelectedServer(serverId): sets the selected id (GUID).
  */
 interface ConfigInteractor {
     suspend fun importClipboardConfig(): ImportResult
@@ -22,4 +23,5 @@ interface ConfigInteractor {
     suspend fun getServerConfig(guid: String): ConfigProfileItem?
     suspend fun deleteItem(guid: String)
     suspend fun getSelectedServer(): String?
+    suspend fun setSelectedServer(serverId: String)
 }

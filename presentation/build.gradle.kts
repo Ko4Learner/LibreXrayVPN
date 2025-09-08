@@ -39,11 +39,17 @@ android {
             jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
         }
     }
+    buildFeatures {
+        compose = true
+    }
+//    composeOptions {
+//        kotlinCompilerExtensionVersion = libs.versions.composeCompiler.get()
+//    }
 }
 
 dependencies {
     implementation(project(":domain"))
-    implementation(project(":core"))
+    implementation(project(":core-android"))
 
     // Hilt
     implementation(libs.hilt.android)
@@ -55,7 +61,11 @@ dependencies {
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
-    implementation(libs.androidx.material3)
+    implementation(libs.androidx.material)
+    implementation(libs.androidx.material.icons.extended)
+    implementation(libs.androidx.ui.tooling.preview)
+    debugImplementation(libs.androidx.ui.tooling)
+    debugImplementation(libs.androidx.ui.test.manifest)
 
     // Navigation
     implementation(libs.androidx.navigation.compose)
@@ -72,7 +82,6 @@ dependencies {
     implementation(libs.cameraX.view)
     implementation(libs.activity.ktx)
 
-    implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)

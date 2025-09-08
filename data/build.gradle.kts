@@ -52,7 +52,7 @@ android {
 
 dependencies {
     implementation(project(":domain"))
-    implementation(project(":core"))
+    implementation(project(":core-android"))
 
     //TODO (использование workManager)
 

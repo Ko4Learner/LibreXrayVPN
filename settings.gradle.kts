@@ -25,7 +25,7 @@ dependencyResolutionManagement {
 rootProject.name = "LibreXrayVPN"
 include(":app")
 include(":domain")
-include(":core")
+include(":core-android")
 include(":data")
 include(":framework")
 include(":presentation")

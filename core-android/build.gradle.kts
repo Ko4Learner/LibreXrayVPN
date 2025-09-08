@@ -43,7 +43,7 @@ android {
 
 dependencies {
     // Gson
-    implementation(libs.gson) // используешь Gson
+    implementation(libs.gson)
 
     // Unit testing (JVM)
     testImplementation(libs.junit)

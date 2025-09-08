@@ -13,7 +13,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
 
 @Composable
-fun CameraView(
+fun QrCameraPreview(
     modifier: Modifier = Modifier,
     onFrame: (ImageProxy) -> Unit
 ) {

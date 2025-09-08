@@ -11,19 +11,21 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MaterialTheme.colorScheme
-import androidx.compose.material3.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalContext
 import org.librexray.vpn.core.utils.Constants
+import org.librexray.vpn.presentation.design_system.icon.AppIcons
 import org.librexray.vpn.presentation.intent.VpnScreenIntent
 
 @Composable
-fun ConnectToggle(onIntent: (VpnScreenIntent) -> Unit, isRunning: Boolean) {
+fun ConnectToggle(
+    onIntent: (VpnScreenIntent) -> Unit, isRunning: Boolean,
+    modifier: Modifier = Modifier
+) {
     val context = LocalContext.current
     val vpnPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
@@ -36,10 +38,13 @@ fun ConnectToggle(onIntent: (VpnScreenIntent) -> Unit, isRunning: Boolean) {
     }
 
     Box(
-        modifier = Modifier
+        modifier = modifier
             .padding(16.dp)
-            .background(color = colorScheme.secondary, shape = CircleShape)
-            .size(80.dp)
+            .background(
+                color = if (!isRunning) MaterialTheme.colors.secondary else MaterialTheme.colors.primary,
+                shape = CircleShape
+            )
+            .size(160.dp)
             .clickable {
                 val intent = VpnService.prepare(context)
                 if (intent == null) {
@@ -51,10 +56,11 @@ fun ConnectToggle(onIntent: (VpnScreenIntent) -> Unit, isRunning: Boolean) {
         contentAlignment = Alignment.Center
 
     ) {
-        Text(
-            text = if (!isRunning) "Start" else "Stop",
-            color = colorScheme.onSecondary,
-            style = MaterialTheme.typography.titleMedium
+        Icon(
+            imageVector = if (!isRunning) AppIcons.Start else AppIcons.Stop,
+            contentDescription = null,
+            tint = MaterialTheme.colors.onSurface,
+            modifier = Modifier.size(64.dp)
         )
     }
 }
