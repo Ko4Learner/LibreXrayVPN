@@ -2,7 +2,6 @@ package org.librexray.vpn.presentation.composable_elements
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -19,14 +18,15 @@ import org.librexray.vpn.domain.models.ConnectionSpeed
 import java.util.Locale
 
 @Composable
-fun ConnectionSpeedView(
+fun ConnectionSpeedInfo(
     connectionSpeed: ConnectionSpeed?,
     modifier: Modifier = Modifier
 ) {
     Surface(
         modifier = modifier
+            .padding(vertical = 8.dp)
             .fillMaxWidth()
-            .heightIn(min = 56.dp),
+            .heightIn(min = 48.dp),
         color = MaterialTheme.colors.surface,
         shape = RoundedCornerShape(16.dp),
         elevation = 0.dp

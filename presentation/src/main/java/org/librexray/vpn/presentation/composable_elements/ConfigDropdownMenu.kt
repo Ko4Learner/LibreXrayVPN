@@ -12,10 +12,14 @@ import org.librexray.vpn.presentation.design_system.icon.AppIcons
 import org.librexray.vpn.presentation.intent.VpnScreenIntent
 
 @Composable
-fun ConfigDropDownMenu(onIntent: (VpnScreenIntent) -> Unit, onQrCodeClick: () -> Unit) {
+fun ConfigDropDownMenu(
+    onIntent: (VpnScreenIntent) -> Unit,
+    onQrCodeClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     var expanded by remember { mutableStateOf(false) }
 
-    Box(modifier = Modifier.background(MaterialTheme.colors.background)) {
+    Box(modifier = modifier.background(MaterialTheme.colors.background)) {
         IconButton(onClick = { expanded = true }) {
             Icon(
                 imageVector = AppIcons.Menu,

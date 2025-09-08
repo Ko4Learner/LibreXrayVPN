@@ -24,14 +24,15 @@ import org.librexray.vpn.presentation.models.ServerItemModel
 fun SubscriptionItem(
     onIntent: (VpnScreenIntent) -> Unit,
     item: ServerItemModel,
-    showBottomSheet: () -> Unit
+    showBottomSheet: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Card(
-        modifier = Modifier
-            .padding(8.dp)
+        modifier = modifier
+            .padding(vertical = 8.dp)
             .fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        elevation = 24.dp,
+        elevation = 0.dp,
         backgroundColor = MaterialTheme.colors.surface
     ) {
         Row(

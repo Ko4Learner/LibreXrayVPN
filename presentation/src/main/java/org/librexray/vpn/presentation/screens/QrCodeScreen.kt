@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import org.librexray.vpn.presentation.intent.QrCodeScreenIntent
 import org.librexray.vpn.presentation.view_model.QrCodeScreenViewModel
-import org.librexray.vpn.presentation.composable_elements.CameraView
+import org.librexray.vpn.presentation.composable_elements.QrCameraPreview
 import android.Manifest
 import android.content.pm.PackageManager
 import android.util.Log
@@ -60,7 +60,7 @@ fun QrCodeScreen(
     }
     if (hasCameraPermission) {
         Box(modifier = modifier.fillMaxSize()) {
-            CameraView(
+            QrCameraPreview(
                 modifier = Modifier.fillMaxSize(),
                 onFrame = viewModel::onAnalyzeFrame
             )

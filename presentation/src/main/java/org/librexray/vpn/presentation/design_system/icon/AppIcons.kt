@@ -8,6 +8,7 @@ import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.QrCode
 import androidx.compose.ui.graphics.vector.ImageVector
+import org.librexray.vpn.core.R
 
 /**
  * Centralized registry of app icons.
@@ -22,4 +23,5 @@ object AppIcons {
     val Start: ImageVector = Icons.Filled.PlayArrow
     val Stop: ImageVector = Icons.Filled.Stop
     val Delete: ImageVector = Icons.Filled.Delete
+    val LatencyTest: Int = R.drawable.vector_test_connection
 }

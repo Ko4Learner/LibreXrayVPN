@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -35,13 +34,14 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import kotlinx.coroutines.launch
 import org.librexray.vpn.domain.models.ConnectionSpeed
-import org.librexray.vpn.presentation.composable_elements.BottomSheetContent
+import org.librexray.vpn.presentation.composable_elements.ContentBottomSheet
 import org.librexray.vpn.presentation.intent.VpnScreenIntent
 import org.librexray.vpn.presentation.state.VpnScreenState
 import org.librexray.vpn.presentation.view_model.VpnScreenViewModel
 import org.librexray.vpn.presentation.composable_elements.ConfigDropDownMenu
 import org.librexray.vpn.presentation.composable_elements.ConnectToggle
-import org.librexray.vpn.presentation.composable_elements.ConnectionSpeedView
+import org.librexray.vpn.presentation.composable_elements.ConnectionSpeedInfo
+import org.librexray.vpn.presentation.composable_elements.ConnectionTestButton
 import org.librexray.vpn.presentation.composable_elements.SubscriptionItem
 import org.librexray.vpn.presentation.design_system.theme.LibreXrayVPNTheme
 import org.librexray.vpn.presentation.models.ServerItemModel
@@ -80,7 +80,7 @@ fun VpnScreen(
         sheetShape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
         sheetBackgroundColor = MaterialTheme.colors.surface,
         sheetContent = {
-            BottomSheetContent(
+            ContentBottomSheet(
                 onIntent = viewModel::onIntent,
                 itemList = state.serverItemList,
                 showBottomSheet = {})
@@ -109,6 +109,7 @@ fun VpnScreenContent(
     Box(
         modifier = modifier
             .fillMaxSize()
+            .padding()
             .background(MaterialTheme.colors.background)
     ) {
         TopSection(
@@ -117,14 +118,16 @@ fun VpnScreenContent(
             state = state,
             modifier = Modifier
                 .align(Alignment.TopCenter)
+                .padding(horizontal = 16.dp, vertical = 8.dp)
                 .fillMaxWidth()
-                .statusBarsPadding()
-                .padding(8.dp), showBottomSheet
+                .statusBarsPadding(), showBottomSheet
         )
         MiddleSection(
             isRunning = state.isRunning,
             onIntent = onIntent,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .fillMaxSize()
         )
         BottomSection(
             visible = state.isRunning,
@@ -135,7 +138,7 @@ fun VpnScreenContent(
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
                 .navigationBarsPadding()
-                .padding(8.dp)
+                .padding(horizontal = 16.dp, vertical = 8.dp)
         )
     }
 }
@@ -157,7 +160,8 @@ private fun TopSection(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(56.dp),
+                    .height(48.dp)
+                    .padding(start = 8.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -211,13 +215,8 @@ private fun BottomSection(
                     .fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                ConnectionSpeedView(connectionSpeed)
-                Spacer(Modifier.height(8.dp))
-                Text(
-                    text = delayMs?.let { "Delay: $it ms" } ?: "—",
-                    style = MaterialTheme.typography.body1,
-                    color = MaterialTheme.colors.onBackground
-                )
+                ConnectionSpeedInfo(connectionSpeed)
+                ConnectionTestButton(onIntent, delayMs)
             }
         }
     }
@@ -230,7 +229,7 @@ fun PreviewVpnScreen() {
         VpnScreenContent(
             modifier = Modifier,
             state = VpnScreenState(
-                isRunning = true, delay = 1000, serverItemList = listOf(
+                isRunning = true, serverItemList = listOf(
                     ServerItemModel(
                         guid = "1",
                         name = "My server",

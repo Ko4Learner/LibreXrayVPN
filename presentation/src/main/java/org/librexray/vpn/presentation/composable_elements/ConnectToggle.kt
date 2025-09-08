@@ -22,7 +22,10 @@ import org.librexray.vpn.presentation.design_system.icon.AppIcons
 import org.librexray.vpn.presentation.intent.VpnScreenIntent
 
 @Composable
-fun ConnectToggle(onIntent: (VpnScreenIntent) -> Unit, isRunning: Boolean) {
+fun ConnectToggle(
+    onIntent: (VpnScreenIntent) -> Unit, isRunning: Boolean,
+    modifier: Modifier = Modifier
+) {
     val context = LocalContext.current
     val vpnPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
@@ -35,7 +38,7 @@ fun ConnectToggle(onIntent: (VpnScreenIntent) -> Unit, isRunning: Boolean) {
     }
 
     Box(
-        modifier = Modifier
+        modifier = modifier
             .padding(16.dp)
             .background(
                 color = if (!isRunning) MaterialTheme.colors.secondary else MaterialTheme.colors.primary,
