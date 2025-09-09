@@ -1,11 +1,13 @@
 package org.librexray.vpn.presentation.composable_elements
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Card
@@ -21,39 +23,57 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import org.librexray.vpn.presentation.design_system.icon.AppIcons
-import org.librexray.vpn.presentation.intent.VpnScreenIntent
 import org.librexray.vpn.presentation.models.ServerItemModel
 
 @Composable
 fun SubscriptionItem(
-    onIntent: (VpnScreenIntent) -> Unit,
+    modifier: Modifier = Modifier,
     item: ServerItemModel,
-    showBottomSheet: () -> Unit,
-    modifier: Modifier = Modifier
+    selectedServerId: String?,
+    buttonIcon: ImageVector,
+    buttonIntent: (ServerItemModel) -> Unit,
+    confirmOnButton: Boolean,
+    onCardClick: ((ServerItemModel) -> Unit)? = null,
 ) {
     var showDialog by remember { mutableStateOf(false) }
+
+    val buttonAction = {
+        if (confirmOnButton) showDialog = true
+        else buttonIntent(item)
+    }
+
+    val isSelected = item.guid == selectedServerId
+    val cardModifier = modifier
+        .padding(vertical = 8.dp)
+        .fillMaxWidth()
+        .let {
+            if (isSelected) it.border(
+                width = 1.dp,
+                color = MaterialTheme.colors.primary.copy(alpha = 0.5f),
+                shape = RoundedCornerShape(16.dp)
+            ) else it
+        }
+
     Card(
-        modifier = modifier
-            .padding(vertical = 8.dp)
-            .fillMaxWidth(),
+        modifier = cardModifier,
         shape = RoundedCornerShape(16.dp),
         elevation = 0.dp,
-        backgroundColor = MaterialTheme.colors.surface
+        backgroundColor = if (isSelected) MaterialTheme.colors.surface else MaterialTheme.colors.surface.copy(
+            alpha = 0.7f
+        )
     ) {
         Row(
             modifier = Modifier
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .clickable(enabled = onCardClick != null) { onCardClick?.invoke(item) },
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Column(
                 modifier = Modifier
-                    .padding(8.dp)
-                    .clickable {
-                        showBottomSheet()
-                    },
+                    .padding(8.dp),
                 horizontalAlignment = Alignment.Start,
                 verticalArrangement = Arrangement.SpaceEvenly
             ) {
@@ -74,10 +94,12 @@ fun SubscriptionItem(
                 )
             }
             IconButton(
-                onClick = { showDialog = true }
+                modifier = Modifier
+                    .size(48.dp),
+                onClick = buttonAction
             ) {
                 Icon(
-                    imageVector = AppIcons.Delete,
+                    imageVector = buttonIcon,
                     contentDescription = null,
                     tint = MaterialTheme.colors.onSurface
                 )
@@ -107,7 +129,7 @@ fun SubscriptionItem(
             },
             confirmButton = {
                 TextButton(onClick = {
-                    onIntent(VpnScreenIntent.DeleteItem(item.guid))
+                    buttonIntent(item)
                     showDialog = false
                 }) {
                     Text(
