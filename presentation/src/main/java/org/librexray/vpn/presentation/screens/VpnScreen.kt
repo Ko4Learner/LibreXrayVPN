@@ -43,6 +43,7 @@ import org.librexray.vpn.presentation.composable_elements.ConnectionSpeedInfo
 import org.librexray.vpn.presentation.composable_elements.ConnectionTestButton
 import org.librexray.vpn.presentation.composable_elements.SubscriptionItem
 import org.librexray.vpn.presentation.design_system.icon.AppIcons
+import org.librexray.vpn.presentation.design_system.theme.Grey80
 import org.librexray.vpn.presentation.design_system.theme.LibreXrayVPNTheme
 import org.librexray.vpn.presentation.models.ServerItemModel
 
@@ -76,7 +77,7 @@ fun VpnScreen(
     ModalBottomSheetLayout(
         sheetState = sheetState,
         sheetElevation = 16.dp,
-        scrimColor = MaterialTheme.colors.background.copy(alpha = 0.3f),
+        scrimColor = Grey80.copy(alpha = 0.8f),
         sheetShape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
         sheetBackgroundColor = MaterialTheme.colors.background,
         sheetContent = {
