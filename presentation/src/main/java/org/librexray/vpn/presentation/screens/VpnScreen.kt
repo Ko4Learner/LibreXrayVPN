@@ -27,7 +27,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -43,6 +42,8 @@ import org.librexray.vpn.presentation.composable_elements.ConnectToggle
 import org.librexray.vpn.presentation.composable_elements.ConnectionSpeedInfo
 import org.librexray.vpn.presentation.composable_elements.ConnectionTestButton
 import org.librexray.vpn.presentation.composable_elements.SubscriptionItem
+import org.librexray.vpn.presentation.design_system.icon.AppIcons
+import org.librexray.vpn.presentation.design_system.theme.Grey80
 import org.librexray.vpn.presentation.design_system.theme.LibreXrayVPNTheme
 import org.librexray.vpn.presentation.models.ServerItemModel
 
@@ -76,14 +77,17 @@ fun VpnScreen(
     ModalBottomSheetLayout(
         sheetState = sheetState,
         sheetElevation = 16.dp,
-        scrimColor = Color.Black.copy(alpha = 0.5f),
+        scrimColor = Grey80.copy(alpha = 0.8f),
         sheetShape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
-        sheetBackgroundColor = MaterialTheme.colors.surface,
+        sheetBackgroundColor = MaterialTheme.colors.background,
         sheetContent = {
             ContentBottomSheet(
                 onIntent = viewModel::onIntent,
                 itemList = state.serverItemList,
-                showBottomSheet = {})
+                selectedServerId = state.selectedServerId, hideBottomSheet = {
+                    scope.launch { sheetState.hide() }
+                }
+            )
         }
     ) {
         VpnScreenContent(
@@ -113,14 +117,15 @@ fun VpnScreenContent(
             .background(MaterialTheme.colors.background)
     ) {
         TopSection(
-            onIntent = onIntent,
-            onQrCodeClick = onQrCodeClick,
-            state = state,
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .padding(horizontal = 16.dp, vertical = 8.dp)
                 .fillMaxWidth()
-                .statusBarsPadding(), showBottomSheet
+                .statusBarsPadding(),
+            onIntent = onIntent,
+            onQrCodeClick = onQrCodeClick,
+            state = state,
+            showBottomSheet = showBottomSheet
         )
         MiddleSection(
             isRunning = state.isRunning,
@@ -145,10 +150,10 @@ fun VpnScreenContent(
 
 @Composable
 private fun TopSection(
+    modifier: Modifier = Modifier,
     onIntent: (VpnScreenIntent) -> Unit,
     onQrCodeClick: () -> Unit,
     state: VpnScreenState,
-    modifier: Modifier,
     showBottomSheet: () -> Unit
 ) {
     val selectedServer = remember(state.serverItemList, state.selectedServerId) {
@@ -175,9 +180,11 @@ private fun TopSection(
             AnimatedVisibility(visible = selectedServer != null) {
                 selectedServer?.let {
                     SubscriptionItem(
-                        onIntent,
-                        it,
-                        showBottomSheet
+                        item = it,
+                        buttonIcon = AppIcons.arrowForward,
+                        buttonIntent = { _ -> showBottomSheet() },
+                        confirmOnButton = false,
+                        selectedServerId = it.guid
                     )
                 }
             }
@@ -187,9 +194,9 @@ private fun TopSection(
 
 @Composable
 private fun MiddleSection(
+    modifier: Modifier = Modifier,
     isRunning: Boolean,
-    onIntent: (VpnScreenIntent) -> Unit,
-    modifier: Modifier = Modifier
+    onIntent: (VpnScreenIntent) -> Unit
 ) {
     Box(
         modifier = modifier.fillMaxWidth(),
@@ -201,11 +208,11 @@ private fun MiddleSection(
 
 @Composable
 private fun BottomSection(
+    modifier: Modifier = Modifier,
     visible: Boolean,
     delayMs: Long?,
     connectionSpeed: ConnectionSpeed?,
-    onIntent: (VpnScreenIntent) -> Unit,
-    modifier: Modifier
+    onIntent: (VpnScreenIntent) -> Unit
 ) {
     Box(modifier = modifier) {
         AnimatedVisibility(visible = visible) {

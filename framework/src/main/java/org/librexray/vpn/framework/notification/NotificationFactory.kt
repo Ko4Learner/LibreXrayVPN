@@ -46,7 +46,7 @@ class NotificationFactory @Inject constructor(
         notificationManager.createNotificationChannel(channel)
 
         return NotificationCompat.Builder(localizedContext, channelId)
-            .setSmallIcon(R.drawable.ic_launcher_background)
+            .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle(title)
             .setOnlyAlertOnce(true)
             .setOngoing(true)

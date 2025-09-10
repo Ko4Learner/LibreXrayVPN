@@ -39,7 +39,7 @@ fun ConnectionTestButton(
     ) {
         Row(
             modifier = modifier
-                .padding(start = 8.dp)
+                .padding(start = 16.dp)
                 .fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {

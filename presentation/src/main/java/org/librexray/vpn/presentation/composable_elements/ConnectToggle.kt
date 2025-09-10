@@ -8,13 +8,15 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalContext
 import org.librexray.vpn.core.utils.Constants
@@ -39,12 +41,31 @@ fun ConnectToggle(
 
     Box(
         modifier = modifier
-            .padding(16.dp)
-            .background(
-                color = if (!isRunning) MaterialTheme.colors.secondary else MaterialTheme.colors.primary,
-                shape = CircleShape
-            )
             .size(160.dp)
+            .clip(CircleShape)
+            .background(
+                brush = if (isRunning)
+                    Brush.radialGradient(
+                        colorStops = arrayOf(
+                            0.00f to Color(0xFF06B9FF),
+                            0.28f to Color(0xFF17C3FF),
+                            0.54f to Color(0xFF2F88FF),
+                            0.74f to Color(0xFF4B64FF),
+                            0.88f to Color(0x88515EFF),
+                            1.00f to Color(0x00515EFF)
+                        )
+                    )
+                else
+                    Brush.radialGradient(
+                        colorStops = arrayOf(
+                            0.00f to Color(0xFF3F464D),
+                            0.35f to Color(0xFF444B52),
+                            0.65f to Color(0xFF393F45),
+                            0.85f to Color(0x663F464D),
+                            1.00f to Color(0x003F464D)
+                        )
+                    )
+            )
             .clickable {
                 val intent = VpnService.prepare(context)
                 if (intent == null) {
@@ -57,10 +78,10 @@ fun ConnectToggle(
 
     ) {
         Icon(
-            imageVector = if (!isRunning) AppIcons.Start else AppIcons.Stop,
+            imageVector = AppIcons.Toggle,
             contentDescription = null,
             tint = MaterialTheme.colors.onSurface,
-            modifier = Modifier.size(64.dp)
+            modifier = Modifier.size(54.dp)
         )
     }
 }
