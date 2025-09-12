@@ -26,7 +26,9 @@ import org.librexray.vpn.presentation.intent.VpnScreenIntent
 @Composable
 fun ConnectToggle(
     onIntent: (VpnScreenIntent) -> Unit, isRunning: Boolean,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    emptyServerList: Boolean,
+    showBottomSheet: () -> Unit
 ) {
     val context = LocalContext.current
     val vpnPermissionLauncher = rememberLauncherForActivityResult(
@@ -67,18 +69,26 @@ fun ConnectToggle(
                     )
             )
             .clickable {
-                val intent = VpnService.prepare(context)
-                if (intent == null) {
-                    onIntent(VpnScreenIntent.ToggleConnection)
+                if (emptyServerList) {
+                    showBottomSheet()
                 } else {
-                    vpnPermissionLauncher.launch(intent)
+                    val intent = VpnService.prepare(context)
+                    if (intent == null) {
+                        onIntent(VpnScreenIntent.ToggleConnection)
+                    } else {
+                        vpnPermissionLauncher.launch(intent)
+                    }
                 }
             },
         contentAlignment = Alignment.Center
 
     ) {
         Icon(
-            imageVector = AppIcons.Toggle,
+            imageVector = if (emptyServerList) {
+                AppIcons.Add
+            } else {
+                AppIcons.Toggle
+            },
             contentDescription = null,
             tint = MaterialTheme.colors.onSurface,
             modifier = Modifier.size(54.dp)

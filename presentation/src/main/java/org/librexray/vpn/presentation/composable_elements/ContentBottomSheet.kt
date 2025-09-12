@@ -5,12 +5,16 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
@@ -28,6 +32,7 @@ import org.librexray.vpn.presentation.models.ServerItemModel
 fun ContentBottomSheet(
     modifier: Modifier = Modifier,
     onIntent: (VpnScreenIntent) -> Unit,
+    onQrCodeClick: () -> Unit,
     hideBottomSheet: () -> Unit,
     itemList: List<ServerItemModel>,
     selectedServerId: String?
@@ -56,7 +61,7 @@ fun ContentBottomSheet(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Мои конфигурации",
+                text = if (itemList.isEmpty()) "Добавить конфигурацию" else "Мои конфигурации",
                 style = MaterialTheme.typography.h6,
                 color = MaterialTheme.colors.onSurface
             )
@@ -77,5 +82,78 @@ fun ContentBottomSheet(
             itemList = itemList,
             selectedServerId = selectedServerId
         )
+        ImportButtonRow(onIntent = onIntent, onQrCodeClick = onQrCodeClick)
+    }
+}
+
+@Composable
+private fun ImportButtonRow(
+    modifier: Modifier = Modifier,
+    onIntent: (VpnScreenIntent) -> Unit,
+    onQrCodeClick: () -> Unit
+) {
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Button(
+            modifier = Modifier
+                .padding(end = 8.dp)
+                .weight(1f)
+                .height(96.dp),
+            shape = RoundedCornerShape(16.dp),
+            colors = ButtonDefaults.buttonColors(
+                backgroundColor = MaterialTheme.colors.surface.copy(alpha = 0.7f)
+            ),
+            onClick = onQrCodeClick
+        ) {
+            Column(
+                modifier = Modifier.fillMaxHeight(),
+                verticalArrangement = Arrangement.SpaceEvenly,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Icon(
+                    modifier = Modifier.size(40.dp),
+                    imageVector = AppIcons.QrScan,
+                    contentDescription = null,
+                    tint = MaterialTheme.colors.onSurface
+                )
+                Text(
+                    text = "QR код",
+                    style = MaterialTheme.typography.body1,
+                    color = MaterialTheme.colors.onSurface
+                )
+            }
+        }
+        Button(
+            modifier = Modifier
+                .padding(start = 8.dp)
+                .weight(1f)
+                .height(96.dp),
+            shape = RoundedCornerShape(16.dp),
+            colors = ButtonDefaults.buttonColors(
+                backgroundColor = MaterialTheme.colors.surface.copy(alpha = 0.7f)
+            ),
+            onClick = { onIntent(VpnScreenIntent.ImportConfigFromClipboard) }
+        ) {
+            Column(
+                modifier = Modifier.fillMaxHeight(),
+                verticalArrangement = Arrangement.SpaceEvenly,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Icon(
+                    modifier = Modifier.size(40.dp),
+                    imageVector = AppIcons.Clipboard,
+                    contentDescription = null,
+                    tint = MaterialTheme.colors.onSurface,
+                )
+                Text(
+                    text = "Буфер обмена",
+                    style = MaterialTheme.typography.body1,
+                    color = MaterialTheme.colors.onSurface
+                )
+            }
+        }
     }
 }
