@@ -24,9 +24,9 @@ import org.librexray.vpn.presentation.intent.VpnScreenIntent
 
 @Composable
 fun ConnectionTestButton(
+    modifier: Modifier = Modifier,
     onIntent: (VpnScreenIntent) -> Unit,
-    delayMs: Long?,
-    modifier: Modifier = Modifier
+    delayMs: Long?
 ) {
     Card(
         modifier = modifier
@@ -48,17 +48,22 @@ fun ConnectionTestButton(
                 style = MaterialTheme.typography.body1,
                 color = MaterialTheme.colors.onSurface)
 
-            Surface(modifier = Modifier.size(48.dp), shape = RoundedCornerShape(16.dp), color = MaterialTheme.colors.primary) {
-            IconButton(
+            Surface(
                 modifier = Modifier.size(48.dp),
-                onClick = { onIntent(VpnScreenIntent.TestConnection) }
+                shape = RoundedCornerShape(16.dp),
+                color = MaterialTheme.colors.primary
             ) {
-                Icon(
-                    painter = painterResource(AppIcons.LatencyTest),
-                    contentDescription = "Test connection",
-                    tint = MaterialTheme.colors.onSurface
-                )
-            }}
+                IconButton(
+                    modifier = Modifier.size(48.dp),
+                    onClick = { onIntent(VpnScreenIntent.TestConnection) }
+                ) {
+                    Icon(
+                        painter = painterResource(AppIcons.LatencyTest),
+                        contentDescription = "Test connection",
+                        tint = MaterialTheme.colors.onSurface
+                    )
+                }
+            }
         }
     }
 }

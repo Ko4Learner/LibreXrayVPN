@@ -25,8 +25,8 @@ import org.librexray.vpn.presentation.intent.VpnScreenIntent
 
 @Composable
 fun ConnectToggle(
-    onIntent: (VpnScreenIntent) -> Unit, isRunning: Boolean,
     modifier: Modifier = Modifier,
+    onIntent: (VpnScreenIntent) -> Unit, isRunning: Boolean,
     emptyServerList: Boolean,
     showBottomSheet: () -> Unit
 ) {

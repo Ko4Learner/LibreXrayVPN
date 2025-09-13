@@ -37,11 +37,10 @@ fun ContentBottomSheet(
     itemList: List<ServerItemModel>,
     selectedServerId: String?
 ) {
-    val sheetMaxHeight = LocalConfiguration.current.screenHeightDp.dp * 0.7f
     Column(
         modifier = modifier
             .padding(horizontal = 16.dp, vertical = 4.dp)
-            .heightIn(max = sheetMaxHeight)
+            .heightIn(max = LocalConfiguration.current.screenHeightDp.dp)
             .fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally

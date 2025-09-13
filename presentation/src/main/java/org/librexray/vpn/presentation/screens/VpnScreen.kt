@@ -86,7 +86,8 @@ fun VpnScreen(
                 onIntent = viewModel::onIntent,
                 onQrCodeClick = onQrCodeClick,
                 itemList = state.serverItemList,
-                selectedServerId = state.selectedServerId, hideBottomSheet = {
+                selectedServerId = state.selectedServerId,
+                hideBottomSheet = {
                     scope.launch { sheetState.hide() }
                 }
             )
@@ -187,10 +188,9 @@ private fun TopSection(
                 selectedServer?.let {
                     SubscriptionItem(
                         item = it,
+                        selectedServerId = it.guid,
                         buttonIcon = AppIcons.arrowForward,
-                        buttonIntent = { _ -> showBottomSheet() },
-                        confirmOnButton = false,
-                        selectedServerId = it.guid
+                        onCardClick = { _ -> showBottomSheet() }
                     )
                 }
             }
@@ -234,8 +234,8 @@ private fun BottomSection(
                     .fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                ConnectionSpeedInfo(connectionSpeed)
-                ConnectionTestButton(onIntent, delayMs)
+                ConnectionSpeedInfo(connectionSpeed = connectionSpeed)
+                ConnectionTestButton(onIntent = onIntent, delayMs = delayMs)
             }
         }
     }
@@ -251,8 +251,8 @@ fun PreviewVpnScreen() {
                 isRunning = true, serverItemList = listOf(
                     ServerItemModel(
                         guid = "1",
-                        name = "My server",
-                        ip = "1.2.3",
+                        name = "My vless server config",
+                        ip = "192.168.252.1",
                         protocol = "Vless"
                     )
                 ), selectedServerId = "1"

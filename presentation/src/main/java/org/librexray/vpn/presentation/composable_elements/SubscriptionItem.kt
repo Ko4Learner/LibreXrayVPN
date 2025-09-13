@@ -34,16 +34,10 @@ fun SubscriptionItem(
     item: ServerItemModel,
     selectedServerId: String?,
     buttonIcon: ImageVector,
-    buttonIntent: (ServerItemModel) -> Unit,
-    confirmOnButton: Boolean,
-    onCardClick: ((ServerItemModel) -> Unit)? = null,
+    onButtonClick: ((ServerItemModel) -> Unit)? = null,
+    onCardClick: (ServerItemModel) -> Unit,
 ) {
     var showDialog by remember { mutableStateOf(false) }
-
-    val buttonAction = {
-        if (confirmOnButton) showDialog = true
-        else buttonIntent(item)
-    }
 
     val isSelected = item.guid == selectedServerId
     val cardModifier = modifier
@@ -68,7 +62,7 @@ fun SubscriptionItem(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable(enabled = onCardClick != null) { onCardClick?.invoke(item) },
+                .clickable { onCardClick(item) },
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -98,7 +92,10 @@ fun SubscriptionItem(
             IconButton(
                 modifier = Modifier
                     .size(48.dp),
-                onClick = buttonAction
+                onClick = {
+                    if (onButtonClick != null) showDialog = true
+                    else onCardClick(item)
+                }
             ) {
                 Icon(
                     imageVector = buttonIcon,
@@ -131,7 +128,7 @@ fun SubscriptionItem(
             },
             confirmButton = {
                 TextButton(onClick = {
-                    buttonIntent(item)
+                    onButtonClick!!(item)
                     showDialog = false
                 }) {
                     Text(

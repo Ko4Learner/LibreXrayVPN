@@ -35,8 +35,7 @@ fun SubscriptionsList(
                 item = item,
                 selectedServerId = selectedServerId,
                 buttonIcon = AppIcons.Delete,
-                buttonIntent = { onIntent(VpnScreenIntent.DeleteItem(it.guid)) },
-                confirmOnButton = true,
+                onButtonClick = { onIntent(VpnScreenIntent.DeleteItem(it.guid)) },
                 onCardClick = { onIntent(VpnScreenIntent.SetSelectedServer(it.guid)) }
             )
         }

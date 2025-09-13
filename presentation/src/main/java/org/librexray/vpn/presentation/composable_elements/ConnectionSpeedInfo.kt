@@ -19,8 +19,8 @@ import java.util.Locale
 
 @Composable
 fun ConnectionSpeedInfo(
-    connectionSpeed: ConnectionSpeed?,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    connectionSpeed: ConnectionSpeed?
 ) {
     Surface(
         modifier = modifier
@@ -63,7 +63,7 @@ fun ConnectionSpeedInfo(
  * @return Formatted speed string.
  */
 private fun fmtBps(bps: Double?): String {
-    bps?: return "—"
+    bps ?: return "—"
     val kb = bps / 1024.0
     val mb = kb / 1024.0
     return when {

@@ -28,6 +28,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import org.librexray.vpn.core.utils.Constants
 import kotlinx.coroutines.delay
+import org.librexray.vpn.presentation.composable_elements.ScanMask
 
 @Composable
 fun QrCodeScreen(
@@ -64,6 +65,7 @@ fun QrCodeScreen(
                 modifier = Modifier.fillMaxSize(),
                 onFrame = viewModel::onAnalyzeFrame
             )
+            ScanMask()
             if (state.error != null) {
                 Text(
                     text = "Ошибка: ${state.error}",
