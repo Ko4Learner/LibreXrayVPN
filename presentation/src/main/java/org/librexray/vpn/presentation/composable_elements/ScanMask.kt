@@ -86,7 +86,6 @@ fun ScanMask(
         val len = 36.dp.toPx()
         val sweep = 90f
 
-// Овалы под четверти окружности в каждом углу (радиус r)
         val ovalTL =
             Rect(window.left, window.top, window.left + 2 * radius, window.top + 2 * radius)
         val ovalTR =
@@ -96,7 +95,6 @@ fun ScanMask(
         val ovalBL =
             Rect(window.left, window.bottom - 2 * radius, window.left + 2 * radius, window.bottom)
 
-// 1) ДУГИ УГОЛКОВ — мягко повторяют радиус окна
         drawArc(
             Color.White, startAngle = 180f, sweepAngle = sweep, useCenter = false,
             topLeft = ovalTL.topLeft, size = ovalTL.size, style = style
@@ -114,7 +112,6 @@ fun ScanMask(
             topLeft = ovalBL.topLeft, size = ovalBL.size, style = style
         ) // левый низ
 
-// 2) ПРЯМЫЕ "УСЫ" ОТ ТАНГЕНТНЫХ ТОЧЕК (строго по сторонам)
         drawLine(
             Color.White,
             Offset(window.left + radius, window.top),
