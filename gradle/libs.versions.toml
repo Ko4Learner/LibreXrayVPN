@@ -33,6 +33,7 @@ androidxTestRunner = "1.6.1"
 androidxTestRules = "1.6.1"
 archCoreTesting = "2.2.0"
 
+
 [libraries]
 # Core / Kotlin / AndroidX
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }

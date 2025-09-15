@@ -2,6 +2,10 @@ package org.librexray.vpn.presentation.screens
 
 import android.content.res.Configuration
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -164,7 +168,7 @@ private fun TopSection(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(48.dp),
+                    .height(56.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -173,18 +177,24 @@ private fun TopSection(
                     style = MaterialTheme.typography.h6,
                     color = MaterialTheme.colors.onBackground
                 )
-                Box {
-                    IconButton(onClick = {}) {
-                        Icon(
-                            imageVector = AppIcons.Menu,
-                            contentDescription = "Добавить конфигурацию",
-                            tint = MaterialTheme.colors.onSurface
-                        )
-                    }
+                IconButton(onClick = {}) {
+                    Icon(
+                        imageVector = AppIcons.Menu,
+                        contentDescription = "Настройки",
+                        tint = MaterialTheme.colors.onSurface
+                    )
                 }
             }
 
-            AnimatedVisibility(visible = selectedServer != null) {
+            AnimatedVisibility(
+                visible = selectedServer != null,
+                enter = expandVertically(
+                    expandFrom = Alignment.Top
+                ) + fadeIn(),
+                exit = shrinkVertically(
+                    shrinkTowards = Alignment.Top
+                ) + fadeOut()
+            ) {
                 selectedServer?.let {
                     SubscriptionItem(
                         item = it,
@@ -228,7 +238,15 @@ private fun BottomSection(
     onIntent: (VpnScreenIntent) -> Unit
 ) {
     Box(modifier = modifier) {
-        AnimatedVisibility(visible = visible) {
+        AnimatedVisibility(
+            visible = visible,
+            enter = expandVertically(
+                expandFrom = Alignment.Bottom
+            ) + fadeIn(),
+            exit = shrinkVertically(
+                shrinkTowards = Alignment.Bottom
+            ) + fadeOut()
+        ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth(),

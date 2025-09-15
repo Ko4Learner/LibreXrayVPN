@@ -2,13 +2,12 @@ package org.librexray.vpn.presentation.design_system.icon
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ContentCopy
-import androidx.compose.material.icons.filled.ContentPaste
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.PowerSettingsNew
-import androidx.compose.material.icons.outlined.QrCode
 import androidx.compose.material.icons.outlined.QrCodeScanner
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -28,6 +27,7 @@ object AppIcons {
     val Add: ImageVector = Icons.Filled.Add
     val Close: ImageVector = Icons.Filled.Close
     val arrowForward: ImageVector = Icons.Default.ChevronRight
+    val arrowBack: ImageVector = Icons.Default.ChevronLeft
     val LatencyTest: Int = R.drawable.vector_test_connection
     val Menu = Icons.Outlined.Settings
 }

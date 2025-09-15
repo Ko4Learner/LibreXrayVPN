@@ -24,11 +24,22 @@ import org.librexray.vpn.presentation.composable_elements.QrCameraPreview
 import android.Manifest
 import android.content.pm.PackageManager
 import android.util.Log
+import android.widget.Toast
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import org.librexray.vpn.core.utils.Constants
 import kotlinx.coroutines.delay
 import org.librexray.vpn.presentation.composable_elements.ScanMask
+import org.librexray.vpn.presentation.design_system.icon.AppIcons
 
 @Composable
 fun QrCodeScreen(
@@ -59,31 +70,59 @@ fun QrCodeScreen(
             launcher.launch(Manifest.permission.CAMERA)
         }
     }
-    if (hasCameraPermission) {
-        Box(modifier = modifier.fillMaxSize()) {
-            QrCameraPreview(
-                modifier = Modifier.fillMaxSize(),
-                onFrame = viewModel::onAnalyzeFrame
-            )
-            ScanMask()
-            if (state.error != null) {
-                Text(
-                    text = "Ошибка: ${state.error}",
-                    modifier = Modifier
-                        .align(Alignment.TopCenter)
-                        .padding(16.dp),
-                    color = Color.Red
-                )
+
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colors.background)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp)
+                .padding(vertical = 16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box {
+                IconButton(onClick = onBackClick) {
+                    Icon(
+                        imageVector = AppIcons.arrowBack,
+                        contentDescription = "Назад",
+                        tint = MaterialTheme.colors.onBackground
+                    )
+                }
             }
+            Text(
+                text = "Сканирование Qr кода",
+                style = MaterialTheme.typography.h6,
+                color = MaterialTheme.colors.onBackground
+            )
+
         }
-    } else {
-        Log.d(Constants.TAG, "permission denied")
+
+        if (hasCameraPermission) {
+            Box(modifier = Modifier.fillMaxSize()) {
+                QrCameraPreview(
+                    modifier = Modifier.fillMaxSize(),
+                    onFrame = viewModel::onAnalyzeFrame
+                )
+                ScanMask()
+            }
+        } else {
+            Log.d(Constants.TAG, "permission denied")
+        }
+    }
+
+    LaunchedEffect(state.error) {
+        state.error?.let { msg ->
+            Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+        }
     }
 
     LaunchedEffect(state.configFound) {
-        //TODO возможно необходимо обработать UX считывания конфигурации или возможных ошибок
         if (state.configFound) {
-            delay(300)
+            Toast.makeText(context, "Конфигурация найдена!", Toast.LENGTH_SHORT).show()
+            delay(2000)
             viewModel.onIntent(QrCodeScreenIntent.ResetState)
             onResult()
         }
