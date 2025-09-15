@@ -21,11 +21,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathFillType
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.util.lerp
 
 @Composable
 fun ScanMask(
@@ -36,140 +36,122 @@ fun ScanMask(
         initialValue = 0f,
         targetValue = 1f,
         animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 1500, easing = LinearEasing),
+            animation = tween(durationMillis = 1700, easing = LinearEasing),
             repeatMode = RepeatMode.Reverse
         )
     )
 
     Canvas(modifier = modifier.fillMaxSize()) {
-        val width = with(density) { 240.dp.toPx() }
-        val height = width
-        val radius = with(density) { 24.dp.toPx() }
+        val windowWidthPx = with(density) { 240.dp.toPx() }
+        val windowHeightPx = windowWidthPx
+        val cornerRadiusPx = with(density) { 24.dp.toPx() }
 
-        val left = (size.width - width) / 2f
-        val top = (size.height - height) / 2f
-        val window = Rect(left, top, left + width, top + height)
+        val left = (size.width - windowWidthPx) / 2f
+        val top = (size.height - windowHeightPx) / 2f
+        val window = Rect(left, top, left + windowWidthPx, top + windowHeightPx)
 
-        val innerPath = Path().apply {
-            addRoundRect(RoundRect(window, CornerRadius(radius, radius)))
+        //Двигающаяся шторка внутри окна
+        val innerClipPath = Path().apply {
+            addRoundRect(RoundRect(window, CornerRadius(cornerRadiusPx, cornerRadiusPx)))
         }
-        val bandHeight = height * 0.4f
-        val bandTop = lerp(window.bottom - bandHeight, window.top, t)
+        val bandHeightPx = windowHeightPx * 0.35f
+        val bandTopPx = androidx.compose.ui.util.lerp(
+            window.bottom - bandHeightPx, window.top, t
+        )
 
-        clipPath(innerPath) {
+        clipPath(innerClipPath) {
             drawRect(
                 brush = Brush.verticalGradient(
                     colorStops = arrayOf(
                         0.00f to Color.Transparent,
-                        0.30f to Color(0x4DFFFFFF),
-                        0.50f to Color.White.copy(alpha = 0.8f),
-                        0.70f to Color(0x4DFFFFFF),
+                        0.30f to Color.White.copy(alpha = 0.3f),
+                        0.50f to Color.White.copy(alpha = 0.7f),
+                        0.70f to Color.White.copy(alpha = 0.3f),
                         1.00f to Color.Transparent
                     ),
-                    startY = bandTop,
-                    endY = bandTop + bandHeight
+                    startY = bandTopPx,
+                    endY = bandTopPx + bandHeightPx
                 ),
-                topLeft = Offset(window.left, bandTop),
-                size = Size(width, bandHeight)
+                topLeft = Offset(window.left, bandTopPx),
+                size = Size(windowWidthPx, bandHeightPx)
             )
         }
 
-        val mask = Path().apply {
+        //Внешняя маска
+        val outerMaskPath = Path().apply {
             fillType = PathFillType.EvenOdd
             addRect(Rect(0f, 0f, size.width, size.height))
-            addRoundRect(RoundRect(window, CornerRadius(radius, radius)))
+            addRoundRect(RoundRect(window, CornerRadius(cornerRadiusPx, cornerRadiusPx)))
         }
-        drawPath(mask, color = Color.Black.copy(alpha = 0.6f))
+        drawPath(outerMaskPath, color = Color.Black.copy(alpha = 0.6f))
 
-        val stroke = 4.dp.toPx()
-        val style = Stroke(width = stroke, cap = StrokeCap.Round)
-        val len = 36.dp.toPx()
-        val sweep = 90f
+        val strokeWidthPx = 4.dp.toPx()
+        val whiskerLengthPx = 36.dp.toPx()
+        val arcSweepDegrees = 90f
+        val frameStroke = Stroke(
+            width = strokeWidthPx,
+            cap = StrokeCap.Round,
+            join = StrokeJoin.Round
+        )
 
-        val ovalTL =
-            Rect(window.left, window.top, window.left + 2 * radius, window.top + 2 * radius)
-        val ovalTR =
-            Rect(window.right - 2 * radius, window.top, window.right, window.top + 2 * radius)
-        val ovalBR =
-            Rect(window.right - 2 * radius, window.bottom - 2 * radius, window.right, window.bottom)
-        val ovalBL =
-            Rect(window.left, window.bottom - 2 * radius, window.left + 2 * radius, window.bottom)
+        val cornerOvals = arrayOf(
+            Rect(
+                window.left,
+                window.top,
+                window.left + 2 * cornerRadiusPx,
+                window.top + 2 * cornerRadiusPx
+            ), // TL
+            Rect(
+                window.right - 2 * cornerRadiusPx,
+                window.top,
+                window.right,
+                window.top + 2 * cornerRadiusPx
+            ), // TR
+            Rect(
+                window.right - 2 * cornerRadiusPx,
+                window.bottom - 2 * cornerRadiusPx,
+                window.right,
+                window.bottom
+            ),                  // BR
+            Rect(
+                window.left,
+                window.bottom - 2 * cornerRadiusPx,
+                window.left + 2 * cornerRadiusPx,
+                window.bottom
+            )                    // BL
+        )
+        val arcStartAngles = floatArrayOf(180f, 270f, 0f, 90f)
 
-        drawArc(
-            Color.White, startAngle = 180f, sweepAngle = sweep, useCenter = false,
-            topLeft = ovalTL.topLeft, size = ovalTL.size, style = style
-        ) // левый верх
-        drawArc(
-            Color.White, startAngle = 270f, sweepAngle = sweep, useCenter = false,
-            topLeft = ovalTR.topLeft, size = ovalTR.size, style = style
-        ) // правый верх
-        drawArc(
-            Color.White, startAngle = 0f, sweepAngle = sweep, useCenter = false,
-            topLeft = ovalBR.topLeft, size = ovalBR.size, style = style
-        ) // правый низ
-        drawArc(
-            Color.White, startAngle = 90f, sweepAngle = sweep, useCenter = false,
-            topLeft = ovalBL.topLeft, size = ovalBL.size, style = style
-        ) // левый низ
+        val tangentHX = floatArrayOf(
+            window.left + cornerRadiusPx,
+            window.right - cornerRadiusPx,
+            window.right - cornerRadiusPx,
+            window.left + cornerRadiusPx
+        )
+        val tangentHY = floatArrayOf(window.top, window.top, window.bottom, window.bottom)
+        val horizontalDir = floatArrayOf(+1f, -1f, -1f, +1f)
 
-        drawLine(
-            Color.White,
-            Offset(window.left + radius, window.top),
-            Offset(window.left + radius + len, window.top),
-            strokeWidth = stroke,
-            cap = StrokeCap.Round
-        )   // верх, слева направо
-        drawLine(
-            Color.White,
-            Offset(window.right - radius - len, window.top),
-            Offset(window.right - radius, window.top),
-            strokeWidth = stroke,
-            cap = StrokeCap.Round
-        ) // верх, справа налево
+        val tangentVX = floatArrayOf(window.left, window.right, window.right, window.left)
+        val tangentVY = floatArrayOf(
+            window.top + cornerRadiusPx,
+            window.top + cornerRadiusPx,
+            window.bottom - cornerRadiusPx,
+            window.bottom - cornerRadiusPx
+        )
+        val verticalDir = floatArrayOf(+1f, +1f, -1f, -1f)
 
-        drawLine(
-            Color.White,
-            Offset(window.left, window.top + radius),
-            Offset(window.left, window.top + radius + len),
-            strokeWidth = stroke,
-            cap = StrokeCap.Round
-        )   // слева, сверху вниз
-        drawLine(
-            Color.White,
-            Offset(window.right, window.top + radius),
-            Offset(window.right, window.top + radius + len),
-            strokeWidth = stroke,
-            cap = StrokeCap.Round
-        ) // справа, сверху вниз
+        val cornerFramePath = Path().apply {
+            for (i in 0..3) {
+                moveTo(tangentHX[i], tangentHY[i])
+                lineTo(tangentHX[i] + horizontalDir[i] * whiskerLengthPx, tangentHY[i])
 
-        drawLine(
-            Color.White,
-            Offset(window.left + radius, window.bottom),
-            Offset(window.left + radius + len, window.bottom),
-            strokeWidth = stroke,
-            cap = StrokeCap.Round
-        )   // низ, слева направо
-        drawLine(
-            Color.White,
-            Offset(window.right - radius - len, window.bottom),
-            Offset(window.right - radius, window.bottom),
-            strokeWidth = stroke,
-            cap = StrokeCap.Round
-        ) // низ, справа налево
+                moveTo(tangentHX[i], tangentHY[i])
+                arcTo(cornerOvals[i], arcStartAngles[i], arcSweepDegrees, true)
 
-        drawLine(
-            Color.White,
-            Offset(window.left, window.bottom - radius - len),
-            Offset(window.left, window.bottom - radius),
-            strokeWidth = stroke,
-            cap = StrokeCap.Round
-        )   // слева, снизу вверх
-        drawLine(
-            Color.White,
-            Offset(window.right, window.bottom - radius - len),
-            Offset(window.right, window.bottom - radius),
-            strokeWidth = stroke,
-            cap = StrokeCap.Round
-        ) // справа, снизу вверх
+                moveTo(tangentVX[i], tangentVY[i])
+                lineTo(tangentVX[i], tangentVY[i] + verticalDir[i] * whiskerLengthPx)
+            }
+        }
+        drawPath(path = cornerFramePath, color = Color.White, style = frameStroke)
     }
 }
