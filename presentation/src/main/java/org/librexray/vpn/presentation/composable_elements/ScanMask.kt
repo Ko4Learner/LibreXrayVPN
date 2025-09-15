@@ -50,7 +50,6 @@ fun ScanMask(
         val top = (size.height - windowHeightPx) / 2f
         val window = Rect(left, top, left + windowWidthPx, top + windowHeightPx)
 
-        //Двигающаяся шторка внутри окна
         val innerClipPath = Path().apply {
             addRoundRect(RoundRect(window, CornerRadius(cornerRadiusPx, cornerRadiusPx)))
         }
@@ -77,7 +76,6 @@ fun ScanMask(
             )
         }
 
-        //Внешняя маска
         val outerMaskPath = Path().apply {
             fillType = PathFillType.EvenOdd
             addRect(Rect(0f, 0f, size.width, size.height))
@@ -100,25 +98,25 @@ fun ScanMask(
                 window.top,
                 window.left + 2 * cornerRadiusPx,
                 window.top + 2 * cornerRadiusPx
-            ), // TL
+            ),
             Rect(
                 window.right - 2 * cornerRadiusPx,
                 window.top,
                 window.right,
                 window.top + 2 * cornerRadiusPx
-            ), // TR
+            ),
             Rect(
                 window.right - 2 * cornerRadiusPx,
                 window.bottom - 2 * cornerRadiusPx,
                 window.right,
                 window.bottom
-            ),                  // BR
+            ),
             Rect(
                 window.left,
                 window.bottom - 2 * cornerRadiusPx,
                 window.left + 2 * cornerRadiusPx,
                 window.bottom
-            )                    // BL
+            )
         )
         val arcStartAngles = floatArrayOf(180f, 270f, 0f, 90f)
 
