@@ -1,7 +1,7 @@
 package org.librexray.vpn.data.mmkv
 
 import com.google.gson.Gson
-import org.librexray.vpn.core.utils.Utils.fromJsonReified
+import org.librexray.vpn.coreandroid.utils.Utils.fromJsonReified
 import org.librexray.vpn.domain.models.ConfigProfileItem
 import org.librexray.vpn.domain.interfaces.KeyValueStorage
 import com.tencent.mmkv.MMKV

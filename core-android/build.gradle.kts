@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "org.librexray.vpn.core"
+    namespace = "org.librexray.vpn.coreandroid"
     compileSdk = 35
 
     defaultConfig {

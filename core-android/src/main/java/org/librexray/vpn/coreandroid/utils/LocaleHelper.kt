@@ -1,4 +1,4 @@
-package org.librexray.vpn.core.utils
+package org.librexray.vpn.coreandroid.utils
 
 import android.content.Context
 import android.content.res.Configuration

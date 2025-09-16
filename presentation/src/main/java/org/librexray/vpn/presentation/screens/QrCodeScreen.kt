@@ -15,7 +15,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import org.librexray.vpn.presentation.intent.QrCodeScreenIntent
@@ -23,8 +22,10 @@ import org.librexray.vpn.presentation.view_model.QrCodeScreenViewModel
 import org.librexray.vpn.presentation.composable_elements.QrCameraPreview
 import android.Manifest
 import android.content.pm.PackageManager
+import android.content.res.Configuration
 import android.util.Log
 import android.widget.Toast
+import androidx.camera.core.ImageProxy
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -35,11 +36,15 @@ import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.content.ContextCompat
-import org.librexray.vpn.core.utils.Constants
+import org.librexray.vpn.coreandroid.utils.Constants
 import kotlinx.coroutines.delay
 import org.librexray.vpn.presentation.composable_elements.ScanMask
 import org.librexray.vpn.presentation.design_system.icon.AppIcons
+import org.librexray.vpn.presentation.design_system.icon.rememberPainter
+import org.librexray.vpn.presentation.design_system.theme.LibreXrayVPNTheme
 
 @Composable
 fun QrCodeScreen(
@@ -59,6 +64,13 @@ fun QrCodeScreen(
         hasCameraPermission = permission
     }
 
+    QrCodeScreenContent(
+        modifier = modifier,
+        onBackClick = onBackClick,
+        hasCameraPermission = hasCameraPermission,
+        onAnalyzeFrame = viewModel::onAnalyzeFrame
+    )
+
     LaunchedEffect(Unit) {
         val cameraPermissionGranted = ContextCompat.checkSelfPermission(
             context,
@@ -68,48 +80,6 @@ fun QrCodeScreen(
             hasCameraPermission = true
         } else {
             launcher.launch(Manifest.permission.CAMERA)
-        }
-    }
-
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colors.background)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp)
-                .padding(vertical = 16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box {
-                IconButton(onClick = onBackClick) {
-                    Icon(
-                        imageVector = AppIcons.arrowBack,
-                        contentDescription = "Назад",
-                        tint = MaterialTheme.colors.onBackground
-                    )
-                }
-            }
-            Text(
-                text = "Сканирование Qr кода",
-                style = MaterialTheme.typography.h6,
-                color = MaterialTheme.colors.onBackground
-            )
-
-        }
-
-        if (hasCameraPermission) {
-            Box(modifier = Modifier.fillMaxSize()) {
-                QrCameraPreview(
-                    modifier = Modifier.fillMaxSize(),
-                    onFrame = viewModel::onAnalyzeFrame
-                )
-                ScanMask()
-            }
-        } else {
-            Log.d(Constants.TAG, "permission denied")
         }
     }
 
@@ -126,5 +96,85 @@ fun QrCodeScreen(
             viewModel.onIntent(QrCodeScreenIntent.ResetState)
             onResult()
         }
+    }
+}
+
+@Composable
+fun QrCodeScreenContent(
+    modifier: Modifier = Modifier,
+    onBackClick: () -> Unit,
+    hasCameraPermission: Boolean,
+    onAnalyzeFrame: (ImageProxy) -> Unit
+) {
+    val isPreview = LocalInspectionMode.current
+
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colors.background)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp)
+                .padding(horizontal = 4.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(modifier = Modifier.fillMaxWidth()) {
+                IconButton(
+                    modifier = Modifier.align(Alignment.CenterStart),
+                    onClick = onBackClick
+                ) {
+                    Icon(
+                        modifier = Modifier.size(32.dp),
+                        painter = AppIcons.arrowBack.rememberPainter(),
+                        contentDescription = "Назад",
+                        tint = MaterialTheme.colors.onBackground
+                    )
+                }
+                Text(
+                    modifier = Modifier.align(Alignment.Center),
+                    text = "Сканирование Qr кода",
+                    style = MaterialTheme.typography.h6,
+                    color = MaterialTheme.colors.onBackground
+                )
+            }
+
+        }
+
+        if (hasCameraPermission) {
+            Box(modifier = Modifier.fillMaxSize()) {
+                if (isPreview) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(MaterialTheme.colors.background),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            "Camera Preview",
+                            color = MaterialTheme.colors.onBackground,
+                            style = MaterialTheme.typography.h6
+                        )
+                    }
+                } else {
+                    QrCameraPreview(
+                        modifier = Modifier.fillMaxSize(),
+                        onFrame = onAnalyzeFrame
+                    )
+                    ScanMask()
+                }
+            }
+        } else {
+            Log.d(Constants.TAG, "permission denied")
+        }
+    }
+}
+
+@Preview(name = "Dark", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+fun PreviewQrCodeScreen() {
+    LibreXrayVPNTheme {
+        QrCodeScreenContent(onBackClick = {}, hasCameraPermission = true, onAnalyzeFrame = {})
     }
 }

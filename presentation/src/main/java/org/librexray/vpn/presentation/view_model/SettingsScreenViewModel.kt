@@ -35,7 +35,7 @@ class SettingsScreenViewModel @Inject constructor(private val settingsInteractor
         }
     }
 
-    fun intent(intent: SettingsScreenIntent) {
+    fun onIntent(intent: SettingsScreenIntent) {
         when (intent) {
             is SettingsScreenIntent.SetLocale -> setLocale(intent.locale)
             is SettingsScreenIntent.SetTheme -> setTheme(intent.themeMode)

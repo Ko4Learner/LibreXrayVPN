@@ -20,7 +20,7 @@ import android.os.StrictMode
 import android.util.Log
 import androidx.annotation.VisibleForTesting
 import androidx.core.app.NotificationCompat
-import org.librexray.vpn.core.utils.Constants
+import org.librexray.vpn.coreandroid.utils.Constants
 import org.librexray.vpn.domain.interfaces.ServiceManager
 import org.librexray.vpn.domain.interfaces.interactor.ConnectionInteractor
 import org.librexray.vpn.domain.interfaces.repository.ServiceStateRepository

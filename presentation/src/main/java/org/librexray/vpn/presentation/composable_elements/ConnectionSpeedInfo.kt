@@ -13,7 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import org.librexray.vpn.core.utils.Constants
+import org.librexray.vpn.coreandroid.utils.Constants
 import org.librexray.vpn.domain.models.ConnectionSpeed
 import java.util.Locale
 

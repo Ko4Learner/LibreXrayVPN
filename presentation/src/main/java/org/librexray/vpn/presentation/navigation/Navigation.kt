@@ -8,6 +8,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import org.librexray.vpn.presentation.screens.QrCodeScreen
+import org.librexray.vpn.presentation.screens.SettingsScreen
 import org.librexray.vpn.presentation.screens.VpnScreen
 
 @Composable
@@ -22,6 +23,7 @@ fun Navigation(
                 Modifier.padding(innerPadding),
                 navController,
                 onQrCodeClick = { navController.navigate(NavItem.QrCodeScreen.route) },
+                onSettingsClick = { navController.navigate(NavItem.SettingsScreen.route) },
                 getString = getString
             )
         }
@@ -37,6 +39,13 @@ fun Navigation(
                     )
                     navController.popBackStack()
                 },
+                getString = getString
+            )
+        }
+        composable(NavItem.SettingsScreen.route) {
+            SettingsScreen(
+                Modifier.padding(innerPadding),
+                onBackClick = { navController.popBackStack() },
                 getString = getString
             )
         }

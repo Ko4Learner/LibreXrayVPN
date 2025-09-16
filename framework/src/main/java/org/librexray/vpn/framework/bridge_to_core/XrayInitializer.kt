@@ -4,7 +4,7 @@ import android.content.Context
 import android.provider.Settings
 import android.util.Base64
 import android.util.Log
-import org.librexray.vpn.core.utils.Constants
+import org.librexray.vpn.coreandroid.utils.Constants
 import go.Seq
 import libv2ray.Libv2ray
 

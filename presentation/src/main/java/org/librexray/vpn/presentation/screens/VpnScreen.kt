@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
@@ -48,6 +49,7 @@ import org.librexray.vpn.presentation.composable_elements.ConnectionSpeedInfo
 import org.librexray.vpn.presentation.composable_elements.ConnectionTestButton
 import org.librexray.vpn.presentation.composable_elements.SubscriptionItem
 import org.librexray.vpn.presentation.design_system.icon.AppIcons
+import org.librexray.vpn.presentation.design_system.icon.rememberPainter
 import org.librexray.vpn.presentation.design_system.theme.Grey80
 import org.librexray.vpn.presentation.design_system.theme.LibreXrayVPNTheme
 import org.librexray.vpn.presentation.models.ServerItemModel
@@ -57,6 +59,7 @@ fun VpnScreen(
     modifier: Modifier = Modifier,
     navController: NavHostController,
     onQrCodeClick: () -> Unit,
+    onSettingsClick: () -> Unit,
     viewModel: VpnScreenViewModel = hiltViewModel(),
     getString: (Int) -> String
 ) {
@@ -100,6 +103,7 @@ fun VpnScreen(
         VpnScreenContent(
             modifier = modifier,
             state = state,
+            onSettingsClick = onSettingsClick,
             onIntent = viewModel::onIntent,
             showBottomSheet = {
                 scope.launch { sheetState.show() }
@@ -112,6 +116,7 @@ fun VpnScreen(
 fun VpnScreenContent(
     modifier: Modifier = Modifier,
     state: VpnScreenState,
+    onSettingsClick: () -> Unit,
     onIntent: (VpnScreenIntent) -> Unit,
     showBottomSheet: () -> Unit
 ) {
@@ -128,6 +133,7 @@ fun VpnScreenContent(
                 .fillMaxWidth()
                 .statusBarsPadding(),
             state = state,
+            onSettingsClick = onSettingsClick,
             showBottomSheet = showBottomSheet
         )
         MiddleSection(
@@ -157,6 +163,7 @@ fun VpnScreenContent(
 private fun TopSection(
     modifier: Modifier = Modifier,
     state: VpnScreenState,
+    onSettingsClick: () -> Unit,
     showBottomSheet: () -> Unit,
 ) {
     val selectedServer = remember(state.serverItemList, state.selectedServerId) {
@@ -177,9 +184,10 @@ private fun TopSection(
                     style = MaterialTheme.typography.h6,
                     color = MaterialTheme.colors.onBackground
                 )
-                IconButton(onClick = {}) {
+                IconButton(onClick = onSettingsClick) {
                     Icon(
-                        imageVector = AppIcons.Menu,
+                        modifier = Modifier.size(28.dp),
+                        painter = AppIcons.Menu.rememberPainter(),
                         contentDescription = "Настройки",
                         tint = MaterialTheme.colors.onSurface
                     )
@@ -275,6 +283,7 @@ fun PreviewVpnScreen() {
                     )
                 ), selectedServerId = "1"
             ),
+            onSettingsClick = {},
             onIntent = {},
             showBottomSheet = {})
     }

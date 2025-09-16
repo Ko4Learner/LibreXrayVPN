@@ -2,7 +2,7 @@ package org.librexray.vpn.data.repository_impl_test
 
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
-import org.librexray.vpn.core.utils.Constants
+import org.librexray.vpn.coreandroid.utils.Constants
 import org.librexray.vpn.data.repository_impl.SettingsRepositoryImpl
 import org.librexray.vpn.domain.interfaces.KeyValueStorage
 import org.librexray.vpn.domain.models.AppLocale

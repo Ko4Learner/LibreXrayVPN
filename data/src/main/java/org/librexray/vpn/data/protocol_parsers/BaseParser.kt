@@ -7,10 +7,10 @@
 
 package org.librexray.vpn.data.protocol_parsers
 
-import org.librexray.vpn.core.utils.Constants
+import org.librexray.vpn.coreandroid.utils.Constants
 import org.librexray.vpn.domain.models.ConfigProfileItem
 import org.librexray.vpn.domain.models.NetworkType
-import org.librexray.vpn.core.utils.Utils
+import org.librexray.vpn.coreandroid.utils.Utils
 import java.net.URI
 import kotlin.text.orEmpty
 

@@ -18,8 +18,8 @@ import com.google.gson.JsonPrimitive
 import com.google.gson.JsonSerializationContext
 import com.google.gson.JsonSerializer
 import com.google.gson.reflect.TypeToken
-import org.librexray.vpn.core.utils.Constants
-import org.librexray.vpn.core.utils.Utils
+import org.librexray.vpn.coreandroid.utils.Constants
+import org.librexray.vpn.coreandroid.utils.Utils
 import org.librexray.vpn.domain.interfaces.KeyValueStorage
 import org.librexray.vpn.domain.models.ConfigProfileItem
 import org.librexray.vpn.domain.models.ConfigResult

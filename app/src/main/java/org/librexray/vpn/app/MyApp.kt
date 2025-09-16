@@ -2,8 +2,8 @@ package org.librexray.vpn.app
 
 import android.app.Application
 import android.util.Log
-import org.librexray.vpn.core.utils.Constants
-import org.librexray.vpn.core.utils.Utils
+import org.librexray.vpn.coreandroid.utils.Constants
+import org.librexray.vpn.coreandroid.utils.Utils
 import org.librexray.vpn.data.mmkv.MMKVInitializer
 import org.librexray.vpn.framework.bridge_to_core.XrayInitializer
 import dagger.hilt.android.HiltAndroidApp

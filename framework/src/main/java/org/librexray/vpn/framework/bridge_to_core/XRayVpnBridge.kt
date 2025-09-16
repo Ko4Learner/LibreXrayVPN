@@ -1,7 +1,7 @@
 package org.librexray.vpn.framework.bridge_to_core
 
 import android.util.Log
-import org.librexray.vpn.core.utils.Constants
+import org.librexray.vpn.coreandroid.utils.Constants
 import org.librexray.vpn.domain.interfaces.CoreVpnBridge
 import org.librexray.vpn.domain.interfaces.KeyValueStorage
 import org.librexray.vpn.domain.interfaces.ServiceManager

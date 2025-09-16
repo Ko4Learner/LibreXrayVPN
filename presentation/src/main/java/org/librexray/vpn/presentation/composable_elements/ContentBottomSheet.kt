@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import org.librexray.vpn.presentation.design_system.icon.AppIcons
+import org.librexray.vpn.presentation.design_system.icon.rememberPainter
 import org.librexray.vpn.presentation.intent.VpnScreenIntent
 import org.librexray.vpn.presentation.models.ServerItemModel
 
@@ -66,7 +67,7 @@ fun ContentBottomSheet(
             )
             IconButton(onClick = hideBottomSheet) {
                 Icon(
-                    imageVector = AppIcons.Close,
+                    painter = AppIcons.Close.rememberPainter(),
                     contentDescription = "Close",
                     tint = MaterialTheme.colors.onSurface
                 )
@@ -114,7 +115,7 @@ private fun ImportButtonRow(
             ) {
                 Icon(
                     modifier = Modifier.size(40.dp),
-                    imageVector = AppIcons.QrScan,
+                    painter = AppIcons.QrScan.rememberPainter(),
                     contentDescription = null,
                     tint = MaterialTheme.colors.onSurface
                 )
@@ -143,7 +144,7 @@ private fun ImportButtonRow(
             ) {
                 Icon(
                     modifier = Modifier.size(40.dp),
-                    imageVector = AppIcons.Clipboard,
+                    painter = AppIcons.Clipboard.rememberPainter(),
                     contentDescription = null,
                     tint = MaterialTheme.colors.onSurface,
                 )

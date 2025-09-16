@@ -7,8 +7,8 @@
 
 package org.librexray.vpn.framework.outbound_converter
 
-import org.librexray.vpn.core.utils.Constants
-import org.librexray.vpn.core.utils.Utils
+import org.librexray.vpn.coreandroid.utils.Constants
+import org.librexray.vpn.coreandroid.utils.Utils
 import org.librexray.vpn.domain.models.ConfigProfileItem
 import org.librexray.vpn.domain.models.ConfigType
 import org.librexray.vpn.framework.models.XrayConfig.OutboundBean

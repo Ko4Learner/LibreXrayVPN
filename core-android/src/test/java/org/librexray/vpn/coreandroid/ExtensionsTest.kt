@@ -1,7 +1,7 @@
-package org.librexray.vpn.core
+package org.librexray.vpn.coreandroid
 
 import com.google.common.truth.Truth.assertThat
-import org.librexray.vpn.core.utils.idnHost
+import org.librexray.vpn.coreandroid.utils.idnHost
 import org.junit.Test
 import java.net.URI
 

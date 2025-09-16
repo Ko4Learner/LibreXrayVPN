@@ -24,8 +24,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import org.librexray.vpn.presentation.design_system.icon.IconType
+import org.librexray.vpn.presentation.design_system.icon.rememberPainter
 import org.librexray.vpn.presentation.models.ServerItemModel
 
 @Composable
@@ -33,7 +34,7 @@ fun SubscriptionItem(
     modifier: Modifier = Modifier,
     item: ServerItemModel,
     selectedServerId: String?,
-    buttonIcon: ImageVector,
+    buttonIcon: IconType,
     onButtonClick: ((ServerItemModel) -> Unit)? = null,
     onCardClick: (ServerItemModel) -> Unit,
 ) {
@@ -50,6 +51,8 @@ fun SubscriptionItem(
                 shape = RoundedCornerShape(16.dp)
             ) else it
         }
+
+    val painter = buttonIcon.rememberPainter()
 
     Card(
         modifier = cardModifier,
@@ -98,7 +101,7 @@ fun SubscriptionItem(
                 }
             ) {
                 Icon(
-                    imageVector = buttonIcon,
+                    painter = painter,
                     contentDescription = null,
                     tint = MaterialTheme.colors.onSurface
                 )

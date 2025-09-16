@@ -1,4 +1,4 @@
-package org.librexray.vpn.core.utils
+package org.librexray.vpn.coreandroid.utils
 
 /**
  * Holds all global constants used across the VPN client project.

@@ -7,9 +7,9 @@ import android.content.Context
 import android.content.Context.NOTIFICATION_SERVICE
 import android.content.Intent
 import androidx.core.app.NotificationCompat
-import org.librexray.vpn.core.R
-import org.librexray.vpn.core.utils.Constants
-import org.librexray.vpn.core.utils.LocaleHelper
+import org.librexray.vpn.coreandroid.R
+import org.librexray.vpn.coreandroid.utils.Constants
+import org.librexray.vpn.coreandroid.utils.LocaleHelper
 import org.librexray.vpn.domain.interfaces.repository.SettingsRepository
 import org.librexray.vpn.framework.services.VPNService
 import dagger.hilt.android.qualifiers.ApplicationContext

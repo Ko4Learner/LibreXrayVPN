@@ -1,6 +1,6 @@
 package org.librexray.vpn.domain.models
 
-import org.librexray.vpn.core.utils.Constants
+import org.librexray.vpn.coreandroid.utils.Constants
 import java.util.Locale
 
 /**

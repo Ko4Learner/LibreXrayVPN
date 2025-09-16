@@ -19,8 +19,9 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalContext
-import org.librexray.vpn.core.utils.Constants
+import org.librexray.vpn.coreandroid.utils.Constants
 import org.librexray.vpn.presentation.design_system.icon.AppIcons
+import org.librexray.vpn.presentation.design_system.icon.rememberPainter
 import org.librexray.vpn.presentation.intent.VpnScreenIntent
 
 @Composable
@@ -84,10 +85,10 @@ fun ConnectToggle(
 
     ) {
         Icon(
-            imageVector = if (emptyServerList) {
-                AppIcons.Add
+            painter = if (emptyServerList) {
+                AppIcons.Add.rememberPainter()
             } else {
-                AppIcons.Toggle
+                AppIcons.Toggle.rememberPainter()
             },
             contentDescription = null,
             tint = MaterialTheme.colors.onSurface,

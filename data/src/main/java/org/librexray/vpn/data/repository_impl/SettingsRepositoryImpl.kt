@@ -1,6 +1,6 @@
 package org.librexray.vpn.data.repository_impl
 
-import org.librexray.vpn.core.utils.Constants
+import org.librexray.vpn.coreandroid.utils.Constants
 import org.librexray.vpn.domain.interfaces.KeyValueStorage
 import org.librexray.vpn.domain.interfaces.repository.SettingsRepository
 import org.librexray.vpn.domain.models.AppLocale

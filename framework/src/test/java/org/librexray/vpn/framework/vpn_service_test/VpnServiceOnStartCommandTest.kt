@@ -10,7 +10,7 @@ import android.os.Build
 import androidx.test.core.app.ApplicationProvider
 import androidx.core.app.NotificationCompat
 import com.google.common.truth.Truth.assertThat
-import org.librexray.vpn.core.utils.Constants
+import org.librexray.vpn.coreandroid.utils.Constants
 import org.librexray.vpn.domain.interfaces.ServiceManager
 import org.librexray.vpn.domain.interfaces.repository.ServiceStateRepository
 import org.librexray.vpn.domain.state.ServiceState
