@@ -4,6 +4,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import org.librexray.vpn.presentation.composable_elements.items.SubscriptionItem
 import org.librexray.vpn.presentation.design_system.icon.AppIcons
 import org.librexray.vpn.presentation.intent.VpnScreenIntent
 import org.librexray.vpn.presentation.models.ServerItemModel

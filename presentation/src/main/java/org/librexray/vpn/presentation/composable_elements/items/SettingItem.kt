@@ -1,5 +1,6 @@
-package org.librexray.vpn.presentation.composable_elements
+package org.librexray.vpn.presentation.composable_elements.items
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -22,7 +23,8 @@ import org.librexray.vpn.presentation.design_system.icon.rememberPainter
 fun SettingItem(
     modifier: Modifier = Modifier,
     title: String,
-    icon: IconType
+    icon: IconType,
+    onClick: () -> Unit
 ) {
     val painter = icon.rememberPainter()
 
@@ -30,7 +32,8 @@ fun SettingItem(
         modifier = modifier
             .padding(horizontal = 16.dp, vertical = 8.dp)
             .fillMaxWidth()
-            .height(56.dp),
+            .height(56.dp)
+            .clickable(onClick = onClick),
         shape = RoundedCornerShape(16.dp),
         elevation = 0.dp,
         backgroundColor = MaterialTheme.colors.surface.copy(alpha = 0.7f)

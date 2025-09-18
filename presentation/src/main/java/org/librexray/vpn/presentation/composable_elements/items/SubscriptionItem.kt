@@ -1,4 +1,4 @@
-package org.librexray.vpn.presentation.composable_elements
+package org.librexray.vpn.presentation.composable_elements.items
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
