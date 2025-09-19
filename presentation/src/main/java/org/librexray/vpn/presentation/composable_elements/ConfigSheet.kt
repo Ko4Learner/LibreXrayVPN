@@ -47,7 +47,7 @@ fun ContentBottomSheet(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(
-            modifier = modifier
+            modifier = Modifier
                 .width(36.dp)
                 .height(4.dp)
                 .background(

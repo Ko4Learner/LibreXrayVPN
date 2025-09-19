@@ -47,7 +47,7 @@ class MainActivity : ComponentActivity() {
             val localizedContext = remember(state.locale) {
                 LocaleHelper.updateLocale(context, state.locale)
             }
-            LibreXrayVPNTheme {
+            LibreXrayVPNTheme(themeMode = state.themeMode) {
                 val view = LocalView.current
                 val window = (view.context as Activity).window
                 val barColor = MaterialTheme.colors.background
