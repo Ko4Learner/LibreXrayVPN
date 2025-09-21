@@ -39,13 +39,11 @@ fun SubscriptionItem(
     onCardClick: (ServerItemModel) -> Unit,
 ) {
     var showDialog by remember { mutableStateOf(false) }
-
-    val isSelected = item.guid == selectedServerId
     val cardModifier = modifier
         .padding(vertical = 4.dp)
         .fillMaxWidth()
         .let {
-            if (isSelected) it.border(
+            if (item.guid == selectedServerId) it.border(
                 width = 1.dp,
                 color = MaterialTheme.colors.primary.copy(alpha = 0.5f),
                 shape = RoundedCornerShape(16.dp)
@@ -58,9 +56,7 @@ fun SubscriptionItem(
         modifier = cardModifier,
         shape = RoundedCornerShape(16.dp),
         elevation = 0.dp,
-        backgroundColor = if (isSelected) MaterialTheme.colors.surface else MaterialTheme.colors.surface.copy(
-            alpha = 0.7f
-        )
+        backgroundColor = MaterialTheme.colors.surface.copy(alpha = 0.7f)
     ) {
         Row(
             modifier = Modifier
@@ -110,6 +106,7 @@ fun SubscriptionItem(
     }
     if (showDialog) {
         AlertDialog(
+            onDismissRequest = { showDialog = false },
             title = {
                 Text(
                     text = "Удалить элемент?",
@@ -117,13 +114,12 @@ fun SubscriptionItem(
                     color = MaterialTheme.colors.onSurface
                 )
             },
-            onDismissRequest = { showDialog = false },
             dismissButton = {
                 TextButton(onClick = {
                     showDialog = false
                 }) {
                     Text(
-                        text = "Отменить",
+                        text = "Нет",
                         style = MaterialTheme.typography.body1,
                         color = MaterialTheme.colors.onSurface
                     )
@@ -131,15 +127,18 @@ fun SubscriptionItem(
             },
             confirmButton = {
                 TextButton(onClick = {
-                    onButtonClick!!(item)
+                    onButtonClick?.invoke(item)
                     showDialog = false
                 }) {
                     Text(
-                        text = "Удалить",
+                        text = "Да",
                         style = MaterialTheme.typography.body1,
                         color = MaterialTheme.colors.onSurface
                     )
                 }
-            })
+            },
+            shape = RoundedCornerShape(16.dp),
+            backgroundColor = MaterialTheme.colors.surface
+        )
     }
 }

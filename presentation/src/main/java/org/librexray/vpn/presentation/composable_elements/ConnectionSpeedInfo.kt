@@ -27,7 +27,7 @@ fun ConnectionSpeedInfo(
             .padding(vertical = 8.dp)
             .fillMaxWidth()
             .heightIn(min = 48.dp),
-        color = MaterialTheme.colors.surface,
+        color = MaterialTheme.colors.surface.copy(alpha = 0.7f),
         shape = RoundedCornerShape(16.dp),
         elevation = 0.dp
     ) {

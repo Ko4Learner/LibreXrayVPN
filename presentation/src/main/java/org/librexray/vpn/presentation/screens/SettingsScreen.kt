@@ -252,10 +252,7 @@ private fun LanguageBottomSheet(
                 modifier = cardModifier,
                 shape = RoundedCornerShape(16.dp),
                 elevation = 0.dp,
-                backgroundColor = if (isSelected) MaterialTheme.colors.surface
-                else MaterialTheme.colors.surface.copy(
-                    alpha = 0.7f
-                )
+                backgroundColor = MaterialTheme.colors.surface.copy(alpha = 0.7f)
             ) {
                 Row(
                     modifier = Modifier
@@ -347,10 +344,7 @@ private fun ThemeBottomSheet(
                 modifier = cardModifier,
                 shape = RoundedCornerShape(16.dp),
                 elevation = 0.dp,
-                backgroundColor = if (isSelected) MaterialTheme.colors.surface
-                else MaterialTheme.colors.surface.copy(
-                    alpha = 0.7f
-                )
+                backgroundColor = MaterialTheme.colors.surface.copy(alpha = 0.7f)
             ) {
                 Row(
                     modifier = Modifier

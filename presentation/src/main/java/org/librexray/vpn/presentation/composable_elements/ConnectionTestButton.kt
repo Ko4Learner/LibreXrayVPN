@@ -32,7 +32,7 @@ fun ConnectionTestButton(
             .padding(top = 8.dp, bottom = 16.dp)
             .fillMaxWidth()
             .height(48.dp),
-        backgroundColor = MaterialTheme.colors.surface,
+        backgroundColor = MaterialTheme.colors.surface.copy(alpha = 0.7f),
         shape = RoundedCornerShape(16.dp),
         elevation = 0.dp,
     ) {

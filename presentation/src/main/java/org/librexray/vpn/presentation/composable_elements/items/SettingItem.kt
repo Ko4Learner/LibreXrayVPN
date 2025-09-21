@@ -30,9 +30,9 @@ fun SettingItem(
 
     Card(
         modifier = modifier
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .padding(horizontal = 16.dp, vertical = 4.dp)
             .fillMaxWidth()
-            .height(56.dp)
+            .height(64.dp)
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(16.dp),
         elevation = 0.dp,
@@ -41,7 +41,7 @@ fun SettingItem(
         Row(
             modifier = modifier
                 .fillMaxWidth()
-                .height(56.dp)
+                .height(64.dp)
                 .padding(horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
