@@ -49,6 +49,7 @@ import org.librexray.vpn.presentation.state.SettingsScreenState
 import org.librexray.vpn.presentation.view_model.SettingsScreenViewModel
 import androidx.core.net.toUri
 import kotlinx.coroutines.launch
+import org.librexray.vpn.domain.models.AppLocale
 import org.librexray.vpn.domain.models.ThemeMode
 import org.librexray.vpn.presentation.design_system.theme.Grey80
 
@@ -103,8 +104,13 @@ private fun SettingsScreenContent(
         sheetBackgroundColor = MaterialTheme.colors.background,
         sheetContent = {
             when (currentSheet) {
-                SettingsSheet.About -> TODO()
-                SettingsSheet.Language -> TODO()
+                SettingsSheet.Language -> LanguageBottomSheet(
+                    state = state,
+                    onIntent = onIntent,
+                    getString = getString,
+                    closeBottomSheet = { closeBottomSheet() }
+                )
+
                 SettingsSheet.Theme ->
                     ThemeBottomSheet(
                         state = state,
@@ -112,6 +118,11 @@ private fun SettingsScreenContent(
                         getString = getString,
                         closeBottomSheet = { closeBottomSheet() }
                     )
+
+                SettingsSheet.About -> AboutBottomSheet(
+                    getString = getString,
+                    closeBottomSheet = { closeBottomSheet() }
+                )
 
                 null -> closeBottomSheet()
             }
@@ -152,13 +163,13 @@ private fun SettingsScreenContent(
 
             Column(modifier = Modifier.fillMaxWidth()) {
                 SettingItem(
+                    title = "Язык",
+                    icon = AppIcons.Language,
+                    onClick = { openBottomSheet(SettingsSheet.Language) })
+                SettingItem(
                     title = "Тема приложения",
                     icon = AppIcons.Theme,
                     onClick = { openBottomSheet(SettingsSheet.Theme) })
-                SettingItem(
-                    title = "Язык приложения",
-                    icon = AppIcons.Language,
-                    onClick = { openBottomSheet(SettingsSheet.Language) })
                 SettingItem(
                     title = "Github",
                     icon = AppIcons.Github,
@@ -181,7 +192,7 @@ private fun SettingsScreenContent(
 }
 
 @Composable
-fun ThemeBottomSheet(
+private fun LanguageBottomSheet(
     modifier: Modifier = Modifier,
     state: SettingsScreenState,
     onIntent: (SettingsScreenIntent) -> Unit,
@@ -190,7 +201,8 @@ fun ThemeBottomSheet(
 ) {
     Column(
         modifier = modifier
-            .padding(horizontal = 16.dp, vertical = 16.dp)
+            .padding(horizontal = 16.dp)
+            .padding(bottom = 16.dp)
             .fillMaxWidth()
             .heightIn(max = LocalConfiguration.current.screenHeightDp.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -198,6 +210,102 @@ fun ThemeBottomSheet(
     ) {
         Box(
             modifier = Modifier
+                .padding(top = 8.dp)
+                .width(36.dp)
+                .height(4.dp)
+                .background(
+                    shape = RoundedCornerShape(50),
+                    color = MaterialTheme.colors.surface
+                ),
+        )
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Язык приложения",
+                style = MaterialTheme.typography.h6,
+                color = MaterialTheme.colors.onBackground
+            )
+            IconButton(onClick = closeBottomSheet) {
+                Icon(
+                    painter = AppIcons.Close.rememberPainter(),
+                    contentDescription = "Close",
+                    tint = MaterialTheme.colors.onBackground
+                )
+            }
+        }
+        AppLocale.entries.forEach { mode ->
+            val isSelected = state.locale == mode
+            val cardModifier = Modifier
+                .fillMaxWidth().let {
+                    if (isSelected) it.border(
+                        color = MaterialTheme.colors.primary,
+                        width = 1.dp,
+                        shape = RoundedCornerShape(16.dp)
+                    ) else it
+                }
+            Card(
+                modifier = cardModifier,
+                shape = RoundedCornerShape(16.dp),
+                elevation = 0.dp,
+                backgroundColor = if (isSelected) MaterialTheme.colors.surface
+                else MaterialTheme.colors.surface.copy(
+                    alpha = 0.7f
+                )
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 16.dp)
+                        .clickable { onIntent(SettingsScreenIntent.SetLocale(mode)) },
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    Text(
+                        text = when (mode) {
+                            AppLocale.SYSTEM -> "Системный"
+                            AppLocale.EN -> "Английский"
+                            AppLocale.RU -> "Русский"
+                        },
+                        style = MaterialTheme.typography.h6,
+                        color = MaterialTheme.colors.onBackground
+                    )
+                    RadioButton(
+                        modifier = Modifier,
+                        selected = isSelected,
+                        onClick = { onIntent(SettingsScreenIntent.SetLocale(mode)) },
+                        colors = RadioButtonDefaults.colors(selectedColor = MaterialTheme.colors.primary),
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ThemeBottomSheet(
+    modifier: Modifier = Modifier,
+    state: SettingsScreenState,
+    onIntent: (SettingsScreenIntent) -> Unit,
+    getString: (Int) -> String,
+    closeBottomSheet: () -> Unit
+) {
+    Column(
+        modifier = modifier
+            .padding(horizontal = 16.dp)
+            .padding(bottom = 16.dp)
+            .fillMaxWidth()
+            .heightIn(max = LocalConfiguration.current.screenHeightDp.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Box(
+            modifier = Modifier
+                .padding(top = 8.dp)
                 .width(36.dp)
                 .height(4.dp)
                 .background(
@@ -229,12 +337,12 @@ fun ThemeBottomSheet(
             val isSelected = state.themeMode == mode
             val cardModifier = Modifier
                 .fillMaxWidth().let {
-                if (isSelected) it.border(
-                    color = MaterialTheme.colors.primary,
-                    width = 1.dp,
-                    shape = RoundedCornerShape(16.dp)
-                ) else it
-            }
+                    if (isSelected) it.border(
+                        color = MaterialTheme.colors.primary,
+                        width = 1.dp,
+                        shape = RoundedCornerShape(16.dp)
+                    ) else it
+                }
             Card(
                 modifier = cardModifier,
                 shape = RoundedCornerShape(16.dp),
@@ -254,9 +362,9 @@ fun ThemeBottomSheet(
                 ) {
                     Text(
                         text = when (mode) {
-                            ThemeMode.SYSTEM -> "Системная тема"
-                            ThemeMode.LIGHT -> "Светлая тема"
-                            ThemeMode.DARK -> "Тёмная тема"
+                            ThemeMode.SYSTEM -> "Системная"
+                            ThemeMode.LIGHT -> "Светлая"
+                            ThemeMode.DARK -> "Тёмная"
                         },
                         style = MaterialTheme.typography.h6,
                         color = MaterialTheme.colors.onBackground
@@ -270,6 +378,76 @@ fun ThemeBottomSheet(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun AboutBottomSheet(
+    modifier: Modifier = Modifier,
+    getString: (Int) -> String,
+    closeBottomSheet: () -> Unit
+) {
+    Column(
+        modifier = modifier
+            .padding(horizontal = 16.dp)
+            .padding(bottom = 16.dp)
+            .fillMaxWidth()
+            .heightIn(max = LocalConfiguration.current.screenHeightDp.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Box(
+            modifier = Modifier
+                .padding(top = 8.dp)
+                .width(36.dp)
+                .height(4.dp)
+                .background(
+                    shape = RoundedCornerShape(50),
+                    color = MaterialTheme.colors.surface
+                ),
+        )
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "О приложении",
+                style = MaterialTheme.typography.h6,
+                color = MaterialTheme.colors.onBackground
+            )
+            IconButton(onClick = closeBottomSheet) {
+                Icon(
+                    painter = AppIcons.Close.rememberPainter(),
+                    contentDescription = "Close",
+                    tint = MaterialTheme.colors.onBackground
+                )
+            }
+        }
+
+        Card(
+            modifier = Modifier
+                .fillMaxWidth(),
+            elevation = 0.dp,
+            backgroundColor = MaterialTheme.colors.background
+        ) {
+            Text(
+                text = "LibreXrayVPN v0.1.0\n" +
+                        "© 2025 Nikita (Ko4Learner)\n" +
+                        "\n" +
+                        "Программа распространяется по лицензии GNU GPL v3.0 или более поздней.\n" +
+                        "\n" +
+                        "Основано на: v2rayNG (GPL-3.0)\n" +
+                        "\n" +
+                        "Полный текст лицензии и список сторонних библиотек см. в репозитории проекта.",
+                style = MaterialTheme.typography.body1,
+                color = MaterialTheme.colors.onBackground
+            )
+        }
+
+
     }
 }
 

@@ -42,7 +42,7 @@ fun SubscriptionItem(
 
     val isSelected = item.guid == selectedServerId
     val cardModifier = modifier
-        .padding(vertical = 8.dp)
+        .padding(vertical = 4.dp)
         .fillMaxWidth()
         .let {
             if (isSelected) it.border(

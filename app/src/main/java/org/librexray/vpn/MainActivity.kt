@@ -26,6 +26,9 @@ import org.librexray.vpn.presentation.design_system.theme.LibreXrayVPNTheme
 import org.librexray.vpn.coreandroid.utils.LocaleHelper
 import org.librexray.vpn.presentation.view_model.SettingsScreenViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import org.librexray.vpn.coreandroid.utils.Constants
+import org.librexray.vpn.domain.models.AppLocale
+import java.util.Locale
 
 /**
  * MainActivity - root activity for the VPN client UI.
@@ -45,7 +48,7 @@ class MainActivity : ComponentActivity() {
             val state by viewModel.state.collectAsState()
             val context = LocalContext.current
             val localizedContext = remember(state.locale) {
-                LocaleHelper.updateLocale(context, state.locale)
+                LocaleHelper.updateLocale(context, resolveEffectiveLocale(state.locale))
             }
             LibreXrayVPNTheme(themeMode = state.themeMode) {
                 val view = LocalView.current
@@ -78,5 +81,22 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    /**
+     * Maps an [AppLocale] selection to a concrete [Locale].
+     *
+     * - [AppLocale.SYSTEM]: returns Russian for system `ru`, English for system `en`,
+     *   otherwise English (fallback).
+     */
+    private fun resolveEffectiveLocale(mode: AppLocale): Locale = when (mode) {
+        AppLocale.SYSTEM -> when (Locale.getDefault().language.lowercase(Locale.ROOT)) {
+            Constants.RU_LOCALE_TAG -> Locale.forLanguageTag(Constants.RU_LOCALE_TAG)
+            Constants.EN_LOCALE_TAG -> Locale.forLanguageTag(Constants.EN_LOCALE_TAG)
+            else -> Locale.forLanguageTag(Constants.EN_LOCALE_TAG)
+        }
+
+        AppLocale.RU -> Locale.forLanguageTag(Constants.RU_LOCALE_TAG)
+        AppLocale.EN -> Locale.forLanguageTag(Constants.EN_LOCALE_TAG)
     }
 }

@@ -3,7 +3,6 @@ package org.librexray.vpn.domain.interfaces.repository
 import org.librexray.vpn.domain.models.AppLocale
 import org.librexray.vpn.domain.models.ThemeMode
 import kotlinx.coroutines.flow.Flow
-import java.util.Locale
 
 /**
  * Central access point for user-facing application settings (locale, theme, etc.).
@@ -16,9 +15,9 @@ import java.util.Locale
  * - setTheme(theme): persists a preferred theme mode (enum-based) and notifies observers.
  */
 interface SettingsRepository {
-    fun observeLocale(): Flow<Locale>
+    fun observeLocale(): Flow<AppLocale>
     suspend fun setLocale(locale: AppLocale)
-    fun getLocale(): Locale
+    fun getLocale(): AppLocale
     fun observeTheme(): Flow<ThemeMode>
     suspend fun setTheme(theme: ThemeMode)
 }

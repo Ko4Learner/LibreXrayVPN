@@ -13,6 +13,8 @@ import org.librexray.vpn.coreandroid.utils.LocaleHelper
 import org.librexray.vpn.domain.interfaces.repository.SettingsRepository
 import org.librexray.vpn.framework.services.VPNService
 import dagger.hilt.android.qualifiers.ApplicationContext
+import org.librexray.vpn.domain.models.AppLocale
+import java.util.Locale
 import javax.inject.Inject
 
 /**
@@ -34,7 +36,7 @@ class NotificationFactory @Inject constructor(
      */
     fun createNotificationBuilder(title: String): NotificationCompat.Builder {
         val locale = settingsRepository.getLocale()
-        val localizedContext = LocaleHelper.updateLocale(context, locale)
+        val localizedContext = LocaleHelper.updateLocale(context, resolveEffectiveLocale(locale))
         val channelId = "LibreXrayVPN"
         val notificationManager =
             localizedContext.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
@@ -108,6 +110,24 @@ class NotificationFactory @Inject constructor(
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
     }
+
+    /**
+     * Maps an [AppLocale] selection to a concrete [Locale].
+     *
+     * - [AppLocale.SYSTEM]: returns Russian for system `ru`, English for system `en`,
+     *   otherwise English (fallback).
+     */
+    private fun resolveEffectiveLocale(mode: AppLocale): Locale = when (mode) {
+        AppLocale.SYSTEM -> when (Locale.getDefault().language.lowercase(Locale.ROOT)) {
+            Constants.RU_LOCALE_TAG -> Locale.forLanguageTag(Constants.RU_LOCALE_TAG)
+            Constants.EN_LOCALE_TAG -> Locale.forLanguageTag(Constants.EN_LOCALE_TAG)
+            else -> Locale.forLanguageTag(Constants.EN_LOCALE_TAG)
+        }
+
+        AppLocale.RU -> Locale.forLanguageTag(Constants.RU_LOCALE_TAG)
+        AppLocale.EN -> Locale.forLanguageTag(Constants.EN_LOCALE_TAG)
+    }
+
     companion object {
         private const val REQUEST_CODE_STOP_SERVICE = 1
         private const val REQUEST_CODE_RESTART_SERVICE = 2

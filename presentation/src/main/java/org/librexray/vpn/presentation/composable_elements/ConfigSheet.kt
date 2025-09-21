@@ -40,14 +40,16 @@ fun ContentBottomSheet(
 ) {
     Column(
         modifier = modifier
-            .padding(horizontal = 16.dp, vertical = 4.dp)
+            .padding(horizontal = 16.dp)
+            .padding(bottom = 16.dp)
             .heightIn(max = LocalConfiguration.current.screenHeightDp.dp)
             .fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(
             modifier = Modifier
+                .padding(top = 8.dp)
                 .width(36.dp)
                 .height(4.dp)
                 .background(
