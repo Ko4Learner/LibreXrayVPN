@@ -9,7 +9,7 @@ object Constants {
     const val TAG = "VpnApplication"
 
     // --- Localization Tags ---
-    const val SYSTEM_LOCALE_TAG = "system"
+    const val SYSTEM_LOCALE_TAG = ""
     const val RU_LOCALE_TAG = "ru"
     const val EN_LOCALE_TAG = "en"
 

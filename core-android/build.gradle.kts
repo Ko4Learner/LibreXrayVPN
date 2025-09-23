@@ -45,6 +45,10 @@ dependencies {
     // Gson
     implementation(libs.gson)
 
+    // UI
+    implementation(libs.androidx.appcompat)
+    implementation(libs.material)
+
     // Unit testing (JVM)
     testImplementation(libs.junit)
     testImplementation(libs.truth)

@@ -9,16 +9,12 @@ import android.content.Intent
 import androidx.core.app.NotificationCompat
 import org.librexray.vpn.coreandroid.R
 import org.librexray.vpn.coreandroid.utils.Constants
-import org.librexray.vpn.coreandroid.utils.LocaleHelper
-import org.librexray.vpn.domain.interfaces.repository.SettingsRepository
 import org.librexray.vpn.framework.services.VPNService
 import dagger.hilt.android.qualifiers.ApplicationContext
-import org.librexray.vpn.domain.models.AppLocale
-import java.util.Locale
 import javax.inject.Inject
 
 /**
- * Factory for localized foreground notifications used by the VPN service.
+ * Factory for foreground notifications used by the VPN service.
  *
  * Responsibilities:
  * - Produces a preconfigured [NotificationCompat.Builder] for persistent VPN status.
@@ -27,19 +23,15 @@ import javax.inject.Inject
  */
 class NotificationFactory @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val pendingIntentProvider: PendingIntentProvider,
-    private val settingsRepository: SettingsRepository
+    private val pendingIntentProvider: PendingIntentProvider
 ) {
-    //TODO строки в ресурсы
     /**
-     * Creates a localized, preconfigured notification builder for the VPN service.
+     * Creates a preconfigured notification builder for the VPN service.
      */
     fun createNotificationBuilder(title: String): NotificationCompat.Builder {
-        val locale = settingsRepository.getLocale()
-        val localizedContext = LocaleHelper.updateLocale(context, resolveEffectiveLocale(locale))
         val channelId = "LibreXrayVPN"
         val notificationManager =
-            localizedContext.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+            context.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         val channel = NotificationChannel(
             channelId,
             title,
@@ -47,21 +39,21 @@ class NotificationFactory @Inject constructor(
         )
         notificationManager.createNotificationChannel(channel)
 
-        return NotificationCompat.Builder(localizedContext, channelId)
+        return NotificationCompat.Builder(context, channelId)
             .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle(title)
             .setOnlyAlertOnce(true)
             .setOngoing(true)
-            .setContentIntent(createMainActivityPendingIntent(localizedContext))
+            .setContentIntent(createMainActivityPendingIntent(context))
             .addAction(
                 R.drawable.outline_3d_rotation_24,
                 "Перезапустить",
-                createRestartServicePendingIntent(localizedContext)
+                createRestartServicePendingIntent(context)
             )
             .addAction(
                 R.drawable.baseline_stop_24,
                 "Выключить",
-                createStopServicePendingIntent(localizedContext)
+                createStopServicePendingIntent(context)
             )
     }
 
@@ -109,23 +101,6 @@ class NotificationFactory @Inject constructor(
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
-    }
-
-    /**
-     * Maps an [AppLocale] selection to a concrete [Locale].
-     *
-     * - [AppLocale.SYSTEM]: returns Russian for system `ru`, English for system `en`,
-     *   otherwise English (fallback).
-     */
-    private fun resolveEffectiveLocale(mode: AppLocale): Locale = when (mode) {
-        AppLocale.SYSTEM -> when (Locale.getDefault().language.lowercase(Locale.ROOT)) {
-            Constants.RU_LOCALE_TAG -> Locale.forLanguageTag(Constants.RU_LOCALE_TAG)
-            Constants.EN_LOCALE_TAG -> Locale.forLanguageTag(Constants.EN_LOCALE_TAG)
-            else -> Locale.forLanguageTag(Constants.EN_LOCALE_TAG)
-        }
-
-        AppLocale.RU -> Locale.forLanguageTag(Constants.RU_LOCALE_TAG)
-        AppLocale.EN -> Locale.forLanguageTag(Constants.EN_LOCALE_TAG)
     }
 
     companion object {

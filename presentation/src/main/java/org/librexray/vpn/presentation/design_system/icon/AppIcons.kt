@@ -37,4 +37,5 @@ object AppIcons {
 
     val Github = IconType.Drawable(R.drawable.vector_github)
     val LatencyTest = IconType.Drawable(R.drawable.vector_test_connection)
+    val AppIcon = IconType.Drawable(R.drawable.ic_notification)
 }

@@ -2,33 +2,30 @@ package org.librexray.vpn
 
 import android.app.Activity
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
+import androidx.core.os.LocaleListCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.rememberNavController
 import org.librexray.vpn.presentation.navigation.Navigation
 import org.librexray.vpn.presentation.design_system.theme.LibreXrayVPNTheme
-import org.librexray.vpn.coreandroid.utils.LocaleHelper
 import org.librexray.vpn.presentation.view_model.SettingsScreenViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import org.librexray.vpn.coreandroid.utils.Constants
-import org.librexray.vpn.domain.models.AppLocale
-import java.util.Locale
 
 /**
  * MainActivity - root activity for the VPN client UI.
@@ -39,17 +36,20 @@ import java.util.Locale
  * - Sets up the root navigation controller and app-wide Scaffold layout.
  */
 @AndroidEntryPoint
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             val viewModel: SettingsScreenViewModel = hiltViewModel()
             val state by viewModel.state.collectAsState()
-            val context = LocalContext.current
-            val localizedContext = remember(state.locale) {
-                LocaleHelper.updateLocale(context, resolveEffectiveLocale(state.locale))
+
+            LaunchedEffect(state.localeMode) {
+                AppCompatDelegate.setApplicationLocales(
+                    LocaleListCompat.forLanguageTags( state.localeMode.toTag())
+                )
             }
+
             LibreXrayVPNTheme(themeMode = state.themeMode) {
                 val view = LocalView.current
                 val window = (view.context as Activity).window
@@ -65,7 +65,6 @@ class MainActivity : ComponentActivity() {
                     window.statusBarColor = barColor.toArgb()
                 }
 
-
                 val navController = rememberNavController()
                 Scaffold(
                     modifier = Modifier
@@ -73,30 +72,9 @@ class MainActivity : ComponentActivity() {
                         .fillMaxSize()
                 ) { innerPadding ->
                     Navigation(
-                        navController = navController, innerPadding = innerPadding,
-                        // Pass a localized string getter to navigation graph.
-                        getString = { resId: Int ->
-                            localizedContext.getString(resId)
-                        })
+                        navController = navController, innerPadding = innerPadding)
                 }
             }
         }
-    }
-
-    /**
-     * Maps an [AppLocale] selection to a concrete [Locale].
-     *
-     * - [AppLocale.SYSTEM]: returns Russian for system `ru`, English for system `en`,
-     *   otherwise English (fallback).
-     */
-    private fun resolveEffectiveLocale(mode: AppLocale): Locale = when (mode) {
-        AppLocale.SYSTEM -> when (Locale.getDefault().language.lowercase(Locale.ROOT)) {
-            Constants.RU_LOCALE_TAG -> Locale.forLanguageTag(Constants.RU_LOCALE_TAG)
-            Constants.EN_LOCALE_TAG -> Locale.forLanguageTag(Constants.EN_LOCALE_TAG)
-            else -> Locale.forLanguageTag(Constants.EN_LOCALE_TAG)
-        }
-
-        AppLocale.RU -> Locale.forLanguageTag(Constants.RU_LOCALE_TAG)
-        AppLocale.EN -> Locale.forLanguageTag(Constants.EN_LOCALE_TAG)
     }
 }

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">LibreXrayVPN</string>
+    <string name="add_configuration">Добавить конфигурацию</string>
+    <string name="my_configurations">Мои конфигурации</string>
+    <string name="language">Язык</string>
+</resources>

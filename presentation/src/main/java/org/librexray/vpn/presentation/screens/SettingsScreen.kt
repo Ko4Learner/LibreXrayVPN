@@ -37,6 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -49,6 +50,7 @@ import org.librexray.vpn.presentation.state.SettingsScreenState
 import org.librexray.vpn.presentation.view_model.SettingsScreenViewModel
 import androidx.core.net.toUri
 import kotlinx.coroutines.launch
+import org.librexray.vpn.coreandroid.R
 import org.librexray.vpn.domain.models.AppLocale
 import org.librexray.vpn.domain.models.ThemeMode
 import org.librexray.vpn.presentation.design_system.theme.Grey80
@@ -57,8 +59,7 @@ import org.librexray.vpn.presentation.design_system.theme.Grey80
 fun SettingsScreen(
     modifier: Modifier = Modifier,
     viewModel: SettingsScreenViewModel = hiltViewModel(),
-    onBackClick: () -> Unit,
-    getString: (Int) -> String,
+    onBackClick: () -> Unit
 ) {
     val state by viewModel.state.collectAsState()
 
@@ -66,8 +67,7 @@ fun SettingsScreen(
         modifier = modifier,
         state = state,
         onIntent = viewModel::onIntent,
-        onBackClick = onBackClick,
-        getString = getString
+        onBackClick = onBackClick
     )
 }
 
@@ -76,8 +76,7 @@ private fun SettingsScreenContent(
     modifier: Modifier = Modifier,
     state: SettingsScreenState,
     onIntent: (SettingsScreenIntent) -> Unit,
-    onBackClick: () -> Unit,
-    getString: (Int) -> String,
+    onBackClick: () -> Unit
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -107,7 +106,6 @@ private fun SettingsScreenContent(
                 SettingsSheet.Language -> LanguageBottomSheet(
                     state = state,
                     onIntent = onIntent,
-                    getString = getString,
                     closeBottomSheet = { closeBottomSheet() }
                 )
 
@@ -115,12 +113,10 @@ private fun SettingsScreenContent(
                     ThemeBottomSheet(
                         state = state,
                         onIntent = onIntent,
-                        getString = getString,
                         closeBottomSheet = { closeBottomSheet() }
                     )
 
                 SettingsSheet.About -> AboutBottomSheet(
-                    getString = getString,
                     closeBottomSheet = { closeBottomSheet() }
                 )
 
@@ -163,7 +159,7 @@ private fun SettingsScreenContent(
 
             Column(modifier = Modifier.fillMaxWidth()) {
                 SettingItem(
-                    title = "Язык",
+                    title = stringResource(R.string.language),
                     icon = AppIcons.Language,
                     onClick = { openBottomSheet(SettingsSheet.Language) })
                 SettingItem(
@@ -196,7 +192,6 @@ private fun LanguageBottomSheet(
     modifier: Modifier = Modifier,
     state: SettingsScreenState,
     onIntent: (SettingsScreenIntent) -> Unit,
-    getString: (Int) -> String,
     closeBottomSheet: () -> Unit
 ) {
     Column(
@@ -239,7 +234,7 @@ private fun LanguageBottomSheet(
             }
         }
         AppLocale.entries.forEach { mode ->
-            val isSelected = state.locale == mode
+            val isSelected = state.localeMode == mode
             val cardModifier = Modifier
                 .fillMaxWidth().let {
                     if (isSelected) it.border(
@@ -288,7 +283,6 @@ private fun ThemeBottomSheet(
     modifier: Modifier = Modifier,
     state: SettingsScreenState,
     onIntent: (SettingsScreenIntent) -> Unit,
-    getString: (Int) -> String,
     closeBottomSheet: () -> Unit
 ) {
     Column(
@@ -378,7 +372,6 @@ private fun ThemeBottomSheet(
 @Composable
 private fun AboutBottomSheet(
     modifier: Modifier = Modifier,
-    getString: (Int) -> String,
     closeBottomSheet: () -> Unit
 ) {
     Column(
@@ -458,7 +451,6 @@ fun SettingsScreenContentPreview() {
         SettingsScreenContent(
             state = SettingsScreenState(),
             onIntent = {},
-            onBackClick = {},
-            getString = { "" })
+            onBackClick = {})
     }
 }

@@ -14,8 +14,7 @@ import org.librexray.vpn.presentation.screens.VpnScreen
 @Composable
 fun Navigation(
     navController: NavHostController,
-    innerPadding: PaddingValues,
-    getString: (Int) -> String
+    innerPadding: PaddingValues
 ) {
     NavHost(navController, startDestination = NavItem.VpnScreen.route) {
         composable(NavItem.VpnScreen.route) {
@@ -23,8 +22,7 @@ fun Navigation(
                 Modifier.padding(innerPadding),
                 navController,
                 onQrCodeClick = { navController.navigate(NavItem.QrCodeScreen.route) },
-                onSettingsClick = { navController.navigate(NavItem.SettingsScreen.route) },
-                getString = getString
+                onSettingsClick = { navController.navigate(NavItem.SettingsScreen.route) }
             )
         }
 
@@ -38,15 +36,13 @@ fun Navigation(
                         true
                     )
                     navController.popBackStack()
-                },
-                getString = getString
+                }
             )
         }
         composable(NavItem.SettingsScreen.route) {
             SettingsScreen(
                 Modifier.padding(innerPadding),
-                onBackClick = { navController.popBackStack() },
-                getString = getString
+                onBackClick = { navController.popBackStack() }
             )
         }
     }

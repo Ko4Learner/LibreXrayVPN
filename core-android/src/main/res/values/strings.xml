@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">LibreXrayVPN</string>
+    <string name="add_configuration">Add Configuration</string>
+    <string name="my_configurations">My configurations</string>
+    <string name="language">Language</string>
 </resources>

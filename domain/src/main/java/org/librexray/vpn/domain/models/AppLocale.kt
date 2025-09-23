@@ -14,7 +14,7 @@ enum class AppLocale {
     /**
      * Returns the persistent tag for this locale choice.
      *
-     * @return "system", "ru" or "en".
+     * @return "", "ru" or "en".
      */
     fun toTag(): String = when (this) {
         SYSTEM -> Constants.SYSTEM_LOCALE_TAG

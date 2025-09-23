@@ -24,7 +24,7 @@ class SettingsRepositoryImplTest {
     fun setUp() {
         storage = mockk(relaxUnitFun = true)
 
-        every { storage.decodeSettingsString("language") } returns "system"
+        every { storage.decodeSettingsString("language") } returns ""
         every { storage.decodeSettingsString("theme") } returns "system"
         Locale.setDefault(Locale.forLanguageTag("en"))
 

@@ -60,8 +60,7 @@ fun VpnScreen(
     navController: NavHostController,
     onQrCodeClick: () -> Unit,
     onSettingsClick: () -> Unit,
-    viewModel: VpnScreenViewModel = hiltViewModel(),
-    getString: (Int) -> String
+    viewModel: VpnScreenViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
 
@@ -81,8 +80,7 @@ fun VpnScreen(
         state = state,
         onSettingsClick = onSettingsClick,
         onIntent = viewModel::onIntent,
-        onQrCodeClick = onQrCodeClick,
-        getString = getString
+        onQrCodeClick = onQrCodeClick
     )
 }
 
@@ -92,8 +90,7 @@ private fun VpnScreenContent(
     state: VpnScreenState,
     onSettingsClick: () -> Unit,
     onIntent: (VpnScreenIntent) -> Unit,
-    onQrCodeClick: () -> Unit,
-    getString: (Int) -> String
+    onQrCodeClick: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(
@@ -179,17 +176,29 @@ private fun TopSection(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "LibreXrayVpn",
-                    style = MaterialTheme.typography.h6,
-                    color = MaterialTheme.colors.onBackground
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(
+                        modifier = Modifier.size(28.dp),
+                        painter = AppIcons.AppIcon.rememberPainter(),
+                        contentDescription = null,
+                        tint = MaterialTheme.colors.onBackground
+                    )
+                    Text(
+                        text = "LibreXrayVpn",
+                        style = MaterialTheme.typography.h6,
+                        color = MaterialTheme.colors.onBackground
+                    )
+                }
+
                 IconButton(onClick = onSettingsClick) {
                     Icon(
                         modifier = Modifier.size(28.dp),
                         painter = AppIcons.Menu.rememberPainter(),
                         contentDescription = "Настройки",
-                        tint = MaterialTheme.colors.onSurface
+                        tint = MaterialTheme.colors.onBackground
                     )
                 }
             }
@@ -285,7 +294,6 @@ fun PreviewVpnScreen() {
             ),
             onSettingsClick = {},
             onIntent = {},
-            onQrCodeClick = {},
-            getString = { "" })
+            onQrCodeClick = {})
     }
 }

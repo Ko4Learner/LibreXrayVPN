@@ -51,8 +51,7 @@ fun QrCodeScreen(
     modifier: Modifier = Modifier,
     viewModel: QrCodeScreenViewModel = hiltViewModel(),
     onBackClick: () -> Unit,
-    onResult: () -> Unit,
-    getString: (Int) -> String
+    onResult: () -> Unit
 ) {
     var hasCameraPermission by remember { mutableStateOf(false) }
     val state by viewModel.state.collectAsState()

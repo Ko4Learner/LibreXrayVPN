@@ -23,7 +23,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import org.librexray.vpn.coreandroid.R
 import org.librexray.vpn.presentation.design_system.icon.AppIcons
 import org.librexray.vpn.presentation.design_system.icon.rememberPainter
 import org.librexray.vpn.presentation.intent.VpnScreenIntent
@@ -63,7 +65,9 @@ fun ContentBottomSheet(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = if (itemList.isEmpty()) "Добавить конфигурацию" else "Мои конфигурации",
+                text = if (itemList.isEmpty()) stringResource(R.string.add_configuration) else stringResource(
+                    R.string.my_configurations
+                ),
                 style = MaterialTheme.typography.h6,
                 color = MaterialTheme.colors.onSurface
             )
@@ -74,7 +78,6 @@ fun ContentBottomSheet(
                     tint = MaterialTheme.colors.onSurface
                 )
             }
-
         }
         SubscriptionsList(
             modifier = Modifier
