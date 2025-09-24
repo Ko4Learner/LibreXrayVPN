@@ -5,7 +5,7 @@
  * Modified from v2rayNG (https://github.com/2dust/v2rayNG).
  */
 
-package org.librexray.vpn.core.utils
+package org.librexray.vpn.coreandroid.utils
 
 import java.net.URI
 

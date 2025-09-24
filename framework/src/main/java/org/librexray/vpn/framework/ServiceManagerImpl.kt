@@ -2,7 +2,7 @@ package org.librexray.vpn.framework
 
 import android.content.Context
 import android.content.Intent
-import org.librexray.vpn.core.utils.Constants
+import org.librexray.vpn.coreandroid.utils.Constants
 import org.librexray.vpn.domain.interfaces.CoreVpnBridge
 import org.librexray.vpn.domain.interfaces.KeyValueStorage
 import org.librexray.vpn.domain.interfaces.ServiceManager
@@ -10,7 +10,7 @@ import org.librexray.vpn.domain.interfaces.repository.ServiceStateRepository
 import org.librexray.vpn.domain.models.ConfigProfileItem
 import org.librexray.vpn.domain.state.ServiceState
 import org.librexray.vpn.framework.services.VPNService
-import org.librexray.vpn.core.utils.Utils
+import org.librexray.vpn.coreandroid.utils.Utils
 import dagger.Lazy
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope

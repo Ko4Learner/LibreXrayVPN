@@ -1,10 +1,10 @@
-package org.librexray.vpn.core
+package org.librexray.vpn.coreandroid
 
 import android.util.Base64
 import com.google.common.truth.Truth.assertThat
 import com.google.gson.Gson
-import org.librexray.vpn.core.utils.Utils
-import org.librexray.vpn.core.utils.Utils.fromJsonReified
+import org.librexray.vpn.coreandroid.utils.Utils
+import org.librexray.vpn.coreandroid.utils.Utils.fromJsonReified
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner

@@ -1,4 +1,4 @@
-package org.librexray.vpn.presentation.composable_elements
+package org.librexray.vpn.presentation.composable_elements.items
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -24,8 +24,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import org.librexray.vpn.coreandroid.R
+import org.librexray.vpn.presentation.design_system.icon.IconType
+import org.librexray.vpn.presentation.design_system.icon.rememberPainter
 import org.librexray.vpn.presentation.models.ServerItemModel
 
 @Composable
@@ -33,42 +36,34 @@ fun SubscriptionItem(
     modifier: Modifier = Modifier,
     item: ServerItemModel,
     selectedServerId: String?,
-    buttonIcon: ImageVector,
-    buttonIntent: (ServerItemModel) -> Unit,
-    confirmOnButton: Boolean,
-    onCardClick: ((ServerItemModel) -> Unit)? = null,
+    buttonIcon: IconType,
+    onButtonClick: ((ServerItemModel) -> Unit)? = null,
+    onCardClick: (ServerItemModel) -> Unit,
 ) {
     var showDialog by remember { mutableStateOf(false) }
-
-    val buttonAction = {
-        if (confirmOnButton) showDialog = true
-        else buttonIntent(item)
-    }
-
-    val isSelected = item.guid == selectedServerId
     val cardModifier = modifier
-        .padding(vertical = 8.dp)
+        .padding(vertical = 4.dp)
         .fillMaxWidth()
         .let {
-            if (isSelected) it.border(
+            if (item.guid == selectedServerId) it.border(
                 width = 1.dp,
                 color = MaterialTheme.colors.primary.copy(alpha = 0.5f),
                 shape = RoundedCornerShape(16.dp)
             ) else it
         }
 
+    val painter = buttonIcon.rememberPainter()
+
     Card(
         modifier = cardModifier,
         shape = RoundedCornerShape(16.dp),
         elevation = 0.dp,
-        backgroundColor = if (isSelected) MaterialTheme.colors.surface else MaterialTheme.colors.surface.copy(
-            alpha = 0.7f
-        )
+        backgroundColor = MaterialTheme.colors.surface.copy(alpha = 0.7f)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable(enabled = onCardClick != null) { onCardClick?.invoke(item) },
+                .clickable { onCardClick(item) },
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -98,10 +93,13 @@ fun SubscriptionItem(
             IconButton(
                 modifier = Modifier
                     .size(48.dp),
-                onClick = buttonAction
+                onClick = {
+                    if (onButtonClick != null) showDialog = true
+                    else onCardClick(item)
+                }
             ) {
                 Icon(
-                    imageVector = buttonIcon,
+                    painter = painter,
                     contentDescription = null,
                     tint = MaterialTheme.colors.onSurface
                 )
@@ -110,20 +108,20 @@ fun SubscriptionItem(
     }
     if (showDialog) {
         AlertDialog(
+            onDismissRequest = { showDialog = false },
             title = {
                 Text(
-                    text = "Удалить элемент?",
+                    text = stringResource(R.string.delete_item),
                     style = MaterialTheme.typography.h6,
                     color = MaterialTheme.colors.onSurface
                 )
             },
-            onDismissRequest = { showDialog = false },
             dismissButton = {
                 TextButton(onClick = {
                     showDialog = false
                 }) {
                     Text(
-                        text = "Отменить",
+                        text = stringResource(R.string.no),
                         style = MaterialTheme.typography.body1,
                         color = MaterialTheme.colors.onSurface
                     )
@@ -131,15 +129,18 @@ fun SubscriptionItem(
             },
             confirmButton = {
                 TextButton(onClick = {
-                    buttonIntent(item)
+                    onButtonClick?.invoke(item)
                     showDialog = false
                 }) {
                     Text(
-                        text = "Удалить",
+                        text = stringResource(R.string.yes),
                         style = MaterialTheme.typography.body1,
                         color = MaterialTheme.colors.onSurface
                     )
                 }
-            })
+            },
+            shape = RoundedCornerShape(16.dp),
+            backgroundColor = MaterialTheme.colors.surface
+        )
     }
 }

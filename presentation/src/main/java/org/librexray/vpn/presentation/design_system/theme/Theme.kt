@@ -1,41 +1,46 @@
 package org.librexray.vpn.presentation.design_system.theme
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
+import org.librexray.vpn.domain.models.ThemeMode
 
 private val DarkColorPalette = darkColors(
-    primary = Blue,           // главный акцент (кнопка "Вкл", ссылки)
-    secondary = Grey,         // второй акцент (кнопка "Выкл", иконки, второстепенные действия)
-    background = Black20,     // общий фон экрана
-    surface = Grey,           // карточки, панели, плашки (чуть светлее фона, у тебя это Grey)
-    error = Color(0xFFB00020),// системный красный под ошибки (можешь заменить своим)
-    onPrimary = White,        // контент на primary (иконка выключателя/текст "Вкл")
-    onSecondary = White,      // контент на secondary (текст/иконки поверх серого круга/кнопки)
-    onBackground = White,     // основной текст на фоне
-    onSurface = White         // текст на карточках/плашках
+    primary = Blue,
+    secondary = Grey,
+    background = Black20,
+    surface = Grey,
+    onPrimary = White,
+    onSecondary = White,
+    onBackground = White,
+    onSurface = White
 )
 
 private val LightColorPalette = lightColors(
-    primary = Blue,           // главный акцент (кнопка "Вкл", ссылки)
-    secondary = Grey,         // второй акцент (кнопка "Выкл", иконки, второстепенные действия)
-    background = Black20,     // общий фон экрана
-    surface = Grey,           // карточки, панели, плашки (чуть светлее фона, у тебя это Grey)
-    error = Color(0xFFB00020),// системный красный под ошибки (можешь заменить своим)
-    onPrimary = White,        // контент на primary (иконка выключателя/текст "Вкл")
-    onSecondary = White,      // контент на secondary (текст/иконки поверх серого круга/кнопки)
-    onBackground = White,     // основной текст на фоне
+    primary = Blue,
+    secondary = Black20,
+    background = Grey,
+    surface = Black20,
+    onPrimary = White,
+    onSecondary = White,
+    onBackground = White,
     onSurface = White
 )
 
 @Composable
 fun LibreXrayVPNTheme(
-    darkTheme: Boolean = true,
+    themeMode: ThemeMode = ThemeMode.SYSTEM,
     content: @Composable () -> Unit
 ) {
-    val colors = if (darkTheme) DarkColorPalette else LightColorPalette
+    val dark = when (themeMode) {
+        ThemeMode.DARK -> true
+        ThemeMode.LIGHT -> false
+        ThemeMode.SYSTEM -> isSystemInDarkTheme()
+    }
+
+    val colors = if (dark) DarkColorPalette else LightColorPalette
 
     MaterialTheme(
         colors = colors,

@@ -13,6 +13,7 @@ import org.librexray.vpn.presentation.models.ServerItemModel
 import org.librexray.vpn.presentation.state.VpnScreenState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -173,6 +174,7 @@ class VpnScreenViewModel @Inject constructor(
     }
 
     private suspend fun startConnection() {
+        _state.update { it.copy(delay = null) }
         connectionInteractor.startConnection()
     }
 

@@ -1,4 +1,4 @@
-package org.librexray.vpn.core.utils
+package org.librexray.vpn.coreandroid.utils
 
 /**
  * Holds all global constants used across the VPN client project.
@@ -7,9 +7,11 @@ object Constants {
     // --- Application Info ---
     const val PACKAGE = "org.librexray.vpn"
     const val TAG = "VpnApplication"
+    const val GITHUB_URI = "https://github.com/Ko4Learner/LibreXrayVPN"
+    const val VERSION_CODE = "0.1.0"
 
     // --- Localization Tags ---
-    const val SYSTEM_LOCALE_TAG = "system"
+    const val SYSTEM_LOCALE_TAG = ""
     const val RU_LOCALE_TAG = "ru"
     const val EN_LOCALE_TAG = "en"
 

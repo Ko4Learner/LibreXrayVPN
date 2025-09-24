@@ -4,7 +4,7 @@ import android.content.ClipboardManager
 import android.content.Context
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.common.InputImage
-import org.librexray.vpn.core.utils.Utils
+import org.librexray.vpn.coreandroid.utils.Utils
 import org.librexray.vpn.data.protocol_parsers.ShadowsocksParser
 import org.librexray.vpn.data.protocol_parsers.SocksParser
 import org.librexray.vpn.data.protocol_parsers.TrojanParser

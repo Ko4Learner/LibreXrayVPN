@@ -13,21 +13,21 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import org.librexray.vpn.core.utils.Constants
+import org.librexray.vpn.coreandroid.utils.Constants
 import org.librexray.vpn.domain.models.ConnectionSpeed
 import java.util.Locale
 
 @Composable
 fun ConnectionSpeedInfo(
-    connectionSpeed: ConnectionSpeed?,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    connectionSpeed: ConnectionSpeed?
 ) {
     Surface(
         modifier = modifier
             .padding(vertical = 8.dp)
             .fillMaxWidth()
             .heightIn(min = 48.dp),
-        color = MaterialTheme.colors.surface,
+        color = MaterialTheme.colors.surface.copy(alpha = 0.7f),
         shape = RoundedCornerShape(16.dp),
         elevation = 0.dp
     ) {
@@ -63,7 +63,7 @@ fun ConnectionSpeedInfo(
  * @return Formatted speed string.
  */
 private fun fmtBps(bps: Double?): String {
-    bps?: return "—"
+    bps ?: return "—"
     val kb = bps / 1024.0
     val mb = kb / 1024.0
     return when {

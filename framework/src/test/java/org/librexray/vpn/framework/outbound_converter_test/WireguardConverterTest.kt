@@ -1,7 +1,7 @@
 package org.librexray.vpn.framework.outbound_converter_test
 
 import com.google.common.truth.Truth.assertThat
-import org.librexray.vpn.core.utils.Utils
+import org.librexray.vpn.coreandroid.utils.Utils
 import org.librexray.vpn.domain.models.ConfigProfileItem
 import org.librexray.vpn.domain.models.ConfigType
 import org.librexray.vpn.framework.bridge_to_core.XrayConfigProvider

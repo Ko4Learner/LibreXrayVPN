@@ -2,6 +2,10 @@ package org.librexray.vpn.presentation.screens
 
 import android.content.res.Configuration
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,8 +16,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
@@ -27,22 +34,24 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import kotlinx.coroutines.launch
+import org.librexray.vpn.coreandroid.R
 import org.librexray.vpn.domain.models.ConnectionSpeed
 import org.librexray.vpn.presentation.composable_elements.ContentBottomSheet
 import org.librexray.vpn.presentation.intent.VpnScreenIntent
 import org.librexray.vpn.presentation.state.VpnScreenState
 import org.librexray.vpn.presentation.view_model.VpnScreenViewModel
-import org.librexray.vpn.presentation.composable_elements.ConfigDropDownMenu
 import org.librexray.vpn.presentation.composable_elements.ConnectToggle
 import org.librexray.vpn.presentation.composable_elements.ConnectionSpeedInfo
 import org.librexray.vpn.presentation.composable_elements.ConnectionTestButton
-import org.librexray.vpn.presentation.composable_elements.SubscriptionItem
+import org.librexray.vpn.presentation.composable_elements.items.SubscriptionItem
 import org.librexray.vpn.presentation.design_system.icon.AppIcons
+import org.librexray.vpn.presentation.design_system.icon.rememberPainter
 import org.librexray.vpn.presentation.design_system.theme.Grey80
 import org.librexray.vpn.presentation.design_system.theme.LibreXrayVPNTheme
 import org.librexray.vpn.presentation.models.ServerItemModel
@@ -52,8 +61,8 @@ fun VpnScreen(
     modifier: Modifier = Modifier,
     navController: NavHostController,
     onQrCodeClick: () -> Unit,
-    viewModel: VpnScreenViewModel = hiltViewModel(),
-    getString: (Int) -> String
+    onSettingsClick: () -> Unit,
+    viewModel: VpnScreenViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
 
@@ -61,18 +70,35 @@ fun VpnScreen(
     val qrCodeImported =
         savedStateHandle?.getStateFlow("qrCodeImported", false)?.collectAsState()
 
-    val scope = rememberCoroutineScope()
-    val sheetState = rememberModalBottomSheetState(
-        initialValue = ModalBottomSheetValue.Hidden,
-        skipHalfExpanded = true
-    )
-
     LaunchedEffect(qrCodeImported?.value) {
         if (qrCodeImported?.value == true) {
             viewModel.onIntent(VpnScreenIntent.RefreshItemList)
             savedStateHandle.remove<Boolean>("qrCodeImported")
         }
     }
+
+    VpnScreenContent(
+        modifier = modifier,
+        state = state,
+        onSettingsClick = onSettingsClick,
+        onIntent = viewModel::onIntent,
+        onQrCodeClick = onQrCodeClick
+    )
+}
+
+@Composable
+private fun VpnScreenContent(
+    modifier: Modifier = Modifier,
+    state: VpnScreenState,
+    onSettingsClick: () -> Unit,
+    onIntent: (VpnScreenIntent) -> Unit,
+    onQrCodeClick: () -> Unit
+) {
+    val scope = rememberCoroutineScope()
+    val sheetState = rememberModalBottomSheetState(
+        initialValue = ModalBottomSheetValue.Hidden,
+        skipHalfExpanded = true
+    )
 
     ModalBottomSheetLayout(
         sheetState = sheetState,
@@ -82,79 +108,62 @@ fun VpnScreen(
         sheetBackgroundColor = MaterialTheme.colors.background,
         sheetContent = {
             ContentBottomSheet(
-                onIntent = viewModel::onIntent,
+                onIntent = onIntent,
+                onQrCodeClick = onQrCodeClick,
                 itemList = state.serverItemList,
-                selectedServerId = state.selectedServerId, hideBottomSheet = {
+                selectedServerId = state.selectedServerId,
+                hideBottomSheet = {
                     scope.launch { sheetState.hide() }
                 }
             )
         }
     ) {
-        VpnScreenContent(
-            modifier = modifier,
-            state = state,
-            onIntent = viewModel::onIntent,
-            onQrCodeClick = onQrCodeClick,
-            showBottomSheet = {
-                scope.launch { sheetState.show() }
-            }
-        )
-    }
-}
-
-@Composable
-fun VpnScreenContent(
-    modifier: Modifier = Modifier,
-    state: VpnScreenState,
-    onIntent: (VpnScreenIntent) -> Unit,
-    onQrCodeClick: () -> Unit,
-    showBottomSheet: () -> Unit
-) {
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .padding()
-            .background(MaterialTheme.colors.background)
-    ) {
-        TopSection(
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .padding(horizontal = 16.dp, vertical = 8.dp)
-                .fillMaxWidth()
-                .statusBarsPadding(),
-            onIntent = onIntent,
-            onQrCodeClick = onQrCodeClick,
-            state = state,
-            showBottomSheet = showBottomSheet
-        )
-        MiddleSection(
-            isRunning = state.isRunning,
-            onIntent = onIntent,
-            modifier = Modifier
-                .padding(horizontal = 16.dp)
+        Box(
+            modifier = modifier
                 .fillMaxSize()
-        )
-        BottomSection(
-            visible = state.isRunning,
-            delayMs = state.delay,
-            connectionSpeed = state.connectionSpeed,
-            onIntent = onIntent,
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .fillMaxWidth()
-                .navigationBarsPadding()
-                .padding(horizontal = 16.dp, vertical = 8.dp)
-        )
+                .padding()
+                .background(MaterialTheme.colors.background)
+        ) {
+            TopSection(
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .fillMaxWidth()
+                    .statusBarsPadding(),
+                state = state,
+                onSettingsClick = onSettingsClick,
+                showBottomSheet = { scope.launch { sheetState.show() } }
+            )
+            MiddleSection(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .fillMaxSize(),
+                isRunning = state.isRunning,
+                onIntent = onIntent,
+                state = state,
+                showBottomSheet = { scope.launch { sheetState.show() } }
+            )
+            BottomSection(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .navigationBarsPadding()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                visible = state.isRunning,
+                delayMs = state.delay,
+                connectionSpeed = state.connectionSpeed,
+                onIntent = onIntent
+            )
+        }
     }
 }
 
 @Composable
 private fun TopSection(
     modifier: Modifier = Modifier,
-    onIntent: (VpnScreenIntent) -> Unit,
-    onQrCodeClick: () -> Unit,
     state: VpnScreenState,
-    showBottomSheet: () -> Unit
+    onSettingsClick: () -> Unit,
+    showBottomSheet: () -> Unit,
 ) {
     val selectedServer = remember(state.serverItemList, state.selectedServerId) {
         state.serverItemList.firstOrNull { it.guid == state.selectedServerId }
@@ -165,26 +174,52 @@ private fun TopSection(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(48.dp),
+                    .height(56.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "LibreXrayVpn",
-                    style = MaterialTheme.typography.h6,
-                    color = MaterialTheme.colors.onBackground
-                )
-                ConfigDropDownMenu(onIntent, onQrCodeClick)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(
+                        modifier = Modifier.size(28.dp),
+                        painter = AppIcons.AppIcon.rememberPainter(),
+                        contentDescription = null,
+                        tint = MaterialTheme.colors.onBackground
+                    )
+                    Text(
+                        text = stringResource(R.string.app_name),
+                        style = MaterialTheme.typography.h6,
+                        color = MaterialTheme.colors.onBackground
+                    )
+                }
+
+                IconButton(onClick = onSettingsClick) {
+                    Icon(
+                        modifier = Modifier.size(28.dp),
+                        painter = AppIcons.Menu.rememberPainter(),
+                        contentDescription = stringResource(R.string.settings),
+                        tint = MaterialTheme.colors.onBackground
+                    )
+                }
             }
 
-            AnimatedVisibility(visible = selectedServer != null) {
+            AnimatedVisibility(
+                visible = selectedServer != null,
+                enter = expandVertically(
+                    expandFrom = Alignment.Top
+                ) + fadeIn(),
+                exit = shrinkVertically(
+                    shrinkTowards = Alignment.Top
+                ) + fadeOut()
+            ) {
                 selectedServer?.let {
                     SubscriptionItem(
                         item = it,
+                        selectedServerId = it.guid,
                         buttonIcon = AppIcons.arrowForward,
-                        buttonIntent = { _ -> showBottomSheet() },
-                        confirmOnButton = false,
-                        selectedServerId = it.guid
+                        onCardClick = { _ -> showBottomSheet() }
                     )
                 }
             }
@@ -196,13 +231,20 @@ private fun TopSection(
 private fun MiddleSection(
     modifier: Modifier = Modifier,
     isRunning: Boolean,
-    onIntent: (VpnScreenIntent) -> Unit
+    onIntent: (VpnScreenIntent) -> Unit,
+    showBottomSheet: () -> Unit,
+    state: VpnScreenState
 ) {
     Box(
         modifier = modifier.fillMaxWidth(),
         contentAlignment = Alignment.Center
     ) {
-        ConnectToggle(onIntent = onIntent, isRunning = isRunning)
+        ConnectToggle(
+            onIntent = onIntent,
+            isRunning = isRunning,
+            emptyServerList = state.serverItemList.isEmpty(),
+            showBottomSheet = showBottomSheet
+        )
     }
 }
 
@@ -215,14 +257,22 @@ private fun BottomSection(
     onIntent: (VpnScreenIntent) -> Unit
 ) {
     Box(modifier = modifier) {
-        AnimatedVisibility(visible = visible) {
+        AnimatedVisibility(
+            visible = visible,
+            enter = expandVertically(
+                expandFrom = Alignment.Bottom
+            ) + fadeIn(),
+            exit = shrinkVertically(
+                shrinkTowards = Alignment.Bottom
+            ) + fadeOut()
+        ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                ConnectionSpeedInfo(connectionSpeed)
-                ConnectionTestButton(onIntent, delayMs)
+                ConnectionSpeedInfo(connectionSpeed = connectionSpeed)
+                ConnectionTestButton(onIntent = onIntent, delayMs = delayMs)
             }
         }
     }
@@ -238,14 +288,14 @@ fun PreviewVpnScreen() {
                 isRunning = true, serverItemList = listOf(
                     ServerItemModel(
                         guid = "1",
-                        name = "My server",
-                        ip = "1.2.3",
+                        name = "My vless server config",
+                        ip = "192.168.252.1",
                         protocol = "Vless"
                     )
                 ), selectedServerId = "1"
             ),
-            onQrCodeClick = {},
+            onSettingsClick = {},
             onIntent = {},
-            showBottomSheet = {})
+            onQrCodeClick = {})
     }
 }

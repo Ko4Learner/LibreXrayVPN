@@ -1,0 +1,31 @@
+<resources>
+    <string name="add_configuration">Добавить конфигурацию</string>
+    <string name="my_configurations">Мои конфигурации</string>
+    <string name="start_vpn">Включить VPN</string>
+    <string name="stop_vpn">Выключить VPN</string>
+    <string name="close">Закрыть</string>
+    <string name="back">Назад</string>
+    <string name="qr_code">QR-код</string>
+    <string name="clipboard">Буфер обмена</string>
+    <string name="delete_item">Удалить конфигурацию?</string>
+    <string name="yes">Да</string>
+    <string name="no">Нет</string>
+
+    <string name="settings">Настройки</string>
+    <string name="language">Язык</string>
+    <string name="application_theme">Тема приложения</string>
+    <string name="about_app">О приложении</string>
+    <string name="system_language">Системный</string>
+    <string name="light_theme">Светлая</string>
+    <string name="dark_theme">Темная</string>
+    <string name="system_theme">Системная</string>
+    <string name="about_text">
+    LibreXrayVPN v%1$s\n© 2025 Nikita (Ko4Learner)\n\nПрограмма распространяется по лицензии GNU GPL v3.0 или более поздней.\n\nОсновано на: v2rayNG (GPL-3.0)\n\nПолный текст лицензии и список сторонних библиотек см. в репозитории проекта.
+    </string>
+
+    <string name="delay_text">Задержка %1$d мс</string>
+    <string name="click_to_test_connection">Нажмите для тестирования</string>
+
+    <string name="qr_code_scanning">Сканирование QR-кода</string>
+    <string name="configuration_found">Конфигурация найдена!</string>
+</resources>

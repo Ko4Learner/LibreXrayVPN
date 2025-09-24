@@ -3,7 +3,6 @@ package org.librexray.vpn.domain.interfaces.interactor
 import org.librexray.vpn.domain.models.AppLocale
 import org.librexray.vpn.domain.models.ThemeMode
 import kotlinx.coroutines.flow.Flow
-import java.util.Locale
 
 /**
  * Domain-level access to user-configurable application settings.
@@ -15,7 +14,7 @@ import java.util.Locale
  * - `observeTheme()`: **hot** stream; immediately emits the current theme and updates on changes.
  */
 interface SettingsInteractor {
-    fun observeLocale(): Flow<Locale>
+    fun observeLocale(): Flow<AppLocale>
     suspend fun setLocale(locale: AppLocale)
     fun observeTheme(): Flow<ThemeMode>
     suspend fun setTheme(theme: ThemeMode)

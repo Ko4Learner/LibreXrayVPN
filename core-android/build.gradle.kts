@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "org.librexray.vpn.core"
+    namespace = "org.librexray.vpn.coreandroid"
     compileSdk = 35
 
     defaultConfig {
@@ -44,6 +44,10 @@ android {
 dependencies {
     // Gson
     implementation(libs.gson)
+
+    // UI
+    implementation(libs.androidx.appcompat)
+    implementation(libs.material)
 
     // Unit testing (JVM)
     testImplementation(libs.junit)

@@ -1,6 +1,6 @@
 package org.librexray.vpn.domain.models
 
-import org.librexray.vpn.core.utils.Constants
+import org.librexray.vpn.coreandroid.utils.Constants
 import java.util.Locale
 
 /**
@@ -14,7 +14,7 @@ enum class AppLocale {
     /**
      * Returns the persistent tag for this locale choice.
      *
-     * @return "system", "ru" or "en".
+     * @return "", "ru" or "en".
      */
     fun toTag(): String = when (this) {
         SYSTEM -> Constants.SYSTEM_LOCALE_TAG

@@ -25,7 +25,7 @@ class SettingsScreenViewModel @Inject constructor(private val settingsInteractor
     init {
         viewModelScope.launch {
             settingsInteractor.observeLocale().collect { locale ->
-                _state.update { it.copy(locale = locale) }
+                _state.update { it.copy(localeMode = locale) }
             }
         }
         viewModelScope.launch {
@@ -35,9 +35,9 @@ class SettingsScreenViewModel @Inject constructor(private val settingsInteractor
         }
     }
 
-    fun intent(intent: SettingsScreenIntent) {
+    fun onIntent(intent: SettingsScreenIntent) {
         when (intent) {
-            is SettingsScreenIntent.SetLocale -> setLocale(intent.locale)
+            is SettingsScreenIntent.SetLocale -> setLocale(intent.localeMode)
             is SettingsScreenIntent.SetTheme -> setTheme(intent.themeMode)
         }
     }

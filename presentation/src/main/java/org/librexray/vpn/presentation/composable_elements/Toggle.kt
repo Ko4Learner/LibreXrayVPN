@@ -19,14 +19,20 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalContext
-import org.librexray.vpn.core.utils.Constants
+import androidx.compose.ui.res.stringResource
+import org.librexray.vpn.coreandroid.R
+import org.librexray.vpn.coreandroid.utils.Constants
 import org.librexray.vpn.presentation.design_system.icon.AppIcons
+import org.librexray.vpn.presentation.design_system.icon.rememberPainter
 import org.librexray.vpn.presentation.intent.VpnScreenIntent
 
 @Composable
 fun ConnectToggle(
-    onIntent: (VpnScreenIntent) -> Unit, isRunning: Boolean,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onIntent: (VpnScreenIntent) -> Unit,
+    isRunning: Boolean,
+    emptyServerList: Boolean,
+    showBottomSheet: () -> Unit
 ) {
     val context = LocalContext.current
     val vpnPermissionLauncher = rememberLauncherForActivityResult(
@@ -67,19 +73,33 @@ fun ConnectToggle(
                     )
             )
             .clickable {
-                val intent = VpnService.prepare(context)
-                if (intent == null) {
-                    onIntent(VpnScreenIntent.ToggleConnection)
+                if (emptyServerList) {
+                    showBottomSheet()
                 } else {
-                    vpnPermissionLauncher.launch(intent)
+                    val intent = VpnService.prepare(context)
+                    if (intent == null) {
+                        onIntent(VpnScreenIntent.ToggleConnection)
+                    } else {
+                        vpnPermissionLauncher.launch(intent)
+                    }
                 }
             },
         contentAlignment = Alignment.Center
 
     ) {
         Icon(
-            imageVector = AppIcons.Toggle,
-            contentDescription = null,
+            painter = if (emptyServerList) {
+                AppIcons.Add.rememberPainter()
+            } else {
+                AppIcons.Toggle.rememberPainter()
+            },
+            contentDescription = if (emptyServerList) {
+                stringResource(R.string.add_configuration)
+            } else if (isRunning) {
+                stringResource(R.string.stop_vpn)
+            } else {
+                stringResource(R.string.start_vpn)
+            },
             tint = MaterialTheme.colors.onSurface,
             modifier = Modifier.size(54.dp)
         )

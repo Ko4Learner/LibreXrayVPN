@@ -7,11 +7,11 @@
 
 package org.librexray.vpn.data.protocol_parsers
 
-import org.librexray.vpn.core.utils.Constants
+import org.librexray.vpn.coreandroid.utils.Constants
 import org.librexray.vpn.domain.models.ConfigProfileItem
 import org.librexray.vpn.domain.models.ConfigType
-import org.librexray.vpn.core.utils.Utils
-import org.librexray.vpn.core.utils.idnHost
+import org.librexray.vpn.coreandroid.utils.Utils
+import org.librexray.vpn.coreandroid.utils.idnHost
 import java.net.URI
 import javax.inject.Inject
 

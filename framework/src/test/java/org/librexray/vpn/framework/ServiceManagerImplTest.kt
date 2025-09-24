@@ -4,8 +4,8 @@ import android.content.Context
 import android.os.Build
 import androidx.test.core.app.ApplicationProvider
 import dagger.Lazy
-import org.librexray.vpn.core.utils.Constants
-import org.librexray.vpn.core.utils.Utils
+import org.librexray.vpn.coreandroid.utils.Constants
+import org.librexray.vpn.coreandroid.utils.Utils
 import org.librexray.vpn.domain.interfaces.CoreVpnBridge
 import org.librexray.vpn.domain.interfaces.KeyValueStorage
 import org.librexray.vpn.domain.interfaces.repository.ServiceStateRepository

@@ -1,7 +1,7 @@
 package org.librexray.vpn.framework.vpn_service_test
 
 import com.google.common.truth.Truth.assertThat
-import org.librexray.vpn.core.utils.Constants
+import org.librexray.vpn.coreandroid.utils.Constants
 import org.librexray.vpn.domain.models.ConnectionSpeed
 import org.librexray.vpn.framework.services.VPNService
 import org.junit.Before
