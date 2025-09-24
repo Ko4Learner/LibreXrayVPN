@@ -16,7 +16,9 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import org.librexray.vpn.coreandroid.R
 import org.librexray.vpn.presentation.design_system.icon.AppIcons
 import org.librexray.vpn.presentation.design_system.icon.rememberPainter
 import org.librexray.vpn.presentation.intent.VpnScreenIntent
@@ -43,7 +45,8 @@ fun ConnectionTestButton(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
 
-            Text(text = delayMs?.let { "Delay: $it ms" } ?: "Нажмите для тестирования",
+            Text(text = delayMs?.let { stringResource(R.string.delay_text, it) }
+                ?: stringResource(R.string.click_to_test_connection),
                 style = MaterialTheme.typography.body1,
                 color = MaterialTheme.colors.onSurface)
 
@@ -58,7 +61,7 @@ fun ConnectionTestButton(
                 ) {
                     Icon(
                         painter = AppIcons.LatencyTest.rememberPainter(),
-                        contentDescription = "Test connection",
+                        contentDescription = stringResource(R.string.click_to_test_connection),
                         tint = MaterialTheme.colors.onSurface
                     )
                 }

@@ -51,6 +51,7 @@ import org.librexray.vpn.presentation.view_model.SettingsScreenViewModel
 import androidx.core.net.toUri
 import kotlinx.coroutines.launch
 import org.librexray.vpn.coreandroid.R
+import org.librexray.vpn.coreandroid.utils.Constants
 import org.librexray.vpn.domain.models.AppLocale
 import org.librexray.vpn.domain.models.ThemeMode
 import org.librexray.vpn.presentation.design_system.theme.Grey80
@@ -144,13 +145,13 @@ private fun SettingsScreenContent(
                         Icon(
                             modifier = Modifier.size(32.dp),
                             painter = AppIcons.arrowBack.rememberPainter(),
-                            contentDescription = "Назад",
+                            contentDescription = stringResource(R.string.back),
                             tint = MaterialTheme.colors.onBackground
                         )
                     }
                     Text(
                         modifier = Modifier.align(Alignment.Center),
-                        text = "Настройки",
+                        text = stringResource(R.string.settings),
                         style = MaterialTheme.typography.h6,
                         color = MaterialTheme.colors.onBackground
                     )
@@ -163,23 +164,23 @@ private fun SettingsScreenContent(
                     icon = AppIcons.Language,
                     onClick = { openBottomSheet(SettingsSheet.Language) })
                 SettingItem(
-                    title = "Тема приложения",
+                    title = stringResource(R.string.application_theme),
                     icon = AppIcons.Theme,
                     onClick = { openBottomSheet(SettingsSheet.Theme) })
                 SettingItem(
-                    title = "Github",
+                    title = stringResource(R.string.github),
                     icon = AppIcons.Github,
                     onClick = {
                         context.startActivity(
                             Intent(
                                 Intent.ACTION_VIEW,
-                                "https://github.com/Ko4Learner/LibreXrayVPN".toUri()
+                                Constants.GITHUB_URI.toUri()
                             )
                         )
 
                     })
                 SettingItem(
-                    title = "О приложении",
+                    title = stringResource(R.string.about_app),
                     icon = AppIcons.Info,
                     onClick = { openBottomSheet(SettingsSheet.About) })
             }
@@ -221,14 +222,14 @@ private fun LanguageBottomSheet(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Язык приложения",
+                text = stringResource(R.string.language),
                 style = MaterialTheme.typography.h6,
                 color = MaterialTheme.colors.onBackground
             )
             IconButton(onClick = closeBottomSheet) {
                 Icon(
                     painter = AppIcons.Close.rememberPainter(),
-                    contentDescription = "Close",
+                    contentDescription = stringResource(R.string.close),
                     tint = MaterialTheme.colors.onBackground
                 )
             }
@@ -259,9 +260,9 @@ private fun LanguageBottomSheet(
                 ) {
                     Text(
                         text = when (mode) {
-                            AppLocale.SYSTEM -> "Системный"
-                            AppLocale.EN -> "Английский"
-                            AppLocale.RU -> "Русский"
+                            AppLocale.SYSTEM -> stringResource(R.string.system_language)
+                            AppLocale.EN -> stringResource(R.string.english_language)
+                            AppLocale.RU -> stringResource(R.string.russian_language)
                         },
                         style = MaterialTheme.typography.h6,
                         color = MaterialTheme.colors.onBackground
@@ -312,14 +313,14 @@ private fun ThemeBottomSheet(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Тема приложения",
+                text = stringResource(R.string.application_theme),
                 style = MaterialTheme.typography.h6,
                 color = MaterialTheme.colors.onBackground
             )
             IconButton(onClick = closeBottomSheet) {
                 Icon(
                     painter = AppIcons.Close.rememberPainter(),
-                    contentDescription = "Close",
+                    contentDescription = stringResource(R.string.close),
                     tint = MaterialTheme.colors.onBackground
                 )
             }
@@ -350,9 +351,9 @@ private fun ThemeBottomSheet(
                 ) {
                     Text(
                         text = when (mode) {
-                            ThemeMode.SYSTEM -> "Системная"
-                            ThemeMode.LIGHT -> "Светлая"
-                            ThemeMode.DARK -> "Тёмная"
+                            ThemeMode.SYSTEM -> stringResource(R.string.system_theme)
+                            ThemeMode.LIGHT -> stringResource(R.string.light_theme)
+                            ThemeMode.DARK -> stringResource(R.string.dark_theme)
                         },
                         style = MaterialTheme.typography.h6,
                         color = MaterialTheme.colors.onBackground
@@ -401,14 +402,14 @@ private fun AboutBottomSheet(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "О приложении",
+                text = stringResource(R.string.about_app),
                 style = MaterialTheme.typography.h6,
                 color = MaterialTheme.colors.onBackground
             )
             IconButton(onClick = closeBottomSheet) {
                 Icon(
                     painter = AppIcons.Close.rememberPainter(),
-                    contentDescription = "Close",
+                    contentDescription = stringResource(R.string.close),
                     tint = MaterialTheme.colors.onBackground
                 )
             }
@@ -421,20 +422,11 @@ private fun AboutBottomSheet(
             backgroundColor = MaterialTheme.colors.background
         ) {
             Text(
-                text = "LibreXrayVPN v0.1.0\n" +
-                        "© 2025 Nikita (Ko4Learner)\n" +
-                        "\n" +
-                        "Программа распространяется по лицензии GNU GPL v3.0 или более поздней.\n" +
-                        "\n" +
-                        "Основано на: v2rayNG (GPL-3.0)\n" +
-                        "\n" +
-                        "Полный текст лицензии и список сторонних библиотек см. в репозитории проекта.",
+                text = stringResource(R.string.about_text, Constants.VERSION_CODE),
                 style = MaterialTheme.typography.body1,
                 color = MaterialTheme.colors.onBackground
             )
         }
-
-
     }
 }
 

@@ -19,6 +19,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import org.librexray.vpn.coreandroid.R
 import org.librexray.vpn.coreandroid.utils.Constants
 import org.librexray.vpn.presentation.design_system.icon.AppIcons
 import org.librexray.vpn.presentation.design_system.icon.rememberPainter
@@ -27,7 +29,8 @@ import org.librexray.vpn.presentation.intent.VpnScreenIntent
 @Composable
 fun ConnectToggle(
     modifier: Modifier = Modifier,
-    onIntent: (VpnScreenIntent) -> Unit, isRunning: Boolean,
+    onIntent: (VpnScreenIntent) -> Unit,
+    isRunning: Boolean,
     emptyServerList: Boolean,
     showBottomSheet: () -> Unit
 ) {
@@ -90,7 +93,13 @@ fun ConnectToggle(
             } else {
                 AppIcons.Toggle.rememberPainter()
             },
-            contentDescription = null,
+            contentDescription = if (emptyServerList) {
+                stringResource(R.string.add_configuration)
+            } else if (isRunning) {
+                stringResource(R.string.stop_vpn)
+            } else {
+                stringResource(R.string.start_vpn)
+            },
             tint = MaterialTheme.colors.onSurface,
             modifier = Modifier.size(54.dp)
         )

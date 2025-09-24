@@ -24,7 +24,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import org.librexray.vpn.coreandroid.R
 import org.librexray.vpn.presentation.design_system.icon.IconType
 import org.librexray.vpn.presentation.design_system.icon.rememberPainter
 import org.librexray.vpn.presentation.models.ServerItemModel
@@ -109,7 +111,7 @@ fun SubscriptionItem(
             onDismissRequest = { showDialog = false },
             title = {
                 Text(
-                    text = "Удалить элемент?",
+                    text = stringResource(R.string.delete_item),
                     style = MaterialTheme.typography.h6,
                     color = MaterialTheme.colors.onSurface
                 )
@@ -119,7 +121,7 @@ fun SubscriptionItem(
                     showDialog = false
                 }) {
                     Text(
-                        text = "Нет",
+                        text = stringResource(R.string.no),
                         style = MaterialTheme.typography.body1,
                         color = MaterialTheme.colors.onSurface
                     )
@@ -131,7 +133,7 @@ fun SubscriptionItem(
                     showDialog = false
                 }) {
                     Text(
-                        text = "Да",
+                        text = stringResource(R.string.yes),
                         style = MaterialTheme.typography.body1,
                         color = MaterialTheme.colors.onSurface
                     )

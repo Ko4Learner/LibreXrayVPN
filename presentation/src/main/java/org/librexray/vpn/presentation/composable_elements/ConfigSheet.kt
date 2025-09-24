@@ -65,16 +65,15 @@ fun ContentBottomSheet(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = if (itemList.isEmpty()) stringResource(R.string.add_configuration) else stringResource(
-                    R.string.my_configurations
-                ),
+                text = if (itemList.isEmpty()) stringResource(R.string.add_configuration)
+                else stringResource(R.string.my_configurations),
                 style = MaterialTheme.typography.h6,
                 color = MaterialTheme.colors.onSurface
             )
             IconButton(onClick = hideBottomSheet) {
                 Icon(
                     painter = AppIcons.Close.rememberPainter(),
-                    contentDescription = "Close",
+                    contentDescription = stringResource(R.string.close),
                     tint = MaterialTheme.colors.onSurface
                 )
             }
@@ -121,11 +120,11 @@ private fun ImportButtonRow(
                 Icon(
                     modifier = Modifier.size(40.dp),
                     painter = AppIcons.QrScan.rememberPainter(),
-                    contentDescription = null,
+                    contentDescription = stringResource(R.string.qr_code),
                     tint = MaterialTheme.colors.onSurface
                 )
                 Text(
-                    text = "QR код",
+                    text = stringResource(R.string.qr_code),
                     style = MaterialTheme.typography.body1,
                     color = MaterialTheme.colors.onSurface
                 )
@@ -150,11 +149,11 @@ private fun ImportButtonRow(
                 Icon(
                     modifier = Modifier.size(40.dp),
                     painter = AppIcons.Clipboard.rememberPainter(),
-                    contentDescription = null,
+                    contentDescription = stringResource(R.string.clipboard),
                     tint = MaterialTheme.colors.onSurface,
                 )
                 Text(
-                    text = "Буфер обмена",
+                    text = stringResource(R.string.clipboard),
                     style = MaterialTheme.typography.body1,
                     color = MaterialTheme.colors.onSurface
                 )

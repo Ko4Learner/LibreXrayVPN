@@ -37,10 +37,12 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.content.ContextCompat
 import org.librexray.vpn.coreandroid.utils.Constants
 import kotlinx.coroutines.delay
+import org.librexray.vpn.coreandroid.R
 import org.librexray.vpn.presentation.composable_elements.ScanMask
 import org.librexray.vpn.presentation.design_system.icon.AppIcons
 import org.librexray.vpn.presentation.design_system.icon.rememberPainter
@@ -90,7 +92,11 @@ fun QrCodeScreen(
 
     LaunchedEffect(state.configFound) {
         if (state.configFound) {
-            Toast.makeText(context, "Конфигурация найдена!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                context,
+                context.getString(R.string.configuration_found),
+                Toast.LENGTH_SHORT
+            ).show()
             delay(2000)
             viewModel.onIntent(QrCodeScreenIntent.ResetState)
             onResult()
@@ -127,13 +133,13 @@ fun QrCodeScreenContent(
                     Icon(
                         modifier = Modifier.size(32.dp),
                         painter = AppIcons.arrowBack.rememberPainter(),
-                        contentDescription = "Назад",
+                        contentDescription = stringResource(R.string.back),
                         tint = MaterialTheme.colors.onBackground
                     )
                 }
                 Text(
                     modifier = Modifier.align(Alignment.Center),
-                    text = "Сканирование Qr кода",
+                    text = stringResource(R.string.qr_code_scanning),
                     style = MaterialTheme.typography.h6,
                     color = MaterialTheme.colors.onBackground
                 )
@@ -151,7 +157,7 @@ fun QrCodeScreenContent(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            "Camera Preview",
+                            stringResource(R.string.qr_code_scanning),
                             color = MaterialTheme.colors.onBackground,
                             style = MaterialTheme.typography.h6
                         )

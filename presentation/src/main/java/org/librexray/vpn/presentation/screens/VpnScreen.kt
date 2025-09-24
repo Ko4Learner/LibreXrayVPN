@@ -34,11 +34,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import kotlinx.coroutines.launch
+import org.librexray.vpn.coreandroid.R
 import org.librexray.vpn.domain.models.ConnectionSpeed
 import org.librexray.vpn.presentation.composable_elements.ContentBottomSheet
 import org.librexray.vpn.presentation.intent.VpnScreenIntent
@@ -187,7 +189,7 @@ private fun TopSection(
                         tint = MaterialTheme.colors.onBackground
                     )
                     Text(
-                        text = "LibreXrayVpn",
+                        text = stringResource(R.string.app_name),
                         style = MaterialTheme.typography.h6,
                         color = MaterialTheme.colors.onBackground
                     )
@@ -197,7 +199,7 @@ private fun TopSection(
                     Icon(
                         modifier = Modifier.size(28.dp),
                         painter = AppIcons.Menu.rememberPainter(),
-                        contentDescription = "Настройки",
+                        contentDescription = stringResource(R.string.settings),
                         tint = MaterialTheme.colors.onBackground
                     )
                 }
