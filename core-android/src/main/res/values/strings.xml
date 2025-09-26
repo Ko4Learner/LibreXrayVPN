@@ -2,8 +2,9 @@
     <string name="app_name" translatable="false">LibreXrayVPN</string>
     <string name="add_configuration">Add configuration</string>
     <string name="my_configurations">My configurations</string>
-    <string name="start_vpn">Start VPN</string>
-    <string name="stop_vpn">Stop VPN</string>
+    <string name="start_vpn">Start</string>
+    <string name="stop_vpn">Stop</string>
+    <string name="restart_vpn">Restart</string>
     <string name="close">Close</string>
     <string name="back">Back</string>
     <string name="qr_code">QR code</string>

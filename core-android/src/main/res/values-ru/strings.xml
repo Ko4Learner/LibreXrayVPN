@@ -1,8 +1,9 @@
 <resources>
     <string name="add_configuration">Добавить конфигурацию</string>
     <string name="my_configurations">Мои конфигурации</string>
-    <string name="start_vpn">Включить VPN</string>
-    <string name="stop_vpn">Выключить VPN</string>
+    <string name="start_vpn">Включить</string>
+    <string name="stop_vpn">Выключить</string>
+    <string name="restart_vpn">Перезапустить</string>
     <string name="close">Закрыть</string>
     <string name="back">Назад</string>
     <string name="qr_code">QR-код</string>

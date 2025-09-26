@@ -19,6 +19,7 @@ import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.os.LocaleListCompat
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.rememberNavController
@@ -38,7 +39,14 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+
+
+        val splash = installSplashScreen()
         super.onCreate(savedInstanceState)
+        var ready = false
+        splash.setKeepOnScreenCondition { !ready }
+
+
         enableEdgeToEdge()
         setContent {
             val viewModel: SettingsScreenViewModel = hiltViewModel()
@@ -46,10 +54,10 @@ class MainActivity : AppCompatActivity() {
 
             LaunchedEffect(state.localeMode) {
                 AppCompatDelegate.setApplicationLocales(
-                    LocaleListCompat.forLanguageTags( state.localeMode.toTag())
+                    LocaleListCompat.forLanguageTags(state.localeMode.toTag())
                 )
+                ready = true
             }
-
             LibreXrayVPNTheme(themeMode = state.themeMode) {
                 val view = LocalView.current
                 val window = (view.context as Activity).window
@@ -72,7 +80,8 @@ class MainActivity : AppCompatActivity() {
                         .fillMaxSize()
                 ) { innerPadding ->
                     Navigation(
-                        navController = navController, innerPadding = innerPadding)
+                        navController = navController, innerPadding = innerPadding
+                    )
                 }
             }
         }

@@ -5,6 +5,7 @@ hiltNavigationCompose = "1.2.0"
 javaxInject = "1"
 kotlin = "2.0.21"
 coreKtx = "1.15.0"
+splashscreen = "1.0.1"
 junit = "4.13.2"
 junitVersion = "1.1.5"
 espressoCore = "3.6.1"
@@ -37,6 +38,7 @@ archCoreTesting = "2.2.0"
 [libraries]
 # Core / Kotlin / AndroidX
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "splashscreen" }
 javax-inject = { module = "javax.inject:javax.inject", version.ref = "javaxInject" }
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinxCoroutinesAndroid" }
 kotlinx-coroutines-play-services = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services", version.ref = "kotlinxCoroutinesAndroid" }

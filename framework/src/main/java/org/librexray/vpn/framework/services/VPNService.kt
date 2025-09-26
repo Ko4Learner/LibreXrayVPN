@@ -34,6 +34,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.librexray.vpn.domain.interfaces.repository.SettingsRepository
 import java.io.File
 import java.util.Locale
 import javax.inject.Inject
@@ -58,6 +59,9 @@ open class VPNService : VpnService() {
 
     @Inject
     lateinit var connectionInteractor: ConnectionInteractor
+
+    @Inject
+    lateinit var settingsRepository: SettingsRepository
 
     private lateinit var mInterface: ParcelFileDescriptor
     private var isRunning = false
@@ -142,7 +146,7 @@ open class VPNService : VpnService() {
         val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
         StrictMode.setThreadPolicy(policy)
 
-        builder = notificationFactory.createNotificationBuilder("LibreXrayVPN")
+        builder = notificationFactory.createNotificationBuilder()
         startForeground(1, builder.build())
 
 

@@ -253,12 +253,13 @@ private fun LanguageBottomSheet(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(start = 16.dp)
                         .clickable { onIntent(SettingsScreenIntent.SetLocale(mode)) },
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
                     Text(
+                        modifier = Modifier
+                            .padding(start = 16.dp),
                         text = when (mode) {
                             AppLocale.SYSTEM -> stringResource(R.string.system_language)
                             AppLocale.EN -> stringResource(R.string.english_language)
@@ -344,12 +345,13 @@ private fun ThemeBottomSheet(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(start = 16.dp)
                         .clickable { onIntent(SettingsScreenIntent.SetTheme(mode)) },
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
                     Text(
+                        modifier = Modifier
+                            .padding(start = 16.dp),
                         text = when (mode) {
                             ThemeMode.SYSTEM -> stringResource(R.string.system_theme)
                             ThemeMode.LIGHT -> stringResource(R.string.light_theme)
