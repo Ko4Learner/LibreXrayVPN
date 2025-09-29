@@ -13,7 +13,6 @@ import org.librexray.vpn.presentation.models.ServerItemModel
 import org.librexray.vpn.presentation.state.VpnScreenState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -148,7 +147,6 @@ class VpnScreenViewModel @Inject constructor(
 
     private suspend fun updateServerList(serverList: List<String>) {
         getSelectedServer()
-        _state.update { it.copy(isLoading = true, error = null) }
         try {
             val items: List<ServerItemModel> = serverList.mapNotNull { guid ->
                 configInteractor.getServerConfig(guid)?.toServerItemModel(guid)
@@ -157,7 +155,8 @@ class VpnScreenViewModel @Inject constructor(
         } catch (ce: CancellationException) {
             throw ce
         } catch (t: Throwable) {
-            _state.update { it.copy(isLoading = false, error = t.message ?: "Unknown error") }
+            //TODO Обработать ошибку
+            _state.update { it.copy(isLoading = false, error = t.message ?: "Не удалось загрузить конфигурации") }
         }
     }
 

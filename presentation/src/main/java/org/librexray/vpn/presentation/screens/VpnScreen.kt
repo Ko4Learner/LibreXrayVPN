@@ -235,16 +235,21 @@ private fun MiddleSection(
     showBottomSheet: () -> Unit,
     state: VpnScreenState
 ) {
+
     Box(
         modifier = modifier.fillMaxWidth(),
         contentAlignment = Alignment.Center
     ) {
-        ConnectToggle(
-            onIntent = onIntent,
-            isRunning = isRunning,
-            emptyServerList = state.serverItemList.isEmpty(),
-            showBottomSheet = showBottomSheet
-        )
+        if (!state.isLoading) {
+            ConnectToggle(
+                onIntent = onIntent,
+                isRunning = isRunning,
+                emptyServerList = state.serverItemList.isEmpty(),
+                showBottomSheet = showBottomSheet
+            )
+        } else {
+            Box(Modifier.size(160.dp))
+        }
     }
 }
 
