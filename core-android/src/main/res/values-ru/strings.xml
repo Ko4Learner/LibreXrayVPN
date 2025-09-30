@@ -29,4 +29,5 @@
 
     <string name="qr_code_scanning">Сканирование QR-кода</string>
     <string name="configuration_found">Конфигурация найдена!</string>
+    <string name="scanning_error">Ошибка сканирования</string>
 </resources>

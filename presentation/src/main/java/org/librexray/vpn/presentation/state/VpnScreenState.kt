@@ -8,7 +8,17 @@ data class VpnScreenState(
     val isRunning: Boolean = false,
     val serverItemList: List<ServerItemModel> = listOf(),
     val delay: Long? = null,
-    val error: String? = null,
+    val error: VpnScreenError? = null,
     val selectedServerId: String? = null,
     val connectionSpeed: ConnectionSpeed? = null
 )
+
+sealed interface VpnScreenError {
+    object StartError : VpnScreenError
+    object StopError : VpnScreenError
+    object ImportConfigError : VpnScreenError
+    object EmptyConfigError : VpnScreenError
+    object DeleteConfigError : VpnScreenError
+    object TestConnectionError : VpnScreenError
+    object UpdateServerListError : VpnScreenError
+}

@@ -85,8 +85,12 @@ fun QrCodeScreen(
     }
 
     LaunchedEffect(state.error) {
-        state.error?.let { msg ->
-            Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+        if (state.error) {
+            Toast.makeText(
+                context,
+                context.getString(R.string.scanning_error),
+                Toast.LENGTH_SHORT
+            ).show()
         }
     }
 

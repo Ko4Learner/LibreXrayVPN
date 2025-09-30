@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.librexray.vpn.presentation.state.VpnScreenError
 import javax.inject.Inject
 import kotlin.coroutines.cancellation.CancellationException
 
@@ -64,7 +65,6 @@ class VpnScreenViewModel @Inject constructor(
     fun onIntent(intent: VpnScreenIntent) {
         when (intent) {
             VpnScreenIntent.ImportConfigFromClipboard -> importConfigFromClipboard()
-            VpnScreenIntent.RestartConnection -> restartConnection()
             VpnScreenIntent.TestConnection -> testConnection()
             VpnScreenIntent.ToggleConnection -> toggleConnection()
             is VpnScreenIntent.DeleteItem -> deleteItem(intent.id)
@@ -88,11 +88,11 @@ class VpnScreenViewModel @Inject constructor(
 
         viewModelScope.launch(Dispatchers.IO) {
             runCatching { configInteractor.deleteItem(guid) }
-                .onFailure { e ->
+                .onFailure { _ ->
                     _state.update {
                         it.copy(
                             serverItemList = before,
-                            error = e.message ?: "Delete failed",
+                            error = VpnScreenError.DeleteConfigError,
                             selectedServerId = guid
                         )
                     }
@@ -111,27 +111,15 @@ class VpnScreenViewModel @Inject constructor(
         }
     }
 
-    private fun restartConnection() {
-        if (state.value.isRunning) {
-            connectionInteractor.restartConnection()
-        } else {
-            _state.update { it.copy(error = "Connection is not running") }
-        }
-    }
-
     private fun importConfigFromClipboard() {
         viewModelScope.launch(Dispatchers.IO) {
             when (configInteractor.importClipboardConfig()) {
                 ImportResult.Empty -> _state.update {
-                    it.copy(
-                        error = "Empty config"
-                    )
+                    it.copy(error = VpnScreenError.EmptyConfigError)
                 }
 
                 ImportResult.Error -> _state.update {
-                    it.copy(
-                        error = "Config imported error"
-                    )
+                    it.copy(error = VpnScreenError.ImportConfigError)
                 }
 
                 ImportResult.Success -> updateServerList(configInteractor.getServerList())
@@ -154,9 +142,13 @@ class VpnScreenViewModel @Inject constructor(
             _state.update { it.copy(isLoading = false, serverItemList = items) }
         } catch (ce: CancellationException) {
             throw ce
-        } catch (t: Throwable) {
-            //TODO Обработать ошибку
-            _state.update { it.copy(isLoading = false, error = t.message ?: "Не удалось загрузить конфигурации") }
+        } catch (_: Throwable) {
+            _state.update {
+                it.copy(
+                    isLoading = false,
+                    error = VpnScreenError.UpdateServerListError
+                )
+            }
         }
     }
 

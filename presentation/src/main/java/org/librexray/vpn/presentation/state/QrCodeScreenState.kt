@@ -2,5 +2,5 @@ package org.librexray.vpn.presentation.state
 
 data class QrCodeScreenState(
     val configFound: Boolean = false,
-    val error: String? = null
+    val error: Boolean = false
 )

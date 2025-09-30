@@ -33,4 +33,5 @@
 
     <string name="qr_code_scanning">QR code scanning</string>
     <string name="configuration_found">Configuration found!</string>
+    <string name="scanning_error">Scanning error</string>
 </resources>
