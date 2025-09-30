@@ -7,4 +7,5 @@ sealed interface VpnScreenIntent {
     data class DeleteItem(val id: String) : VpnScreenIntent
     object RefreshItemList : VpnScreenIntent
     data class SetSelectedServer(val id: String) : VpnScreenIntent
+    object ConsumeError: VpnScreenIntent
 }

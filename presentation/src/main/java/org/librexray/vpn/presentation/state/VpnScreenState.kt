@@ -21,4 +21,5 @@ sealed interface VpnScreenError {
     object DeleteConfigError : VpnScreenError
     object TestConnectionError : VpnScreenError
     object UpdateServerListError : VpnScreenError
+    object SelectServerError : VpnScreenError
 }

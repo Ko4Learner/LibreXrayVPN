@@ -1,6 +1,7 @@
 package org.librexray.vpn.presentation.screens
 
 import android.content.res.Configuration
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -34,6 +35,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -55,6 +57,7 @@ import org.librexray.vpn.presentation.design_system.icon.rememberPainter
 import org.librexray.vpn.presentation.design_system.theme.Grey80
 import org.librexray.vpn.presentation.design_system.theme.LibreXrayVPNTheme
 import org.librexray.vpn.presentation.models.ServerItemModel
+import org.librexray.vpn.presentation.state.VpnScreenError
 
 @Composable
 fun VpnScreen(
@@ -65,6 +68,7 @@ fun VpnScreen(
     viewModel: VpnScreenViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
+    val context = LocalContext.current
 
     val savedStateHandle = navController.currentBackStackEntry?.savedStateHandle
     val qrCodeImported =
@@ -75,6 +79,77 @@ fun VpnScreen(
             viewModel.onIntent(VpnScreenIntent.RefreshItemList)
             savedStateHandle.remove<Boolean>("qrCodeImported")
         }
+    }
+
+    LaunchedEffect(state.error) {
+        when (state.error) {
+            VpnScreenError.DeleteConfigError -> {
+                Toast.makeText(
+                    context,
+                    context.getString(R.string.scanning_error),
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+
+            VpnScreenError.EmptyConfigError -> {
+                Toast.makeText(
+                    context,
+                    context.getString(R.string.scanning_error),
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+
+            VpnScreenError.ImportConfigError -> {
+                Toast.makeText(
+                    context,
+                    context.getString(R.string.scanning_error),
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+
+            VpnScreenError.StartError -> {
+                Toast.makeText(
+                    context,
+                    context.getString(R.string.scanning_error),
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+
+            VpnScreenError.StopError -> {
+                Toast.makeText(
+                    context,
+                    context.getString(R.string.scanning_error),
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+
+            VpnScreenError.TestConnectionError -> {
+                Toast.makeText(
+                    context,
+                    context.getString(R.string.scanning_error),
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+
+            VpnScreenError.UpdateServerListError -> {
+                Toast.makeText(
+                    context,
+                    context.getString(R.string.scanning_error),
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+
+            VpnScreenError.SelectServerError -> {
+                Toast.makeText(
+                    context,
+                    context.getString(R.string.scanning_error),
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+
+            null -> {}
+        }
+        viewModel.onIntent(VpnScreenIntent.ConsumeError)
     }
 
     VpnScreenContent(
