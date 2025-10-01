@@ -11,9 +11,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
+import androidx.compose.material.SnackbarHost
+import androidx.compose.material.SnackbarHostState
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.toArgb
@@ -93,13 +96,18 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 val navController = rememberNavController()
+                val snackbarHostState = remember { SnackbarHostState() }
+
                 Scaffold(
                     modifier = Modifier
                         .systemBarsPadding()
-                        .fillMaxSize()
+                        .fillMaxSize(),
+                    snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
                 ) { innerPadding ->
                     Navigation(
-                        navController = navController, innerPadding = innerPadding
+                        navController = navController,
+                        innerPadding = innerPadding,
+                        snackbarHostState = snackbarHostState
                     )
                 }
             }

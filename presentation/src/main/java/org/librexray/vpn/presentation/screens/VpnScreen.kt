@@ -1,5 +1,6 @@
 package org.librexray.vpn.presentation.screens
 
+import android.content.Context
 import android.content.res.Configuration
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
@@ -25,6 +26,9 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material.SnackbarDuration
+import androidx.compose.material.SnackbarHostState
+import androidx.compose.material.SnackbarResult
 import androidx.compose.material.Text
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -65,7 +69,8 @@ fun VpnScreen(
     navController: NavHostController,
     onQrCodeClick: () -> Unit,
     onSettingsClick: () -> Unit,
-    viewModel: VpnScreenViewModel = hiltViewModel()
+    viewModel: VpnScreenViewModel = hiltViewModel(),
+    snackbarHostState: SnackbarHostState
 ) {
     val state by viewModel.state.collectAsState()
     val context = LocalContext.current
@@ -73,7 +78,6 @@ fun VpnScreen(
     val savedStateHandle = navController.currentBackStackEntry?.savedStateHandle
     val qrCodeImported =
         savedStateHandle?.getStateFlow("qrCodeImported", false)?.collectAsState()
-
     LaunchedEffect(qrCodeImported?.value) {
         if (qrCodeImported?.value == true) {
             viewModel.onIntent(VpnScreenIntent.RefreshItemList)
@@ -83,73 +87,23 @@ fun VpnScreen(
 
     LaunchedEffect(state.error) {
         when (state.error) {
-            VpnScreenError.DeleteConfigError -> {
-                Toast.makeText(
-                    context,
-                    context.getString(R.string.scanning_error),
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-
-            VpnScreenError.EmptyConfigError -> {
-                Toast.makeText(
-                    context,
-                    context.getString(R.string.scanning_error),
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-
-            VpnScreenError.ImportConfigError -> {
-                Toast.makeText(
-                    context,
-                    context.getString(R.string.scanning_error),
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-
-            VpnScreenError.StartError -> {
-                Toast.makeText(
-                    context,
-                    context.getString(R.string.scanning_error),
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-
-            VpnScreenError.StopError -> {
-                Toast.makeText(
-                    context,
-                    context.getString(R.string.scanning_error),
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-
-            VpnScreenError.TestConnectionError -> {
-                Toast.makeText(
-                    context,
-                    context.getString(R.string.scanning_error),
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-
             VpnScreenError.UpdateServerListError -> {
-                Toast.makeText(
-                    context,
-                    context.getString(R.string.scanning_error),
-                    Toast.LENGTH_SHORT
-                ).show()
+                val res = snackbarHostState.showSnackbar(
+                    message = context.getString(R.string.update_server_list_error),
+                    actionLabel = context.getString(R.string.repeat),
+                    duration = SnackbarDuration.Short
+                )
+                if (res == SnackbarResult.ActionPerformed) {
+                    viewModel.onIntent(VpnScreenIntent.RefreshItemList)
+                }
+                viewModel.onIntent(VpnScreenIntent.ConsumeError)
             }
-
-            VpnScreenError.SelectServerError -> {
-                Toast.makeText(
-                    context,
-                    context.getString(R.string.scanning_error),
-                    Toast.LENGTH_SHORT
-                ).show()
+            null -> Unit
+            else -> {
+                errorHandler(state.error, context)
+                viewModel.onIntent(VpnScreenIntent.ConsumeError)
             }
-
-            null -> {}
         }
-        viewModel.onIntent(VpnScreenIntent.ConsumeError)
     }
 
     VpnScreenContent(
@@ -355,6 +309,70 @@ private fun BottomSection(
                 ConnectionTestButton(onIntent = onIntent, delayMs = delayMs)
             }
         }
+    }
+}
+
+private fun errorHandler(
+    error: VpnScreenError?,
+    context: Context
+) {
+    when (error) {
+        VpnScreenError.DeleteConfigError -> {
+            Toast.makeText(
+                context,
+                context.getString(R.string.delete_configuration_error),
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+
+        VpnScreenError.EmptyConfigError -> {
+            Toast.makeText(
+                context,
+                context.getString(R.string.configuration_not_found),
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+
+        VpnScreenError.ImportConfigError -> {
+            Toast.makeText(
+                context,
+                context.getString(R.string.configuration_import_error),
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+
+        VpnScreenError.StartError -> {
+            Toast.makeText(
+                context,
+                context.getString(R.string.start_error),
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+
+        VpnScreenError.StopError -> {
+            Toast.makeText(
+                context,
+                context.getString(R.string.stop_error),
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+
+        VpnScreenError.TestConnectionError -> {
+            Toast.makeText(
+                context,
+                context.getString(R.string.test_connection_error),
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+
+        VpnScreenError.SelectServerError -> {
+            Toast.makeText(
+                context,
+                context.getString(R.string.server_selection_error),
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+        else -> Unit
     }
 }
 

@@ -85,11 +85,10 @@ class VpnScreenViewModel @Inject constructor(
         val before = state.value.serverItemList
         val after = before.filterNot { it.guid == guid }
 
-        _state.update { it.copy(serverItemList = after) }
-
         viewModelScope.launch(Dispatchers.IO) {
             runCatching { configInteractor.deleteItem(guid) }
                 .onSuccess {
+                    _state.update { it.copy(serverItemList = after) }
                     if (guid == state.value.selectedServerId) {
                         val newSelected = after.firstOrNull()?.guid
                         _state.update { it.copy(selectedServerId = newSelected) }

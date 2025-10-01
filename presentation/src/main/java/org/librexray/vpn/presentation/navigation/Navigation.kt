@@ -2,6 +2,7 @@ package org.librexray.vpn.presentation.navigation
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
@@ -14,7 +15,8 @@ import org.librexray.vpn.presentation.screens.VpnScreen
 @Composable
 fun Navigation(
     navController: NavHostController,
-    innerPadding: PaddingValues
+    innerPadding: PaddingValues,
+    snackbarHostState: SnackbarHostState
 ) {
     NavHost(navController, startDestination = NavItem.VpnScreen.route) {
         composable(NavItem.VpnScreen.route) {
@@ -22,7 +24,8 @@ fun Navigation(
                 Modifier.padding(innerPadding),
                 navController,
                 onQrCodeClick = { navController.navigate(NavItem.QrCodeScreen.route) },
-                onSettingsClick = { navController.navigate(NavItem.SettingsScreen.route) }
+                onSettingsClick = { navController.navigate(NavItem.SettingsScreen.route) },
+                snackbarHostState = snackbarHostState
             )
         }
 
