@@ -149,7 +149,6 @@ open class VPNService : VpnService() {
         builder = notificationFactory.createNotificationBuilder()
         startForeground(1, builder.build())
 
-
         serviceScope.launch {
             connectionInteractor.observeSpeed().collect { speed ->
                 val text = formatSpeedLine(speed)

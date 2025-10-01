@@ -98,6 +98,7 @@ fun VpnScreen(
                 }
                 viewModel.onIntent(VpnScreenIntent.ConsumeError)
             }
+
             null -> Unit
             else -> {
                 errorHandler(state.error, context)
@@ -372,6 +373,7 @@ private fun errorHandler(
                 Toast.LENGTH_SHORT
             ).show()
         }
+
         else -> Unit
     }
 }
@@ -383,14 +385,17 @@ fun PreviewVpnScreen() {
         VpnScreenContent(
             modifier = Modifier,
             state = VpnScreenState(
-                isRunning = true, serverItemList = listOf(
+                isLoading = false,
+                isRunning = false,
+                serverItemList = listOf(
                     ServerItemModel(
                         guid = "1",
                         name = "My vless server config",
                         ip = "192.168.252.1",
                         protocol = "Vless"
                     )
-                ), selectedServerId = "1"
+                ),
+                selectedServerId = "1"
             ),
             onSettingsClick = {},
             onIntent = {},

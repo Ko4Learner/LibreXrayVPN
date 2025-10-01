@@ -1,6 +1,7 @@
 package org.librexray.vpn.presentation.screens
 
 import android.content.Intent
+import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -438,7 +439,7 @@ private sealed class SettingsSheet {
     data object About : SettingsSheet()
 }
 
-@Preview
+@Preview(name = "Dark", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun SettingsScreenContentPreview() {
     LibreXrayVPNTheme {
