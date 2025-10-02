@@ -54,12 +54,6 @@ dependencies {
     implementation(project(":domain"))
     implementation(project(":core-android"))
 
-    //TODO (использование workManager)
-
-    // Background Task Libraries (WorkManager)
-    implementation(libs.work.runtime.ktx)
-    implementation(libs.work.multiprocess)
-
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.coroutines.play.services)

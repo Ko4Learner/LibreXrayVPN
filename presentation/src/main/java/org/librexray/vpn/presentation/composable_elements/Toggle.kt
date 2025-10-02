@@ -64,11 +64,11 @@ fun ConnectToggle(
                 else if (MaterialTheme.colors.isLight) {
                     Brush.radialGradient(
                         colorStops = arrayOf(
-                            0.00f to Color(0xB35A6B80), // 70%
-                            0.25f to Color(0x8C5A6B80), // 55%
-                            0.50f to Color(0x665A6B80), // 40%
-                            0.75f to Color(0x335A6B80), // 20%
-                            1.00f to Color(0x005A6B80)  // 0%
+                            0.00f to Color(0xB35A6B80),
+                            0.25f to Color(0x8C5A6B80),
+                            0.50f to Color(0x665A6B80),
+                            0.75f to Color(0x335A6B80),
+                            1.00f to Color(0x005A6B80)
                         )
                     )
                 } else {
