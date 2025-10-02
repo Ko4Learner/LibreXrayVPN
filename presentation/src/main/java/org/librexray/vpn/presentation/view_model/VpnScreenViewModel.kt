@@ -13,7 +13,6 @@ import org.librexray.vpn.presentation.models.ServerItemModel
 import org.librexray.vpn.presentation.state.VpnScreenState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -21,6 +20,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.librexray.vpn.presentation.state.VpnScreenError
 import javax.inject.Inject
 import kotlin.coroutines.cancellation.CancellationException
 
@@ -65,12 +65,12 @@ class VpnScreenViewModel @Inject constructor(
     fun onIntent(intent: VpnScreenIntent) {
         when (intent) {
             VpnScreenIntent.ImportConfigFromClipboard -> importConfigFromClipboard()
-            VpnScreenIntent.RestartConnection -> restartConnection()
             VpnScreenIntent.TestConnection -> testConnection()
             VpnScreenIntent.ToggleConnection -> toggleConnection()
             is VpnScreenIntent.DeleteItem -> deleteItem(intent.id)
             VpnScreenIntent.RefreshItemList -> refreshItemList()
             is VpnScreenIntent.SetSelectedServer -> setSelectedServer(intent.id)
+            VpnScreenIntent.ConsumeError -> consumeError()
         }
     }
 
@@ -85,38 +85,37 @@ class VpnScreenViewModel @Inject constructor(
         val before = state.value.serverItemList
         val after = before.filterNot { it.guid == guid }
 
-        _state.update { it.copy(serverItemList = after) }
-
         viewModelScope.launch(Dispatchers.IO) {
             runCatching { configInteractor.deleteItem(guid) }
+                .onSuccess {
+                    _state.update { it.copy(serverItemList = after) }
+                    if (guid == state.value.selectedServerId) {
+                        val newSelected = after.firstOrNull()?.guid
+                        _state.update { it.copy(selectedServerId = newSelected) }
+                        if (newSelected != null) setSelectedServer(newSelected)
+                    }
+                }
                 .onFailure { e ->
+                    if (e is CancellationException) throw e
                     _state.update {
                         it.copy(
                             serverItemList = before,
-                            error = e.message ?: "Delete failed",
-                            selectedServerId = guid
+                            error = VpnScreenError.DeleteConfigError
                         )
                     }
                 }
-        }
-        if (guid == state.value.selectedServerId) {
-            val newSelected = after.firstOrNull()?.guid ?: return
-            setSelectedServer(newSelected)
         }
     }
 
     private fun testConnection() {
         viewModelScope.launch(Dispatchers.IO) {
-            val delay = connectionInteractor.testConnection()
-            _state.update { it.copy(delay = delay) }
-        }
-    }
-
-    private fun restartConnection() {
-        if (state.value.isRunning) {
-            connectionInteractor.restartConnection()
-        } else {
-            _state.update { it.copy(error = "Connection is not running") }
+            runCatching {
+                val delay = connectionInteractor.testConnection()
+                _state.update { it.copy(delay = delay) }
+            }.onFailure { e ->
+                if (e is CancellationException) throw e
+                _state.update { it.copy(error = VpnScreenError.TestConnectionError) }
+            }
         }
     }
 
@@ -124,15 +123,11 @@ class VpnScreenViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             when (configInteractor.importClipboardConfig()) {
                 ImportResult.Empty -> _state.update {
-                    it.copy(
-                        error = "Empty config"
-                    )
+                    it.copy(error = VpnScreenError.EmptyConfigError)
                 }
 
                 ImportResult.Error -> _state.update {
-                    it.copy(
-                        error = "Config imported error"
-                    )
+                    it.copy(error = VpnScreenError.ImportConfigError)
                 }
 
                 ImportResult.Success -> updateServerList(configInteractor.getServerList())
@@ -148,7 +143,6 @@ class VpnScreenViewModel @Inject constructor(
 
     private suspend fun updateServerList(serverList: List<String>) {
         getSelectedServer()
-        _state.update { it.copy(isLoading = true, error = null) }
         try {
             val items: List<ServerItemModel> = serverList.mapNotNull { guid ->
                 configInteractor.getServerConfig(guid)?.toServerItemModel(guid)
@@ -156,8 +150,13 @@ class VpnScreenViewModel @Inject constructor(
             _state.update { it.copy(isLoading = false, serverItemList = items) }
         } catch (ce: CancellationException) {
             throw ce
-        } catch (t: Throwable) {
-            _state.update { it.copy(isLoading = false, error = t.message ?: "Unknown error") }
+        } catch (_: Throwable) {
+            _state.update {
+                it.copy(
+                    isLoading = false,
+                    error = VpnScreenError.UpdateServerListError
+                )
+            }
         }
     }
 
@@ -168,17 +167,36 @@ class VpnScreenViewModel @Inject constructor(
 
     private fun setSelectedServer(serverId: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            configInteractor.setSelectedServer(serverId)
-            _state.update { it.copy(selectedServerId = serverId) }
+            runCatching {
+                configInteractor.setSelectedServer(serverId)
+                _state.update { it.copy(selectedServerId = serverId) }
+            }.onFailure { e ->
+                if (e is CancellationException) throw e
+                _state.update { it.copy(error = VpnScreenError.SelectServerError) }
+            }
         }
     }
 
     private suspend fun startConnection() {
         _state.update { it.copy(delay = null) }
-        connectionInteractor.startConnection()
+        runCatching {
+            connectionInteractor.startConnection()
+        }.onFailure { e ->
+            if (e is CancellationException) throw e
+            _state.update { it.copy(error = VpnScreenError.StartError) }
+        }
     }
 
     private suspend fun stopConnection() {
-        connectionInteractor.stopConnection()
+        runCatching {
+            connectionInteractor.stopConnection()
+        }.onFailure { e ->
+            if (e is CancellationException) throw e
+            _state.update { it.copy(error = VpnScreenError.StopError) }
+        }
+    }
+
+    private fun consumeError() {
+        _state.update { it.copy(error = null) }
     }
 }

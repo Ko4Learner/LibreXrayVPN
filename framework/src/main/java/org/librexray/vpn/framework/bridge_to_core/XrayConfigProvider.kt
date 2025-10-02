@@ -128,19 +128,44 @@ class XrayConfigProvider @Inject constructor(
      * Configures inbound listeners (loopback, ports, sniffing) on the template.
      */
     private fun getInbounds(xrayConfig: XrayConfig): Boolean {
-        try {
-            xrayConfig.inbounds.forEach { curInbound ->
-                curInbound.listen = LOOPBACK
+        return try {
+            val inbounds = xrayConfig.inbounds
+            if (inbounds.isEmpty()) {
+                Log.e(Constants.TAG, "No inbounds in template config")
+                return false
             }
-            xrayConfig.inbounds[0].port = LOCAL_SOCKS_PORT
-            xrayConfig.inbounds[0].sniffing?.enabled = true
-            xrayConfig.inbounds[0].sniffing?.routeOnly = false
-            xrayConfig.inbounds.removeAt(1)
+            inbounds.forEach { cur -> cur.listen = LOOPBACK }
+
+            val first = inbounds[0]
+            first.port = LOCAL_SOCKS_PORT
+
+            if (first.sniffing == null) {
+                inbounds[0] = first.copy(
+                    sniffing = XrayConfig.InboundBean.SniffingBean(
+                        enabled = true,
+                        routeOnly = false,
+                        destOverride = arrayListOf(HTTP, TLS),
+                        metadataOnly = null
+                    )
+                )
+            } else {
+                first.sniffing.enabled = true
+                first.sniffing.routeOnly = false
+                if (first.sniffing.destOverride.isEmpty()) {
+                    first.sniffing.destOverride.add(HTTP)
+                    first.sniffing.destOverride.add(TLS)
+                }
+            }
+
+            if (inbounds.size > 1) {
+                inbounds.removeAt(1)
+            }
+
+            true
         } catch (e: Exception) {
             Log.e(Constants.TAG, "Failed to configure inbounds", e)
-            return false
+            false
         }
-        return true
     }
 
     /**
@@ -556,6 +581,8 @@ class XrayConfigProvider @Inject constructor(
         private const val USE_IPV4V6 = "UseIPv4v6"
         private const val NONE = "none"
         private const val MULTI = "multi"
+        private const val HTTP = "HTTP"
+        private const val TLS = "tls"
 
         /**
          * DNS service domains for popular public DNS providers and specialized endpoints.

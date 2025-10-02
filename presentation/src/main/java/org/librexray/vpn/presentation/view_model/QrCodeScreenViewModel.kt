@@ -30,7 +30,7 @@ class QrCodeScreenViewModel @Inject constructor(
             QrCodeScreenIntent.ResetState -> _state.update {
                 it.copy(
                     configFound = false,
-                    error = null
+                    error = false
                 )
             }
         }
@@ -47,7 +47,7 @@ class QrCodeScreenViewModel @Inject constructor(
                     ImportResult.Error -> _state.update {
                         it.copy(
                             configFound = false,
-                            error = "Ошибка сканирования"
+                            error = true
                         )
                     }
 
@@ -55,7 +55,7 @@ class QrCodeScreenViewModel @Inject constructor(
                         _state.update {
                             it.copy(
                                 configFound = false,
-                                error = null
+                                error = false
                             )
                         }
 
@@ -64,7 +64,7 @@ class QrCodeScreenViewModel @Inject constructor(
                         _state.update {
                             it.copy(
                                 configFound = true,
-                                error = null
+                                error = false
                             )
                         }
                     }

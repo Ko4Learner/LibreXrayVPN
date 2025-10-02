@@ -1,6 +1,7 @@
 package org.librexray.vpn.presentation.screens
 
 import android.content.Intent
+import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -253,12 +254,13 @@ private fun LanguageBottomSheet(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(start = 16.dp)
                         .clickable { onIntent(SettingsScreenIntent.SetLocale(mode)) },
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
                     Text(
+                        modifier = Modifier
+                            .padding(start = 16.dp),
                         text = when (mode) {
                             AppLocale.SYSTEM -> stringResource(R.string.system_language)
                             AppLocale.EN -> stringResource(R.string.english_language)
@@ -344,12 +346,13 @@ private fun ThemeBottomSheet(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(start = 16.dp)
                         .clickable { onIntent(SettingsScreenIntent.SetTheme(mode)) },
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
                     Text(
+                        modifier = Modifier
+                            .padding(start = 16.dp),
                         text = when (mode) {
                             ThemeMode.SYSTEM -> stringResource(R.string.system_theme)
                             ThemeMode.LIGHT -> stringResource(R.string.light_theme)
@@ -436,7 +439,7 @@ private sealed class SettingsSheet {
     data object About : SettingsSheet()
 }
 
-@Preview
+@Preview(name = "Dark", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Composable
 fun SettingsScreenContentPreview() {
     LibreXrayVPNTheme {

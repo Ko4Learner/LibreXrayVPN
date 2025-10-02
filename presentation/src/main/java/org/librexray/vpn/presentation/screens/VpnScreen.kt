@@ -1,6 +1,8 @@
 package org.librexray.vpn.presentation.screens
 
+import android.content.Context
 import android.content.res.Configuration
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -24,6 +26,9 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material.SnackbarDuration
+import androidx.compose.material.SnackbarHostState
+import androidx.compose.material.SnackbarResult
 import androidx.compose.material.Text
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -34,6 +39,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -55,6 +61,7 @@ import org.librexray.vpn.presentation.design_system.icon.rememberPainter
 import org.librexray.vpn.presentation.design_system.theme.Grey80
 import org.librexray.vpn.presentation.design_system.theme.LibreXrayVPNTheme
 import org.librexray.vpn.presentation.models.ServerItemModel
+import org.librexray.vpn.presentation.state.VpnScreenError
 
 @Composable
 fun VpnScreen(
@@ -62,18 +69,41 @@ fun VpnScreen(
     navController: NavHostController,
     onQrCodeClick: () -> Unit,
     onSettingsClick: () -> Unit,
-    viewModel: VpnScreenViewModel = hiltViewModel()
+    viewModel: VpnScreenViewModel = hiltViewModel(),
+    snackbarHostState: SnackbarHostState
 ) {
     val state by viewModel.state.collectAsState()
+    val context = LocalContext.current
 
     val savedStateHandle = navController.currentBackStackEntry?.savedStateHandle
     val qrCodeImported =
         savedStateHandle?.getStateFlow("qrCodeImported", false)?.collectAsState()
-
     LaunchedEffect(qrCodeImported?.value) {
         if (qrCodeImported?.value == true) {
             viewModel.onIntent(VpnScreenIntent.RefreshItemList)
             savedStateHandle.remove<Boolean>("qrCodeImported")
+        }
+    }
+
+    LaunchedEffect(state.error) {
+        when (state.error) {
+            VpnScreenError.UpdateServerListError -> {
+                val res = snackbarHostState.showSnackbar(
+                    message = context.getString(R.string.update_server_list_error),
+                    actionLabel = context.getString(R.string.repeat),
+                    duration = SnackbarDuration.Short
+                )
+                if (res == SnackbarResult.ActionPerformed) {
+                    viewModel.onIntent(VpnScreenIntent.RefreshItemList)
+                }
+                viewModel.onIntent(VpnScreenIntent.ConsumeError)
+            }
+
+            null -> Unit
+            else -> {
+                errorHandler(state.error, context)
+                viewModel.onIntent(VpnScreenIntent.ConsumeError)
+            }
         }
     }
 
@@ -235,16 +265,21 @@ private fun MiddleSection(
     showBottomSheet: () -> Unit,
     state: VpnScreenState
 ) {
+
     Box(
         modifier = modifier.fillMaxWidth(),
         contentAlignment = Alignment.Center
     ) {
-        ConnectToggle(
-            onIntent = onIntent,
-            isRunning = isRunning,
-            emptyServerList = state.serverItemList.isEmpty(),
-            showBottomSheet = showBottomSheet
-        )
+        if (!state.isLoading) {
+            ConnectToggle(
+                onIntent = onIntent,
+                isRunning = isRunning,
+                emptyServerList = state.serverItemList.isEmpty(),
+                showBottomSheet = showBottomSheet
+            )
+        } else {
+            Box(Modifier.size(160.dp))
+        }
     }
 }
 
@@ -278,21 +313,89 @@ private fun BottomSection(
     }
 }
 
-@Preview(name = "Dark", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+private fun errorHandler(
+    error: VpnScreenError?,
+    context: Context
+) {
+    when (error) {
+        VpnScreenError.DeleteConfigError -> {
+            Toast.makeText(
+                context,
+                context.getString(R.string.delete_configuration_error),
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+
+        VpnScreenError.EmptyConfigError -> {
+            Toast.makeText(
+                context,
+                context.getString(R.string.configuration_not_found),
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+
+        VpnScreenError.ImportConfigError -> {
+            Toast.makeText(
+                context,
+                context.getString(R.string.configuration_import_error),
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+
+        VpnScreenError.StartError -> {
+            Toast.makeText(
+                context,
+                context.getString(R.string.start_error),
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+
+        VpnScreenError.StopError -> {
+            Toast.makeText(
+                context,
+                context.getString(R.string.stop_error),
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+
+        VpnScreenError.TestConnectionError -> {
+            Toast.makeText(
+                context,
+                context.getString(R.string.test_connection_error),
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+
+        VpnScreenError.SelectServerError -> {
+            Toast.makeText(
+                context,
+                context.getString(R.string.server_selection_error),
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+
+        else -> Unit
+    }
+}
+
+@Preview(name = "Dark", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Composable
 fun PreviewVpnScreen() {
     LibreXrayVPNTheme {
         VpnScreenContent(
             modifier = Modifier,
             state = VpnScreenState(
-                isRunning = true, serverItemList = listOf(
+                isLoading = false,
+                isRunning = false,
+                serverItemList = listOf(
                     ServerItemModel(
                         guid = "1",
                         name = "My vless server config",
                         ip = "192.168.252.1",
                         protocol = "Vless"
                     )
-                ), selectedServerId = "1"
+                ),
+                selectedServerId = "1"
             ),
             onSettingsClick = {},
             onIntent = {},

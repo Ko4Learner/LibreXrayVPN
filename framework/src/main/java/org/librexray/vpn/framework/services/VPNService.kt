@@ -142,9 +142,8 @@ open class VPNService : VpnService() {
         val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
         StrictMode.setThreadPolicy(policy)
 
-        builder = notificationFactory.createNotificationBuilder("LibreXrayVPN")
+        builder = notificationFactory.createNotificationBuilder()
         startForeground(1, builder.build())
-
 
         serviceScope.launch {
             connectionInteractor.observeSpeed().collect { speed ->

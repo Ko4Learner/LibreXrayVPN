@@ -28,31 +28,31 @@ class NotificationFactory @Inject constructor(
     /**
      * Creates a preconfigured notification builder for the VPN service.
      */
-    fun createNotificationBuilder(title: String): NotificationCompat.Builder {
-        val channelId = "LibreXrayVPN"
+    fun createNotificationBuilder(): NotificationCompat.Builder {
+        val channelId = context.getString(R.string.app_name)
         val notificationManager =
             context.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         val channel = NotificationChannel(
             channelId,
-            title,
+            channelId,
             NotificationManager.IMPORTANCE_LOW
         )
         notificationManager.createNotificationChannel(channel)
 
         return NotificationCompat.Builder(context, channelId)
             .setSmallIcon(R.drawable.ic_notification)
-            .setContentTitle(title)
+            .setContentTitle(channelId)
             .setOnlyAlertOnce(true)
             .setOngoing(true)
             .setContentIntent(createMainActivityPendingIntent(context))
             .addAction(
                 R.drawable.outline_3d_rotation_24,
-                "Перезапустить",
+                context.getString(R.string.restart_vpn),
                 createRestartServicePendingIntent(context)
             )
             .addAction(
                 R.drawable.baseline_stop_24,
-                "Выключить",
+                context.getString(R.string.stop_vpn),
                 createStopServicePendingIntent(context)
             )
     }

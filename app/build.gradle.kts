@@ -72,6 +72,7 @@ dependencies {
     implementation(project(":presentation"))
 
     implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.core.splashscreen)
 
     // Compose
     implementation(libs.androidx.activity.compose)

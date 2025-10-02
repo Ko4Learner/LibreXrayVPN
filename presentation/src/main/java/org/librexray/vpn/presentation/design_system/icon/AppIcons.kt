@@ -6,9 +6,9 @@ import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ContentCopy
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.PowerSettingsNew
 import androidx.compose.material.icons.outlined.DarkMode
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Public
 import androidx.compose.material.icons.outlined.QrCodeScanner
@@ -25,7 +25,7 @@ object AppIcons {
     val QrScan = IconType.Vector(Icons.Outlined.QrCodeScanner)
     val Clipboard = IconType.Vector(Icons.Filled.ContentCopy)
     val Toggle = IconType.Vector(Icons.Filled.PowerSettingsNew)
-    val Delete = IconType.Vector(Icons.Filled.Delete)
+    val Delete = IconType.Vector(Icons.Outlined.Delete)
     val Add = IconType.Vector(Icons.Filled.Add)
     val Close = IconType.Vector(Icons.Filled.Close)
     val arrowForward = IconType.Vector(Icons.Default.ChevronRight)
