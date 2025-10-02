@@ -66,7 +66,7 @@ class VpnServiceOnStartCommandTest {
         )
 
         notificationFactory = mockk {
-            every { createNotificationBuilder(any()) } returns NotificationCompat.Builder(
+            every { createNotificationBuilder() } returns NotificationCompat.Builder(
                 ctx,
                 "test"
             )
