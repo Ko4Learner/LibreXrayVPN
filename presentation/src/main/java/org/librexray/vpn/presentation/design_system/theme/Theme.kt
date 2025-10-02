@@ -10,7 +10,7 @@ import org.librexray.vpn.domain.models.ThemeMode
 private val DarkColorPalette = darkColors(
     primary = Blue,
     secondary = Grey,
-    background = Black20,
+    background = Black,
     surface = Grey,
     onPrimary = White,
     onSecondary = White,
@@ -20,13 +20,13 @@ private val DarkColorPalette = darkColors(
 
 private val LightColorPalette = lightColors(
     primary = Blue,
-    secondary = Black20,
-    background = Grey,
-    surface = Black20,
-    onPrimary = White,
-    onSecondary = White,
-    onBackground = White,
-    onSurface = White
+    secondary = MistBlue,
+    background = Ice,
+    surface = MistBlue,
+    onPrimary = Ink,
+    onSecondary = Ink,
+    onBackground = Ink,
+    onSurface = Ink
 )
 
 @Composable

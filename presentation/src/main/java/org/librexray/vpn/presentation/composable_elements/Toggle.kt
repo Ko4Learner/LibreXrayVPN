@@ -44,7 +44,7 @@ fun ConnectToggle(
             Log.d(Constants.TAG, "VPN permission denied")
         }
     }
-
+    MaterialTheme.colors.isLight
     Box(
         modifier = modifier
             .size(160.dp)
@@ -61,16 +61,27 @@ fun ConnectToggle(
                             1.00f to Color(0x00515EFF)
                         )
                     )
-                else
+                else if (MaterialTheme.colors.isLight) {
                     Brush.radialGradient(
                         colorStops = arrayOf(
-                            0.00f to Color(0xFF3F464D),
-                            0.35f to Color(0xFF444B52),
-                            0.65f to Color(0xFF393F45),
-                            0.85f to Color(0x663F464D),
-                            1.00f to Color(0x003F464D)
+                            0.00f to Color(0xB3475869),
+                            0.25f to Color(0x8C475869),
+                            0.50f to Color(0x66475869),
+                            0.75f to Color(0x33475869),
+                            1.00f to Color(0x00475869)
                         )
                     )
+                } else {
+                    Brush.radialGradient(
+                        colorStops = arrayOf(
+                            0.00f to Color(0xFF2F3439),
+                            0.30f to Color(0xFF3A4046),
+                            0.60f to Color(0xFF2B3035),
+                            0.82f to Color(0x662F3439),
+                            1.00f to Color(0x002F3439)
+                        )
+                    )
+                }
             )
             .clickable {
                 if (emptyServerList) {

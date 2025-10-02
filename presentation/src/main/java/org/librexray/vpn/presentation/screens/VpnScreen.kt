@@ -378,7 +378,7 @@ private fun errorHandler(
     }
 }
 
-@Preview(name = "Dark", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Preview(name = "Dark", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Composable
 fun PreviewVpnScreen() {
     LibreXrayVPNTheme {

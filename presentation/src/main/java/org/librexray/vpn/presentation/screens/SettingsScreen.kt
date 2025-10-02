@@ -439,7 +439,7 @@ private sealed class SettingsSheet {
     data object About : SettingsSheet()
 }
 
-@Preview(name = "Dark", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Preview(name = "Dark", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Composable
 fun SettingsScreenContentPreview() {
     LibreXrayVPNTheme {

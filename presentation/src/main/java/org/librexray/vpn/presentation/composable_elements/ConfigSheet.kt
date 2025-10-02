@@ -110,6 +110,7 @@ private fun ImportButtonRow(
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = MaterialTheme.colors.surface.copy(alpha = 0.7f)
             ),
+            elevation = ButtonDefaults.elevation(0.dp, 0.dp, 0.dp),
             onClick = onQrCodeClick
         ) {
             Column(
@@ -139,6 +140,7 @@ private fun ImportButtonRow(
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = MaterialTheme.colors.surface.copy(alpha = 0.7f)
             ),
+            elevation = ButtonDefaults.elevation(0.dp, 0.dp, 0.dp),
             onClick = { onIntent(VpnScreenIntent.ImportConfigFromClipboard) }
         ) {
             Column(
