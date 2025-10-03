@@ -1,7 +1,9 @@
 package org.librexray.vpn.presentation.composable_elements
 
 import android.app.Activity
+import android.content.pm.PackageManager
 import android.net.VpnService
+import android.os.Build
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -20,6 +22,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.core.content.ContextCompat
 import org.librexray.vpn.coreandroid.R
 import org.librexray.vpn.coreandroid.utils.Constants
 import org.librexray.vpn.presentation.design_system.icon.AppIcons
@@ -44,7 +47,21 @@ fun ConnectToggle(
             Log.d(Constants.TAG, "VPN permission denied")
         }
     }
-    MaterialTheme.colors.isLight
+
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { result ->
+        val intent = VpnService.prepare(context)
+        if (intent == null) {
+            onIntent(VpnScreenIntent.ToggleConnection)
+        } else {
+            vpnPermissionLauncher.launch(intent)
+        }
+        if (!result) {
+            Log.d(Constants.TAG, "Notification permission denied")
+        }
+    }
+
     Box(
         modifier = modifier
             .size(160.dp)
@@ -86,13 +103,24 @@ fun ConnectToggle(
             .clickable {
                 if (emptyServerList) {
                     showBottomSheet()
-                } else {
-                    val intent = VpnService.prepare(context)
-                    if (intent == null) {
-                        onIntent(VpnScreenIntent.ToggleConnection)
-                    } else {
-                        vpnPermissionLauncher.launch(intent)
+                    return@clickable
+                }
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    val hasNotification = ContextCompat.checkSelfPermission(
+                        context, android.Manifest.permission.POST_NOTIFICATIONS
+                    ) == PackageManager.PERMISSION_GRANTED
+
+                    if (!hasNotification) {
+                        notificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+                        return@clickable
                     }
+                }
+
+                val intent = VpnService.prepare(context)
+                if (intent == null) {
+                    onIntent(VpnScreenIntent.ToggleConnection)
+                } else {
+                    vpnPermissionLauncher.launch(intent)
                 }
             },
         contentAlignment = Alignment.Center
@@ -111,7 +139,7 @@ fun ConnectToggle(
             } else {
                 stringResource(R.string.start_vpn)
             },
-            tint = MaterialTheme.colors.onSurface,
+            tint = Color.White,
             modifier = Modifier.size(48.dp)
         )
     }
