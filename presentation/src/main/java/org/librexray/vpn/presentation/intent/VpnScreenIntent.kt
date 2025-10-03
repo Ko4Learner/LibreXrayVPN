@@ -8,4 +8,5 @@ sealed interface VpnScreenIntent {
     object RefreshItemList : VpnScreenIntent
     data class SetSelectedServer(val id: String) : VpnScreenIntent
     object ConsumeError: VpnScreenIntent
+    object MarkNotificationAsked : VpnScreenIntent
 }

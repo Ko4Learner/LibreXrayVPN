@@ -116,6 +116,26 @@ class MMKVStorage @Inject constructor(private val gson: Gson) : KeyValueStorage 
         return settingsStorage.decodeString(key)
     }
 
+    /**
+     * Writes a Boolean setting into the settings store.
+     *
+     * @param key Setting key.
+     * @param value Value to save.
+     */
+    override fun encodeSettingsBoolean(key: String, value: Boolean) {
+        settingsStorage.encode(key, value)
+    }
+
+    /**
+     * Reads a Boolean setting from the settings store.
+     *
+     * @param key Setting key.
+     * @return Stored value.
+     */
+    override fun decodeSettingsBoolean(key: String): Boolean {
+        return settingsStorage.decodeBool(key)
+    }
+
     companion object {
         private const val ID_MAIN = "MAIN"
         private const val ID_PROFILE_FULL_CONFIG = "PROFILE_FULL_CONFIG"

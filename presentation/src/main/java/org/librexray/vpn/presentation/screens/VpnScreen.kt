@@ -275,7 +275,8 @@ private fun MiddleSection(
                 onIntent = onIntent,
                 isRunning = isRunning,
                 emptyServerList = state.serverItemList.isEmpty(),
-                showBottomSheet = showBottomSheet
+                showBottomSheet = showBottomSheet,
+                wasNotificationPermissionAsked = state.wasNotificationPermissionAsked
             )
         } else {
             Box(Modifier.size(160.dp))

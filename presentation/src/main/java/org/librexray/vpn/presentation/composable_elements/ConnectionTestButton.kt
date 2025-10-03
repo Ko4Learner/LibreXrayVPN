@@ -21,6 +21,8 @@ import androidx.compose.ui.unit.dp
 import org.librexray.vpn.coreandroid.R
 import org.librexray.vpn.presentation.design_system.icon.AppIcons
 import org.librexray.vpn.presentation.design_system.icon.rememberPainter
+import org.librexray.vpn.presentation.design_system.theme.Ice
+import org.librexray.vpn.presentation.design_system.theme.White
 import org.librexray.vpn.presentation.intent.VpnScreenIntent
 
 @Composable
@@ -62,7 +64,11 @@ fun ConnectionTestButton(
                     Icon(
                         painter = AppIcons.LatencyTest.rememberPainter(),
                         contentDescription = stringResource(R.string.click_to_test_connection),
-                        tint = MaterialTheme.colors.onSurface
+                        tint = if (MaterialTheme.colors.isLight) {
+                            Ice
+                        } else {
+                            White
+                        }
                     )
                 }
             }

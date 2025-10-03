@@ -8,7 +8,7 @@ object Constants {
     const val PACKAGE = "org.librexray.vpn"
     const val TAG = "VpnApplication"
     const val GITHUB_URI = "https://github.com/Ko4Learner/LibreXrayVPN"
-    const val VERSION_CODE = "0.1.0"
+    const val VERSION_CODE = "1.0.0"
 
     // --- Localization Tags ---
     const val SYSTEM_LOCALE_TAG = ""

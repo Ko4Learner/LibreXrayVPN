@@ -10,7 +10,8 @@ data class VpnScreenState(
     val delay: Long? = null,
     val error: VpnScreenError? = null,
     val selectedServerId: String? = null,
-    val connectionSpeed: ConnectionSpeed? = null
+    val connectionSpeed: ConnectionSpeed? = null,
+    val wasNotificationPermissionAsked: Boolean = false
 )
 
 sealed interface VpnScreenError {
