@@ -16,7 +16,7 @@ import org.librexray.vpn.domain.models.ConfigProfileItem
  * - removeServer(guid):
  *     Deletes the profile for the id.
  *
- * - encodeSettings(key, value)/decodeSettingsString(key):
+ * - encodeSettings(key, value)/decodeSettings(key):
  *     Writes/reads simple string settings.
  */
 interface KeyValueStorage {
@@ -29,4 +29,6 @@ interface KeyValueStorage {
     fun removeServer(guid: String)
     fun encodeSettingsString(key: String, value: String?)
     fun decodeSettingsString(key: String): String?
+    fun encodeSettingsBoolean(key: String, value: Boolean)
+    fun decodeSettingsBoolean(key: String): Boolean
 }

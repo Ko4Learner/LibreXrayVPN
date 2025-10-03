@@ -427,7 +427,7 @@ private fun AboutBottomSheet(
             Text(
                 text = stringResource(R.string.about_text, Constants.VERSION_CODE),
                 style = MaterialTheme.typography.body1,
-                color = MaterialTheme.colors.onBackground
+                color = MaterialTheme.colors.onBackground.copy(alpha = 0.85f)
             )
         }
     }

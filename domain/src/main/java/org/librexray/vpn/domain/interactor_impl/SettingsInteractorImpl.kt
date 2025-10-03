@@ -14,4 +14,6 @@ class SettingsInteractorImpl @Inject constructor(
     override suspend fun setLocale(locale: AppLocale) = settingsRepository.setLocale(locale)
     override fun observeTheme(): Flow<ThemeMode> = settingsRepository.observeTheme()
     override suspend fun setTheme(theme: ThemeMode) = settingsRepository.setTheme(theme)
+    override fun wasNotificationAsked(): Boolean = settingsRepository.wasNotificationAsked()
+    override suspend fun markNotificationAsked() = settingsRepository.markNotificationAsked()
 }

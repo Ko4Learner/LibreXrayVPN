@@ -1,8 +1,10 @@
 package org.librexray.vpn.presentation.composable_elements
 
 import android.app.Activity
+import android.content.pm.PackageManager
 import android.net.VpnService
-import android.util.Log
+import android.os.Build
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -20,10 +22,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.core.content.ContextCompat
 import org.librexray.vpn.coreandroid.R
-import org.librexray.vpn.coreandroid.utils.Constants
 import org.librexray.vpn.presentation.design_system.icon.AppIcons
 import org.librexray.vpn.presentation.design_system.icon.rememberPainter
+import org.librexray.vpn.presentation.design_system.theme.Ice
+import org.librexray.vpn.presentation.design_system.theme.White
 import org.librexray.vpn.presentation.intent.VpnScreenIntent
 
 @Composable
@@ -31,6 +35,7 @@ fun ConnectToggle(
     modifier: Modifier = Modifier,
     onIntent: (VpnScreenIntent) -> Unit,
     isRunning: Boolean,
+    wasNotificationPermissionAsked: Boolean,
     emptyServerList: Boolean,
     showBottomSheet: () -> Unit
 ) {
@@ -41,10 +46,32 @@ fun ConnectToggle(
         if (result.resultCode == Activity.RESULT_OK) {
             onIntent(VpnScreenIntent.ToggleConnection)
         } else {
-            Log.d(Constants.TAG, "VPN permission denied")
+            Toast.makeText(
+                context,
+                context.getString(R.string.vpn_permission_denied),
+                Toast.LENGTH_LONG
+            ).show()
         }
     }
-    MaterialTheme.colors.isLight
+
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { result ->
+        val intent = VpnService.prepare(context)
+        if (intent == null) {
+            onIntent(VpnScreenIntent.ToggleConnection)
+        } else {
+            vpnPermissionLauncher.launch(intent)
+        }
+        if (!result) {
+            Toast.makeText(
+                context,
+                context.getString(R.string.notifications_permission_denied),
+                Toast.LENGTH_LONG
+            ).show()
+        }
+    }
+
     Box(
         modifier = modifier
             .size(160.dp)
@@ -86,13 +113,26 @@ fun ConnectToggle(
             .clickable {
                 if (emptyServerList) {
                     showBottomSheet()
-                } else {
-                    val intent = VpnService.prepare(context)
-                    if (intent == null) {
-                        onIntent(VpnScreenIntent.ToggleConnection)
-                    } else {
-                        vpnPermissionLauncher.launch(intent)
+                    return@clickable
+                }
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && !wasNotificationPermissionAsked) {
+                    val hasNotification = ContextCompat.checkSelfPermission(
+                        context, android.Manifest.permission.POST_NOTIFICATIONS
+                    ) == PackageManager.PERMISSION_GRANTED
+
+                    onIntent(VpnScreenIntent.MarkNotificationAsked)
+
+                    if (!hasNotification) {
+                        notificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+                        return@clickable
                     }
+                }
+
+                val intent = VpnService.prepare(context)
+                if (intent == null) {
+                    onIntent(VpnScreenIntent.ToggleConnection)
+                } else {
+                    vpnPermissionLauncher.launch(intent)
                 }
             },
         contentAlignment = Alignment.Center
@@ -111,7 +151,11 @@ fun ConnectToggle(
             } else {
                 stringResource(R.string.start_vpn)
             },
-            tint = MaterialTheme.colors.onSurface,
+            tint = if (MaterialTheme.colors.isLight) {
+                Ice
+            } else {
+                White
+            },
             modifier = Modifier.size(48.dp)
         )
     }

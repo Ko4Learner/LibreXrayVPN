@@ -1,6 +1,7 @@
 package org.librexray.vpn.presentation.view_model
 
-import  androidx.lifecycle.ViewModel
+import android.os.Build
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import org.librexray.vpn.domain.interfaces.interactor.ConfigInteractor
 import org.librexray.vpn.domain.interfaces.interactor.ConnectionInteractor
@@ -20,6 +21,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.librexray.vpn.domain.interfaces.interactor.SettingsInteractor
 import org.librexray.vpn.presentation.state.VpnScreenError
 import javax.inject.Inject
 import kotlin.coroutines.cancellation.CancellationException
@@ -28,6 +30,7 @@ import kotlin.coroutines.cancellation.CancellationException
 class VpnScreenViewModel @Inject constructor(
     private val configInteractor: ConfigInteractor,
     private val connectionInteractor: ConnectionInteractor,
+    private val settingsInteractor: SettingsInteractor,
     stateRepository: ServiceStateRepository
 ) : ViewModel() {
     private val _state = MutableStateFlow(VpnScreenState())
@@ -60,6 +63,11 @@ class VpnScreenViewModel @Inject constructor(
                 _state.update { it.copy(connectionSpeed = speed) }
             }
         }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            _state.update {
+                it.copy(wasNotificationPermissionAsked = settingsInteractor.wasNotificationAsked())
+            }
+        }
     }
 
     fun onIntent(intent: VpnScreenIntent) {
@@ -71,6 +79,7 @@ class VpnScreenViewModel @Inject constructor(
             VpnScreenIntent.RefreshItemList -> refreshItemList()
             is VpnScreenIntent.SetSelectedServer -> setSelectedServer(intent.id)
             VpnScreenIntent.ConsumeError -> consumeError()
+            VpnScreenIntent.MarkNotificationAsked -> markNotificationAsked()
         }
     }
 
@@ -198,5 +207,12 @@ class VpnScreenViewModel @Inject constructor(
 
     private fun consumeError() {
         _state.update { it.copy(error = null) }
+    }
+
+    private fun markNotificationAsked() {
+        viewModelScope.launch(Dispatchers.IO) {
+            settingsInteractor.markNotificationAsked()
+        }
+        _state.update { it.copy(wasNotificationPermissionAsked = true) }
     }
 }

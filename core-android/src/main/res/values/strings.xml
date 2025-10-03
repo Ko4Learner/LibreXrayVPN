@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name" translatable="false">LibreXrayVPN</string>
     <string name="add_configuration">Add configuration</string>
-    <string name="my_configurations">My configurations</string>
+    <string name="my_configurations">Configurations</string>
     <string name="start_vpn">Start</string>
     <string name="stop_vpn">Stop</string>
     <string name="restart_vpn">Restart</string>
@@ -44,5 +44,7 @@
     <string name="server_selection_error">Server selection error</string>
     <string name="update_server_list_error">Update server list error</string>
     <string name="repeat">Repeat</string>
+    <string name="notifications_permission_denied">Notifications are disabled. VPN will keep running, but you won’t be able to control the connection or see traffic statistics. You can enable notifications in the app settings.</string>
+    <string name="vpn_permission_denied">System permission is required to start the VPN. The connection cannot be established without confirmation. Please try again and press ‘OK’ in the system dialog.</string>
 
 </resources>

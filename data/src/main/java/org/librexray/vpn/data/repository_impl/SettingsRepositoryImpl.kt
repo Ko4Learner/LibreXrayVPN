@@ -16,7 +16,7 @@ class SettingsRepositoryImpl @Inject constructor(private val storage: KeyValueSt
     /**
      * Hot stream emitting the current [AppLocale].
      */
-    private val _localeFlow = MutableStateFlow(getLocale())
+    private val _localeFlow = MutableStateFlow(AppLocale.fromTag(storage.decodeSettingsString(LANGUAGE)))
 
     /**
      * Hot stream emitting the current theme mode.
@@ -38,12 +38,6 @@ class SettingsRepositoryImpl @Inject constructor(private val storage: KeyValueSt
     }
 
     /**
-     * Returns the current effective [AppLocale].
-     */
-    override fun getLocale(): AppLocale =
-        AppLocale.fromTag(storage.decodeSettingsString(LANGUAGE))
-
-    /**
      * Observes the user's preferred theme mode.
      */
     override fun observeTheme(): Flow<ThemeMode> = _themeFlow
@@ -56,8 +50,24 @@ class SettingsRepositoryImpl @Inject constructor(private val storage: KeyValueSt
         _themeFlow.value = theme
     }
 
+    /**
+     * Returns whether the app has already asked for the notifications permission.
+     * Used to avoid prompting the user more than once.
+     */
+    override fun wasNotificationAsked(): Boolean {
+        return storage.decodeSettingsBoolean(NOTIFICATION_PERMISSION)
+    }
+
+    /**
+     * Persists a marker that the notifications permission has been requested.
+     */
+    override suspend fun markNotificationAsked() {
+        storage.encodeSettingsBoolean(NOTIFICATION_PERMISSION, true)
+    }
+
     companion object {
         private const val LANGUAGE = "language"
         private const val THEME = "theme"
+        private const val NOTIFICATION_PERMISSION = "notification_permission"
     }
 }
