@@ -8,7 +8,6 @@ coreKtx = "1.15.0"
 splashscreen = "1.0.1"
 junit = "4.13.2"
 junitVersion = "1.1.5"
-espressoCore = "3.6.1"
 kotlinxCoroutinesAndroid = "1.9.0"
 lifecycleRuntimeCompose = "2.8.7"
 lifecycleRuntimeKtx = "2.8.7"
@@ -17,7 +16,6 @@ composeBom = "2025.03.00"
 navigationCom = "2.8.9"
 gson = "2.12.1"
 mmkvStatic = "2.1.0"
-workRuntimeKtx = "2.10.1"
 cameraX = "1.4.2"
 mlkit = "17.3.0"
 mockk = "1.14.4"
@@ -26,13 +24,10 @@ material = "1.12.0"
 coroutinesTest = "1.9.0"
 turbine = "1.1.0"
 truth = "1.4.4"
-assertk = "0.28.1"
 robolectric = "4.12.2"
 hiltTesting = "2.50"
 androidxTestCore = "1.6.1"
 androidxTestRunner = "1.6.1"
-androidxTestRules = "1.6.1"
-archCoreTesting = "2.2.0"
 
 
 [libraries]
@@ -57,7 +52,6 @@ androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
 androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
-androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-material = { group = "androidx.compose.material", name = "material" }
 androidx-material-icons-core = { group = "androidx.compose.material", name = "material-icons-core" }
 androidx-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
@@ -74,10 +68,6 @@ androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-com
 mmkv-static = { module = "com.tencent:mmkv-static", version.ref = "mmkvStatic" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 
-# WorkManager
-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workRuntimeKtx" }
-work-multiprocess = { module = "androidx.work:work-multiprocess", version.ref = "workRuntimeKtx" }
-
 # CameraX / MLKit
 cameraX = { group = "androidx.camera", name = "camera-camera2", version.ref = "cameraX" }
 cameraX-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "cameraX" }
@@ -91,18 +81,13 @@ mockK = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 turbine = { group = "app.cash.turbine", name = "turbine", version.ref = "turbine" }
 coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutinesTest" }
 truth = { group = "com.google.truth", name = "truth", version.ref = "truth" }
-assertk = { group = "com.willowtreeapps.assertk", name = "assertk", version.ref = "assertk" }
-arch-core-testing = { group = "androidx.arch.core", name = "core-testing", version.ref = "archCoreTesting" }
 
 # Instrumented / Android testing
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
-androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 androidx-test-core = { group = "androidx.test", name = "core-ktx", version.ref = "androidxTestCore" }
 androidx-test-runner = { group = "androidx.test", name = "runner", version.ref = "androidxTestRunner" }
-androidx-test-rules = { group = "androidx.test", name = "rules", version.ref = "androidxTestRules" }
 mockk-android = { group = "io.mockk", name = "mockk-android", version.ref = "mockk" }
 hilt-android-testing = { group = "com.google.dagger", name = "hilt-android-testing", version.ref = "hiltTesting" }
-hilt-android-compiler-test = { group = "com.google.dagger", name = "hilt-compiler", version.ref = "hiltTesting" }
 robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
 
 [plugins]

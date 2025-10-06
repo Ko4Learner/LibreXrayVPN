@@ -11,7 +11,7 @@ The project is built with a modern technology stack and inspired by [v2rayNG](ht
 - **Hilt** (dependency injection)
 - **MMKV** (local storage)
 - **ML Kit** (QR code scanning)
-- **Testing**: JUnit, MockK, Espresso
+- **Testing**: JUnit, MockK, Robolectric
 
 ### Features
 - Import configs via **QR code** and **clipboard**
@@ -48,7 +48,7 @@ LibreXrayVPN — Android VPN-клиент с открытым исходным �
 - **Hilt** (внедрение зависимостей)
 - **MMKV** (локальное хранилище)
 - **ML Kit** (сканирование QR-кодов)
-- **Тестирование**: JUnit, MockK, Espresso
+- **Тестирование**: JUnit, MockK, Robolectric
 
 ### Возможности
 - Импорт конфигураций через **QR-код** и **буфер обмена**

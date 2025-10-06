@@ -16,10 +16,14 @@ import androidx.compose.material.icons.outlined.Settings
 import org.librexray.vpn.coreandroid.R
 
 /**
- * Centralized registry of app icons.
+ * Centralized registry of all app icons.
  *
- * All icons used across the VPN client are referenced here
- * with semantic names instead of calling Icons.* directly.
+ * Provides stable, semantic references to icons used across the VPN client.
+ *
+ * Adding a new icon:
+ * - Define it here with a descriptive name.
+ * - Prefer [IconType.Vector] when using Material icons,
+ *   or [IconType.Drawable] for custom resources.
  */
 object AppIcons {
     val QrScan = IconType.Vector(Icons.Outlined.QrCodeScanner)
@@ -28,8 +32,8 @@ object AppIcons {
     val Delete = IconType.Vector(Icons.Outlined.Delete)
     val Add = IconType.Vector(Icons.Filled.Add)
     val Close = IconType.Vector(Icons.Filled.Close)
-    val arrowForward = IconType.Vector(Icons.Default.ChevronRight)
-    val arrowBack = IconType.Vector(Icons.Default.ChevronLeft)
+    val ArrowForward = IconType.Vector(Icons.Default.ChevronRight)
+    val ArrowBack = IconType.Vector(Icons.Default.ChevronLeft)
     val Menu = IconType.Vector(Icons.Outlined.Settings)
     val Theme = IconType.Vector(Icons.Outlined.DarkMode)
     val Language = IconType.Vector(Icons.Outlined.Public)

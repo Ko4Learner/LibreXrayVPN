@@ -42,7 +42,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import org.librexray.vpn.presentation.composable_elements.items.SettingItem
+import org.librexray.vpn.presentation.composable_element.item.SettingItem
 import org.librexray.vpn.presentation.design_system.icon.AppIcons
 import org.librexray.vpn.presentation.design_system.icon.rememberPainter
 import org.librexray.vpn.presentation.design_system.theme.LibreXrayVPNTheme
@@ -106,14 +106,14 @@ private fun SettingsScreenContent(
         sheetContent = {
             when (currentSheet) {
                 SettingsSheet.Language -> LanguageBottomSheet(
-                    state = state,
+                    localeMode = state.localeMode,
                     onIntent = onIntent,
                     closeBottomSheet = { closeBottomSheet() }
                 )
 
                 SettingsSheet.Theme ->
                     ThemeBottomSheet(
-                        state = state,
+                        themeMode = state.themeMode,
                         onIntent = onIntent,
                         closeBottomSheet = { closeBottomSheet() }
                     )
@@ -145,7 +145,7 @@ private fun SettingsScreenContent(
                     ) {
                         Icon(
                             modifier = Modifier.size(32.dp),
-                            painter = AppIcons.arrowBack.rememberPainter(),
+                            painter = AppIcons.ArrowBack.rememberPainter(),
                             contentDescription = stringResource(R.string.back),
                             tint = MaterialTheme.colors.onBackground
                         )
@@ -192,7 +192,7 @@ private fun SettingsScreenContent(
 @Composable
 private fun LanguageBottomSheet(
     modifier: Modifier = Modifier,
-    state: SettingsScreenState,
+    localeMode: AppLocale,
     onIntent: (SettingsScreenIntent) -> Unit,
     closeBottomSheet: () -> Unit
 ) {
@@ -236,7 +236,7 @@ private fun LanguageBottomSheet(
             }
         }
         AppLocale.entries.forEach { mode ->
-            val isSelected = state.localeMode == mode
+            val isSelected = localeMode == mode
             val cardModifier = Modifier
                 .fillMaxWidth().let {
                     if (isSelected) it.border(
@@ -284,7 +284,7 @@ private fun LanguageBottomSheet(
 @Composable
 private fun ThemeBottomSheet(
     modifier: Modifier = Modifier,
-    state: SettingsScreenState,
+    themeMode: ThemeMode,
     onIntent: (SettingsScreenIntent) -> Unit,
     closeBottomSheet: () -> Unit
 ) {
@@ -328,7 +328,7 @@ private fun ThemeBottomSheet(
             }
         }
         ThemeMode.entries.forEach { mode ->
-            val isSelected = state.themeMode == mode
+            val isSelected = themeMode == mode
             val cardModifier = Modifier
                 .fillMaxWidth().let {
                     if (isSelected) it.border(
@@ -439,7 +439,7 @@ private sealed class SettingsSheet {
     data object About : SettingsSheet()
 }
 
-@Preview(name = "Dark", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_NO)
+@Preview(name = "Dark", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun SettingsScreenContentPreview() {
     LibreXrayVPNTheme {

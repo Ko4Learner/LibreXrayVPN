@@ -1,17 +1,17 @@
 package org.librexray.vpn.presentation.state
 
 import org.librexray.vpn.domain.models.ConnectionSpeed
-import org.librexray.vpn.presentation.models.ServerItemModel
+import org.librexray.vpn.presentation.model.ServerItemModel
 
 data class VpnScreenState(
-    val isLoading: Boolean = true,
+    val isLaunchLoading: Boolean = true,
     val isRunning: Boolean = false,
     val serverItemList: List<ServerItemModel> = listOf(),
-    val delay: Long? = null,
-    val error: VpnScreenError? = null,
     val selectedServerId: String? = null,
+    val delay: Long? = null,
     val connectionSpeed: ConnectionSpeed? = null,
-    val wasNotificationPermissionAsked: Boolean = false
+    val wasNotificationPermissionAsked: Boolean = false,
+    val error: VpnScreenError? = null,
 )
 
 sealed interface VpnScreenError {

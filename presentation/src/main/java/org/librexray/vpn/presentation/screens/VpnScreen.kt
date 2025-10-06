@@ -48,19 +48,20 @@ import androidx.navigation.NavHostController
 import kotlinx.coroutines.launch
 import org.librexray.vpn.coreandroid.R
 import org.librexray.vpn.domain.models.ConnectionSpeed
-import org.librexray.vpn.presentation.composable_elements.ContentBottomSheet
+import org.librexray.vpn.presentation.composable_element.ContentBottomSheet
 import org.librexray.vpn.presentation.intent.VpnScreenIntent
 import org.librexray.vpn.presentation.state.VpnScreenState
 import org.librexray.vpn.presentation.view_model.VpnScreenViewModel
-import org.librexray.vpn.presentation.composable_elements.ConnectToggle
-import org.librexray.vpn.presentation.composable_elements.ConnectionSpeedInfo
-import org.librexray.vpn.presentation.composable_elements.ConnectionTestButton
-import org.librexray.vpn.presentation.composable_elements.items.SubscriptionItem
+import org.librexray.vpn.presentation.composable_element.ConnectToggle
+import org.librexray.vpn.presentation.composable_element.ConnectionSpeedInfo
+import org.librexray.vpn.presentation.composable_element.ConnectionTestButton
+import org.librexray.vpn.presentation.composable_element.item.SubscriptionItem
 import org.librexray.vpn.presentation.design_system.icon.AppIcons
 import org.librexray.vpn.presentation.design_system.icon.rememberPainter
 import org.librexray.vpn.presentation.design_system.theme.Grey80
 import org.librexray.vpn.presentation.design_system.theme.LibreXrayVPNTheme
-import org.librexray.vpn.presentation.models.ServerItemModel
+import org.librexray.vpn.presentation.model.ServerItemModel
+import org.librexray.vpn.presentation.navigation.NavItem.Route.QR_CODE_IMPORTED_KEY
 import org.librexray.vpn.presentation.state.VpnScreenError
 
 @Composable
@@ -77,11 +78,11 @@ fun VpnScreen(
 
     val savedStateHandle = navController.currentBackStackEntry?.savedStateHandle
     val qrCodeImported =
-        savedStateHandle?.getStateFlow("qrCodeImported", false)?.collectAsState()
+        savedStateHandle?.getStateFlow(QR_CODE_IMPORTED_KEY, false)?.collectAsState()
     LaunchedEffect(qrCodeImported?.value) {
         if (qrCodeImported?.value == true) {
             viewModel.onIntent(VpnScreenIntent.RefreshItemList)
-            savedStateHandle.remove<Boolean>("qrCodeImported")
+            savedStateHandle.remove<Boolean>(QR_CODE_IMPORTED_KEY)
         }
     }
 
@@ -160,7 +161,8 @@ private fun VpnScreenContent(
                     .padding(horizontal = 16.dp, vertical = 8.dp)
                     .fillMaxWidth()
                     .statusBarsPadding(),
-                state = state,
+                serverItemList = state.serverItemList,
+                selectedServerId = state.selectedServerId,
                 onSettingsClick = onSettingsClick,
                 showBottomSheet = { scope.launch { sheetState.show() } }
             )
@@ -169,8 +171,10 @@ private fun VpnScreenContent(
                     .padding(horizontal = 16.dp)
                     .fillMaxSize(),
                 isRunning = state.isRunning,
+                isLoading = state.isLaunchLoading,
+                wasNotificationPermissionAsked = state.wasNotificationPermissionAsked,
+                serverListIsEmpty = state.serverItemList.isEmpty(),
                 onIntent = onIntent,
-                state = state,
                 showBottomSheet = { scope.launch { sheetState.show() } }
             )
             BottomSection(
@@ -191,12 +195,13 @@ private fun VpnScreenContent(
 @Composable
 private fun TopSection(
     modifier: Modifier = Modifier,
-    state: VpnScreenState,
+    serverItemList: List<ServerItemModel>,
+    selectedServerId: String?,
     onSettingsClick: () -> Unit,
     showBottomSheet: () -> Unit,
 ) {
-    val selectedServer = remember(state.serverItemList, state.selectedServerId) {
-        state.serverItemList.firstOrNull { it.guid == state.selectedServerId }
+    val selectedServer = remember(serverItemList, selectedServerId) {
+        serverItemList.firstOrNull { it.guid == selectedServerId }
     }
 
     Box(modifier = modifier) {
@@ -248,7 +253,7 @@ private fun TopSection(
                     SubscriptionItem(
                         item = it,
                         selectedServerId = it.guid,
-                        buttonIcon = AppIcons.arrowForward,
+                        buttonIcon = AppIcons.ArrowForward,
                         onCardClick = { _ -> showBottomSheet() }
                     )
                 }
@@ -261,22 +266,24 @@ private fun TopSection(
 private fun MiddleSection(
     modifier: Modifier = Modifier,
     isRunning: Boolean,
+    isLoading: Boolean,
+    wasNotificationPermissionAsked: Boolean,
+    serverListIsEmpty :Boolean,
     onIntent: (VpnScreenIntent) -> Unit,
-    showBottomSheet: () -> Unit,
-    state: VpnScreenState
+    showBottomSheet: () -> Unit
 ) {
 
     Box(
         modifier = modifier.fillMaxWidth(),
         contentAlignment = Alignment.Center
     ) {
-        if (!state.isLoading) {
+        if (!isLoading) {
             ConnectToggle(
                 onIntent = onIntent,
                 isRunning = isRunning,
-                emptyServerList = state.serverItemList.isEmpty(),
+                emptyServerList = serverListIsEmpty,
                 showBottomSheet = showBottomSheet,
-                wasNotificationPermissionAsked = state.wasNotificationPermissionAsked
+                wasNotificationPermissionAsked = wasNotificationPermissionAsked
             )
         } else {
             Box(Modifier.size(160.dp))
@@ -379,15 +386,15 @@ private fun errorHandler(
     }
 }
 
-@Preview(name = "Dark", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_NO)
+@Preview(name = "Dark", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun PreviewVpnScreen() {
     LibreXrayVPNTheme {
         VpnScreenContent(
             modifier = Modifier,
             state = VpnScreenState(
-                isLoading = false,
-                isRunning = false,
+                isLaunchLoading = false,
+                isRunning = true,
                 serverItemList = listOf(
                     ServerItemModel(
                         guid = "1",
