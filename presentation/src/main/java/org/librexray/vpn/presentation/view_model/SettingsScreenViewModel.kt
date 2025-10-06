@@ -8,16 +8,21 @@ import org.librexray.vpn.domain.models.ThemeMode
 import org.librexray.vpn.presentation.intent.SettingsScreenIntent
 import org.librexray.vpn.presentation.state.SettingsScreenState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.librexray.vpn.presentation.di.IoDispatcher
 import javax.inject.Inject
 
 @HiltViewModel
-class SettingsScreenViewModel @Inject constructor(private val settingsInteractor: SettingsInteractor) :
+class SettingsScreenViewModel @Inject constructor(
+    private val settingsInteractor: SettingsInteractor,
+    @IoDispatcher private val io: CoroutineDispatcher = Dispatchers.IO
+) :
     ViewModel() {
     private val _state = MutableStateFlow(SettingsScreenState())
     val state: StateFlow<SettingsScreenState> = _state.asStateFlow()
@@ -43,13 +48,13 @@ class SettingsScreenViewModel @Inject constructor(private val settingsInteractor
     }
 
     private fun setLocale(locale: AppLocale) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(io) {
             settingsInteractor.setLocale(locale)
         }
     }
 
     private fun setTheme(themeMode: ThemeMode) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(io) {
             settingsInteractor.setTheme(themeMode)
         }
     }

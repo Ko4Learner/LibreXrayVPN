@@ -42,14 +42,16 @@ android {
     buildFeatures {
         compose = true
     }
-//    composeOptions {
-//        kotlinCompilerExtensionVersion = libs.versions.composeCompiler.get()
-//    }
 }
 
 dependencies {
     implementation(project(":domain"))
     implementation(project(":core-android"))
+
+    // Core UI
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.material)
 
     // Hilt
     implementation(libs.hilt.android)
@@ -57,8 +59,8 @@ dependencies {
     ksp(libs.hilt.compiler)
 
     // Compose
-    implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.material)
@@ -74,7 +76,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.lifecycle.runtime.compose)
 
-    //QR scanner
+    // QR scanner
     implementation(libs.mlkit)
     implementation(libs.cameraX)
     implementation(libs.cameraX.core)
@@ -82,10 +84,10 @@ dependencies {
     implementation(libs.cameraX.view)
     implementation(libs.activity.ktx)
 
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat)
-    implementation(libs.material)
+    // Unit Testing
     testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
+    testImplementation(libs.mockK)
+    testImplementation(libs.coroutines.test)
+    testImplementation(libs.turbine)
+    testImplementation(libs.truth)
 }

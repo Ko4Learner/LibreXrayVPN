@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import org.librexray.vpn.presentation.intent.QrCodeScreenIntent
 import org.librexray.vpn.presentation.view_model.QrCodeScreenViewModel
-import org.librexray.vpn.presentation.composable_elements.QrCameraPreview
+import org.librexray.vpn.presentation.composable_element.QrCameraPreview
 import android.Manifest
 import android.content.pm.PackageManager
 import android.content.res.Configuration
@@ -43,7 +43,7 @@ import androidx.core.content.ContextCompat
 import org.librexray.vpn.coreandroid.utils.Constants
 import kotlinx.coroutines.delay
 import org.librexray.vpn.coreandroid.R
-import org.librexray.vpn.presentation.composable_elements.ScanMask
+import org.librexray.vpn.presentation.composable_element.ScanMask
 import org.librexray.vpn.presentation.design_system.icon.AppIcons
 import org.librexray.vpn.presentation.design_system.icon.rememberPainter
 import org.librexray.vpn.presentation.design_system.theme.LibreXrayVPNTheme

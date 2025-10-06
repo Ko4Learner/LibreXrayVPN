@@ -8,11 +8,12 @@ import org.librexray.vpn.domain.interfaces.interactor.ConnectionInteractor
 import org.librexray.vpn.domain.interfaces.repository.ServiceStateRepository
 import org.librexray.vpn.domain.models.ImportResult
 import org.librexray.vpn.domain.state.ServiceState
-import org.librexray.vpn.presentation.formatter.toServerItemModel
+import org.librexray.vpn.presentation.mapper.toServerItemModel
 import org.librexray.vpn.presentation.intent.VpnScreenIntent
-import org.librexray.vpn.presentation.models.ServerItemModel
+import org.librexray.vpn.presentation.model.ServerItemModel
 import org.librexray.vpn.presentation.state.VpnScreenState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -22,6 +23,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.librexray.vpn.domain.interfaces.interactor.SettingsInteractor
+import org.librexray.vpn.presentation.di.IoDispatcher
 import org.librexray.vpn.presentation.state.VpnScreenError
 import javax.inject.Inject
 import kotlin.coroutines.cancellation.CancellationException
@@ -31,7 +33,8 @@ class VpnScreenViewModel @Inject constructor(
     private val configInteractor: ConfigInteractor,
     private val connectionInteractor: ConnectionInteractor,
     private val settingsInteractor: SettingsInteractor,
-    stateRepository: ServiceStateRepository
+    stateRepository: ServiceStateRepository,
+    @IoDispatcher private val io: CoroutineDispatcher = Dispatchers.IO
 ) : ViewModel() {
     private val _state = MutableStateFlow(VpnScreenState())
     val state: StateFlow<VpnScreenState> = _state.asStateFlow()
@@ -44,7 +47,7 @@ class VpnScreenViewModel @Inject constructor(
         )
 
     init {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(io) {
             updateServerList(configInteractor.getServerList())
             getSelectedServer()
         }
@@ -84,7 +87,7 @@ class VpnScreenViewModel @Inject constructor(
     }
 
     private fun toggleConnection() {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(io) {
             if (state.value.isRunning) stopConnection() else startConnection()
         }
     }
@@ -94,7 +97,7 @@ class VpnScreenViewModel @Inject constructor(
         val before = state.value.serverItemList
         val after = before.filterNot { it.guid == guid }
 
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(io) {
             runCatching { configInteractor.deleteItem(guid) }
                 .onSuccess {
                     _state.update { it.copy(serverItemList = after) }
@@ -117,7 +120,7 @@ class VpnScreenViewModel @Inject constructor(
     }
 
     private fun testConnection() {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(io) {
             runCatching {
                 val delay = connectionInteractor.testConnection()
                 _state.update { it.copy(delay = delay) }
@@ -129,7 +132,7 @@ class VpnScreenViewModel @Inject constructor(
     }
 
     private fun importConfigFromClipboard() {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(io) {
             when (configInteractor.importClipboardConfig()) {
                 ImportResult.Empty -> _state.update {
                     it.copy(error = VpnScreenError.EmptyConfigError)
@@ -145,7 +148,7 @@ class VpnScreenViewModel @Inject constructor(
     }
 
     private fun refreshItemList() {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(io) {
             updateServerList(configInteractor.getServerList())
         }
     }
@@ -175,7 +178,7 @@ class VpnScreenViewModel @Inject constructor(
     }
 
     private fun setSelectedServer(serverId: String) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(io) {
             runCatching {
                 configInteractor.setSelectedServer(serverId)
                 _state.update { it.copy(selectedServerId = serverId) }
@@ -210,7 +213,7 @@ class VpnScreenViewModel @Inject constructor(
     }
 
     private fun markNotificationAsked() {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(io) {
             settingsInteractor.markNotificationAsked()
         }
         _state.update { it.copy(wasNotificationPermissionAsked = true) }

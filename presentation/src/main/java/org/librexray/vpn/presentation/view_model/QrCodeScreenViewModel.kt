@@ -5,21 +5,24 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import org.librexray.vpn.domain.interfaces.interactor.ConfigInteractor
 import org.librexray.vpn.domain.models.ImportResult
-import org.librexray.vpn.presentation.formatter.toFrameData
+import org.librexray.vpn.presentation.mapper.toFrameData
 import org.librexray.vpn.presentation.intent.QrCodeScreenIntent
 import org.librexray.vpn.presentation.state.QrCodeScreenState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.librexray.vpn.presentation.di.IoDispatcher
 import javax.inject.Inject
 
 @HiltViewModel
 class QrCodeScreenViewModel @Inject constructor(
-    private val configInteractor: ConfigInteractor
+    private val configInteractor: ConfigInteractor,
+    @IoDispatcher private val io: CoroutineDispatcher = Dispatchers.IO
 ) : ViewModel() {
     private val _state = MutableStateFlow(QrCodeScreenState())
     val state: StateFlow<QrCodeScreenState> = _state.asStateFlow()
@@ -41,7 +44,7 @@ class QrCodeScreenViewModel @Inject constructor(
             imageProxy.close()
             return
         }
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(io) {
             try {
                 when (configInteractor.importQrCodeConfig(imageProxy.toFrameData())) {
                     ImportResult.Error -> _state.update {

@@ -1,7 +1,7 @@
 package org.librexray.vpn.presentation.state
 
 import org.librexray.vpn.domain.models.ConnectionSpeed
-import org.librexray.vpn.presentation.models.ServerItemModel
+import org.librexray.vpn.presentation.model.ServerItemModel
 
 data class VpnScreenState(
     val isLoading: Boolean = true,
