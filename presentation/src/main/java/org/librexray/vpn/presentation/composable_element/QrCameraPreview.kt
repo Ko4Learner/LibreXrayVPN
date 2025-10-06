@@ -12,6 +12,19 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
 
+/**
+ * CameraX preview used for scanning QR codes.
+ *
+ * This composable hosts a [PreviewView] inside an [AndroidView] and binds
+ * both a preview and an image analysis pipeline to the current [LifecycleOwner].
+ *
+ * Each camera frame is passed to [onFrame] for further processing
+ * (e.g., QR decoding). The callback is executed on the main executor.
+ *
+ * Responsibilities:
+ * - Manages CameraX lifecycle automatically with Compose lifecycle.
+ * - Uses [ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST] to avoid frame backlog.
+ */
 @Composable
 fun QrCameraPreview(
     modifier: Modifier = Modifier,

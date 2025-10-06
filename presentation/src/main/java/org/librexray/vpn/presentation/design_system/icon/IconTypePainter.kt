@@ -7,6 +7,14 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.res.painterResource
 
+/**
+ * Creates a [Painter] for the given [IconType], memoized across recompositions.
+ *
+ * Guarantees:
+ * - Always returns a valid painter, falling back to [Icons.Default.Image]
+ *   if the resource cannot be loaded.
+ * - Safe to call from any @Composable scope.
+ */
 @Composable
 fun IconType.rememberPainter():Painter = when(this){
     is IconType.Vector -> rememberVectorPainter(image = image)

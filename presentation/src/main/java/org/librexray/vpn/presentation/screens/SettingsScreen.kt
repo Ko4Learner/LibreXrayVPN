@@ -145,7 +145,7 @@ private fun SettingsScreenContent(
                     ) {
                         Icon(
                             modifier = Modifier.size(32.dp),
-                            painter = AppIcons.arrowBack.rememberPainter(),
+                            painter = AppIcons.ArrowBack.rememberPainter(),
                             contentDescription = stringResource(R.string.back),
                             tint = MaterialTheme.colors.onBackground
                         )

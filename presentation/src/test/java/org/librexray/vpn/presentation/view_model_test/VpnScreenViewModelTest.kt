@@ -73,7 +73,7 @@ class VpnScreenViewModelTest {
     @Test
     fun `init loads server list and selected`() = runTest {
         val s = vm.state.value
-        assertThat(s.isLoading).isFalse()
+        assertThat(s.isLaunchLoading).isFalse()
         assertThat(s.serverItemList).hasSize(2)
         assertThat(s.selectedServerId).isEqualTo("a")
     }

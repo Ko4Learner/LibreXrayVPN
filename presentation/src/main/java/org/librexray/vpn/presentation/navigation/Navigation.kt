@@ -8,10 +8,20 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import org.librexray.vpn.presentation.navigation.NavItem.Route.QR_CODE_IMPORTED_KEY
 import org.librexray.vpn.presentation.screens.QrCodeScreen
 import org.librexray.vpn.presentation.screens.SettingsScreen
 import org.librexray.vpn.presentation.screens.VpnScreen
 
+/**
+ * Configures the app's navigation graph.
+ *
+ * Responsibilities:
+ * - Declares start destination [NavItem.VpnScreen].
+ * - Wires callbacks for navigation between VPN, QR, and Settings screens.
+ * - Uses [NavItem.Route.QR_CODE_IMPORTED_KEY] to communicate one-off results
+ *   from the QR screen back to the VPN screen.
+ */
 @Composable
 fun Navigation(
     navController: NavHostController,
@@ -35,7 +45,7 @@ fun Navigation(
                 onBackClick = { navController.popBackStack() },
                 onResult = {
                     navController.previousBackStackEntry?.savedStateHandle?.set(
-                        "qrCodeImported",
+                        QR_CODE_IMPORTED_KEY,
                         true
                     )
                     navController.popBackStack()

@@ -61,6 +61,7 @@ import org.librexray.vpn.presentation.design_system.icon.rememberPainter
 import org.librexray.vpn.presentation.design_system.theme.Grey80
 import org.librexray.vpn.presentation.design_system.theme.LibreXrayVPNTheme
 import org.librexray.vpn.presentation.model.ServerItemModel
+import org.librexray.vpn.presentation.navigation.NavItem.Route.QR_CODE_IMPORTED_KEY
 import org.librexray.vpn.presentation.state.VpnScreenError
 
 @Composable
@@ -77,11 +78,11 @@ fun VpnScreen(
 
     val savedStateHandle = navController.currentBackStackEntry?.savedStateHandle
     val qrCodeImported =
-        savedStateHandle?.getStateFlow("qrCodeImported", false)?.collectAsState()
+        savedStateHandle?.getStateFlow(QR_CODE_IMPORTED_KEY, false)?.collectAsState()
     LaunchedEffect(qrCodeImported?.value) {
         if (qrCodeImported?.value == true) {
             viewModel.onIntent(VpnScreenIntent.RefreshItemList)
-            savedStateHandle.remove<Boolean>("qrCodeImported")
+            savedStateHandle.remove<Boolean>(QR_CODE_IMPORTED_KEY)
         }
     }
 
@@ -170,7 +171,7 @@ private fun VpnScreenContent(
                     .padding(horizontal = 16.dp)
                     .fillMaxSize(),
                 isRunning = state.isRunning,
-                isLoading = state.isLoading,
+                isLoading = state.isLaunchLoading,
                 wasNotificationPermissionAsked = state.wasNotificationPermissionAsked,
                 serverListIsEmpty = state.serverItemList.isEmpty(),
                 onIntent = onIntent,
@@ -252,7 +253,7 @@ private fun TopSection(
                     SubscriptionItem(
                         item = it,
                         selectedServerId = it.guid,
-                        buttonIcon = AppIcons.arrowForward,
+                        buttonIcon = AppIcons.ArrowForward,
                         onCardClick = { _ -> showBottomSheet() }
                     )
                 }
@@ -392,7 +393,7 @@ fun PreviewVpnScreen() {
         VpnScreenContent(
             modifier = Modifier,
             state = VpnScreenState(
-                isLoading = false,
+                isLaunchLoading = false,
                 isRunning = true,
                 serverItemList = listOf(
                     ServerItemModel(
