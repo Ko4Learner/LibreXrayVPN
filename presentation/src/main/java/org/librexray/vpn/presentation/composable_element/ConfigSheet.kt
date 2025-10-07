@@ -103,7 +103,7 @@ private fun ImportButtonRow(
     ) {
         Button(
             modifier = Modifier
-                .padding(end = 8.dp)
+                .padding(end = 4.dp)
                 .weight(1f)
                 .height(96.dp),
             shape = RoundedCornerShape(16.dp),
@@ -119,21 +119,21 @@ private fun ImportButtonRow(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Icon(
-                    modifier = Modifier.size(40.dp),
+                    modifier = Modifier.size(36.dp),
                     painter = AppIcons.QrScan.rememberPainter(),
                     contentDescription = stringResource(R.string.qr_code),
                     tint = MaterialTheme.colors.onSurface
                 )
                 Text(
                     text = stringResource(R.string.qr_code),
-                    style = MaterialTheme.typography.body1,
+                    style = MaterialTheme.typography.body2,
                     color = MaterialTheme.colors.onSurface
                 )
             }
         }
         Button(
             modifier = Modifier
-                .padding(start = 8.dp)
+                .padding(start = 4.dp)
                 .weight(1f)
                 .height(96.dp),
             shape = RoundedCornerShape(16.dp),
@@ -149,14 +149,14 @@ private fun ImportButtonRow(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Icon(
-                    modifier = Modifier.size(40.dp),
+                    modifier = Modifier.size(36.dp),
                     painter = AppIcons.Clipboard.rememberPainter(),
                     contentDescription = stringResource(R.string.clipboard),
                     tint = MaterialTheme.colors.onSurface,
                 )
                 Text(
                     text = stringResource(R.string.clipboard),
-                    style = MaterialTheme.typography.body1,
+                    style = MaterialTheme.typography.body2,
                     color = MaterialTheme.colors.onSurface
                 )
             }
