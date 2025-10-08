@@ -38,6 +38,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.content.ContextCompat
 import org.librexray.vpn.coreandroid.utils.Constants
@@ -145,7 +146,10 @@ fun QrCodeScreenContent(
                     modifier = Modifier.align(Alignment.Center),
                     text = stringResource(R.string.qr_code_scanning),
                     style = MaterialTheme.typography.h6,
-                    color = MaterialTheme.colors.onBackground
+                    color = MaterialTheme.colors.onBackground,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    softWrap = false
                 )
             }
 

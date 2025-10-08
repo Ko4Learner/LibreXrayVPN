@@ -41,6 +41,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -226,7 +227,10 @@ private fun TopSection(
                     Text(
                         text = stringResource(R.string.app_name),
                         style = MaterialTheme.typography.h6,
-                        color = MaterialTheme.colors.onBackground
+                        color = MaterialTheme.colors.onBackground,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        softWrap = false
                     )
                 }
 
@@ -398,7 +402,7 @@ fun PreviewVpnScreen() {
                 serverItemList = listOf(
                     ServerItemModel(
                         guid = "1",
-                        name = "My vless server config",
+                        name = "My very long vless server configuration",
                         ip = "192.168.252.1",
                         protocol = "Vless"
                     )

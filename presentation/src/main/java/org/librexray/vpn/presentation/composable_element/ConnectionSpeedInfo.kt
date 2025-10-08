@@ -12,6 +12,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.librexray.vpn.coreandroid.utils.Constants
 import org.librexray.vpn.domain.models.ConnectionSpeed
@@ -42,13 +43,19 @@ fun ConnectionSpeedInfo(
                 "${Constants.LABEL_PROXY} ${Constants.ARROW_UP} ${fmtBps(connectionSpeed?.proxyUplinkBps)} " +
                         "${Constants.ARROW_DOWN} ${fmtBps(connectionSpeed?.proxyDownlinkBps)}",
                 style = MaterialTheme.typography.body1.copy(fontFeatureSettings = "tnum"),
-                color = MaterialTheme.colors.onSurface
+                color = MaterialTheme.colors.onSurface,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                softWrap = false
             )
             Text(
                 "${Constants.LABEL_DIRECT} ${Constants.ARROW_UP} ${fmtBps(connectionSpeed?.directUplinkBps)} " +
                         "${Constants.ARROW_DOWN} ${fmtBps(connectionSpeed?.directDownlinkBps)}",
                 style = MaterialTheme.typography.body1.copy(fontFeatureSettings = "tnum"),
-                color = MaterialTheme.colors.onSurface
+                color = MaterialTheme.colors.onSurface,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                softWrap = false
             )
         }
     }

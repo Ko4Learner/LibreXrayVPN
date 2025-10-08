@@ -39,6 +39,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -154,7 +155,10 @@ private fun SettingsScreenContent(
                         modifier = Modifier.align(Alignment.Center),
                         text = stringResource(R.string.settings),
                         style = MaterialTheme.typography.h6,
-                        color = MaterialTheme.colors.onBackground
+                        color = MaterialTheme.colors.onBackground,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        softWrap = false
                     )
                 }
             }
@@ -219,13 +223,16 @@ private fun LanguageBottomSheet(
         Row(
             modifier = Modifier
                 .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
+                modifier = Modifier.weight(1f),
                 text = stringResource(R.string.language),
                 style = MaterialTheme.typography.h6,
-                color = MaterialTheme.colors.onBackground
+                color = MaterialTheme.colors.onBackground,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                softWrap = false
             )
             IconButton(onClick = closeBottomSheet) {
                 Icon(
@@ -255,19 +262,22 @@ private fun LanguageBottomSheet(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable { onIntent(SettingsScreenIntent.SetLocale(mode)) },
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
                         modifier = Modifier
-                            .padding(start = 16.dp),
+                            .padding(start = 16.dp)
+                            .weight(1f),
                         text = when (mode) {
                             AppLocale.SYSTEM -> stringResource(R.string.system_language)
                             AppLocale.EN -> stringResource(R.string.english_language)
                             AppLocale.RU -> stringResource(R.string.russian_language)
                         },
                         style = MaterialTheme.typography.h6,
-                        color = MaterialTheme.colors.onBackground
+                        color = MaterialTheme.colors.onBackground,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        softWrap = false
                     )
                     RadioButton(
                         modifier = Modifier,
@@ -311,13 +321,16 @@ private fun ThemeBottomSheet(
         Row(
             modifier = Modifier
                 .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
+                modifier = Modifier.weight(1f),
                 text = stringResource(R.string.application_theme),
                 style = MaterialTheme.typography.h6,
-                color = MaterialTheme.colors.onBackground
+                color = MaterialTheme.colors.onBackground,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                softWrap = false
             )
             IconButton(onClick = closeBottomSheet) {
                 Icon(
@@ -348,18 +361,21 @@ private fun ThemeBottomSheet(
                         .fillMaxWidth()
                         .clickable { onIntent(SettingsScreenIntent.SetTheme(mode)) },
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
                     Text(
                         modifier = Modifier
-                            .padding(start = 16.dp),
+                            .padding(start = 16.dp)
+                            .weight(1f),
                         text = when (mode) {
                             ThemeMode.SYSTEM -> stringResource(R.string.system_theme)
                             ThemeMode.LIGHT -> stringResource(R.string.light_theme)
                             ThemeMode.DARK -> stringResource(R.string.dark_theme)
                         },
                         style = MaterialTheme.typography.h6,
-                        color = MaterialTheme.colors.onBackground
+                        color = MaterialTheme.colors.onBackground,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        softWrap = false
                     )
                     RadioButton(
                         modifier = Modifier,
@@ -401,13 +417,16 @@ private fun AboutBottomSheet(
         Row(
             modifier = Modifier
                 .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
+                modifier = Modifier.weight(1f),
                 text = stringResource(R.string.about_app),
                 style = MaterialTheme.typography.h6,
-                color = MaterialTheme.colors.onBackground
+                color = MaterialTheme.colors.onBackground,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                softWrap = false
             )
             IconButton(onClick = closeBottomSheet) {
                 Icon(

@@ -24,6 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.librexray.vpn.coreandroid.R
 import org.librexray.vpn.presentation.design_system.icon.AppIcons
@@ -61,14 +62,18 @@ fun ContentBottomSheet(
         )
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
+                modifier = Modifier
+                    .weight(1f),
                 text = if (itemList.isEmpty()) stringResource(R.string.add_configuration)
                 else stringResource(R.string.my_configurations),
                 style = MaterialTheme.typography.h6,
-                color = MaterialTheme.colors.onSurface
+                color = MaterialTheme.colors.onSurface,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                softWrap = false
             )
             IconButton(onClick = hideBottomSheet) {
                 Icon(
@@ -127,7 +132,10 @@ private fun ImportButtonRow(
                 Text(
                     text = stringResource(R.string.qr_code),
                     style = MaterialTheme.typography.body2,
-                    color = MaterialTheme.colors.onSurface
+                    color = MaterialTheme.colors.onSurface,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    softWrap = false
                 )
             }
         }
@@ -157,7 +165,10 @@ private fun ImportButtonRow(
                 Text(
                     text = stringResource(R.string.clipboard),
                     style = MaterialTheme.typography.body2,
-                    color = MaterialTheme.colors.onSurface
+                    color = MaterialTheme.colors.onSurface,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    softWrap = false
                 )
             }
         }
